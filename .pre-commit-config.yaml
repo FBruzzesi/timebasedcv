@@ -1,0 +1,40 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+    -   id: trailing-whitespace
+    -   id: name-tests-test
+    -   id: end-of-file-fixer
+    -   id: requirements-txt-fixer
+    -   id: check-json
+    -   id: check-yaml
+    -   id: check-ast
+    -   id: check-added-large-files
+-   repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        name: isort (python)
+        args: [--profile, black, -l, "90", timebasedcv, tests]
+-   repo: https://github.com/psf/black
+    rev: 23.3.0
+    hooks:
+      - id: black
+        language_version: python3.8
+        args: [--target-version, py38, --line-length, "90", timebasedcv, tests]
+-   repo: https://github.com/Lucas-C/pre-commit-hooks-bandit
+    rev: v1.0.6
+    hooks:
+    -   id: python-bandit-vulnerability-check
+        args: [--skip, "B101",--severity-level, medium,  --recursive, timebasedcv]
+-   repo: https://github.com/econchick/interrogate
+    rev: 1.5.0
+    hooks:
+    -   id: interrogate
+        args: [-vv, --ignore-nested-functions, --ignore-module, --ignore-init-method, --ignore-private, --ignore-magic, --ignore-property-decorators, --fail-under=90, timebasedcv, tests]
+-   repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.10.0
+    hooks:
+    -   id: python-no-eval

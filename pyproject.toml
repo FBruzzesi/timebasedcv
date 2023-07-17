@@ -1,0 +1,61 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "timebasedcv"
+version = "0.0.1"
+description = "Time based cross validation"
+
+license = {file = "LICENSE"}
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [{name = "Francesco Bruzzesi"}]
+
+[project.urls]
+# documentation = "https://fbruzzesi.github.io/timebased-cv/"
+repository = "https://github.com/fbruzzesi/timebased-cv"
+issue-tracker = "https://github.com/fbruzzesi/timebased-cv/issues"
+
+
+[project.optional-dependencies]
+dev = [
+    "black==23.3.0",
+    "interrogate==1.5.0",
+    "isort==5.12.0",
+    "pre-commit==2.21.0",
+    "pytest==7.2.0",
+    "pytest-xdist==3.2.1",
+    "coverage==7.2.1",
+    "ruff"
+]
+
+docs = [
+    "mkdocs==1.4.2",
+    "mkdocs-material==9.1.2",
+    "mkdocstrings[python]==0.20.0",
+]
+
+all = ["timebasedcv[dev,docs]"]
+
+[tool.setuptools.packages.find]
+include = ["timebasedcv*"]
+exclude = ["docs", "tests", "data", "docker", "results", "notebooks", "kubernetes"]
+
+[tool.setuptools.package-data]
+timebasedcv = ["py.typed"]
+
+[tool.black]
+line-length = 90
+target_version = ['py38']
+
+[tool.isort]
+py_version = 310
+profile = "black"
+line_length = 90
+
+[tool.ruff]
+line-length = 90
+
+[tool.mypy]
+ignore_missing_imports = true
