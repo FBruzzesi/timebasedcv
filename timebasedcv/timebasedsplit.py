@@ -207,29 +207,6 @@ class TimeBasedSplit:
         return len(tuple(self._splits_from_period(time_start, time_end)))
 
 
-class RollingTimeSplit(TimeBasedSplit):
-    """
-    Alias for `TimeBasedSplit` with `window="rolling"`.
-    """
-
-    def __init__(
-        self,
-        frequency: FrequencyUnit,
-        train_size: int,
-        forecast_horizon: int,
-        gap: int = 1,
-        stride: int = 1,
-    ):
-        super().__init__(
-            frequency,
-            train_size,
-            forecast_horizon,
-            gap,
-            stride,
-            window="rolling",
-        )
-
-
 class ExpandingTimeSplit(TimeBasedSplit):
     """
     Alias for `TimeBasedSplit` with `window="expanding"`.
@@ -250,4 +227,27 @@ class ExpandingTimeSplit(TimeBasedSplit):
             gap,
             stride,
             window="expanding",
+        )
+
+
+class RollingTimeSplit(TimeBasedSplit):
+    """
+    Alias for `TimeBasedSplit` with `window="rolling"`.
+    """
+
+    def __init__(
+        self,
+        frequency: FrequencyUnit,
+        train_size: int,
+        forecast_horizon: int,
+        gap: int = 1,
+        stride: int = 1,
+    ):
+        super().__init__(
+            frequency,
+            train_size,
+            forecast_horizon,
+            gap,
+            stride,
+            window="rolling",
         )
