@@ -1,46 +1,45 @@
-from datetime import date, datetime, timedelta
+from datetime import timedelta
 from itertools import chain
-from typing import Iterable, Tuple, get_args
+from typing import Iterable, Tuple, Union, get_args
 
-from timebasedcv._backends import BACKEND_TO_INDEXING_METHOD, DEFAULT_INDEXING_METHOD
-from timebasedcv._types import FrequencyUnit, SeriesLike, TensorLike, WindowType
 from timebasedcv.splitstate import SplitState
+from timebasedcv.utils._backends import (
+    BACKEND_TO_INDEXING_METHOD,
+    default_indexing_method,
+)
+from timebasedcv.utils._types import (
+    DateTimeLike,
+    FrequencyUnit,
+    SeriesLike,
+    TensorLike,
+    WindowType,
+)
 
 _frequency_values = get_args(FrequencyUnit)
 _window_values = get_args(WindowType)
 
 
-class TimeBasedSplit:
+class _BaseTimeSplit:
     """
-    Class that generates splits which as time based splits, indepedently from the number
-    of samples in each split.
+    Base class for time based splits.
+    """
 
-    Arguments:
-        frequency: The frequency of the time series. Must be one of "days", "seconds",
-            "microseconds", "milliseconds", "minutes", "hours", "weeks".
-            These are the only valid values for the `unit` argument of the `timedelta`.
-        train_size: The size of the training set.
-        forecast_horizon: The size of the forecast horizon.
-        gap: The size of the gap between the training set and the forecast horizon.
-        stride: The size of the stride between consecutive splits.
-        window: The type of window to use. Must be one of "rolling" or "expanding".
-        indexing_methods: A dictionary mapping types to indexing methods.
-    """
+    name_ = "_BaseTimeSplit"
 
     def __init__(
         self,
         frequency: FrequencyUnit,
         train_size: int,
         forecast_horizon: int,
-        gap: int = 1,
-        stride: int = 1,
+        gap: int = 0,
+        stride: int | None = None,
         window: WindowType = "rolling",
     ):
         self.frequency_ = frequency
         self.train_size_ = train_size
         self.forecast_horizon_ = forecast_horizon
         self.gap_ = gap
-        self.stride_ = stride
+        self.stride_ = stride or forecast_horizon
         self.window_ = window
 
         self.__post_init__()
@@ -72,22 +71,44 @@ class TimeBasedSplit:
             )
 
         # Validate positive integer arguments
-        _slot_names = ("train_size", "forecast_horizon_", "gap_", "stride_")
+        _slot_names = ("train_size_", "forecast_horizon_", "gap_", "stride_")
         _values = tuple(getattr(self, _attr) for _attr in _slot_names)
+        _lower_bounds = (1, 1, 0, 1)
+
         _types = tuple(type(v) for v in _values)
 
         if not all(t is int for t in _types):
-            print(_types)
             raise TypeError(
                 f"(`{'`, `'.join(_slot_names)}`) arguments must be of type `int`. "
                 f"Found (`{'`, `'.join(t._name_ for t in _types)}`)"
             )
 
-        if not all(v > 0 for v in _values):
+        if not all(v >= lb for v, lb in zip(_values, _lower_bounds)):
             raise ValueError(
-                f"(`{'`, `'.join(_slot_names)}`) must be greater than 0. "
+                f"(`{'`, `'.join(_slot_names)}`) must be greater or equal than"
+                f"({', '.join(map(str, _lower_bounds))}).\n"
                 f"Found ({', '.join(str(v) for v in _values)})"
             )
+
+    def __repr__(self) -> str:
+        """Custom repr method"""
+
+        _attrs = (
+            "frequency_",
+            "train_size_",
+            "forecast_horizon_",
+            "gap_",
+            "stride_",
+            "window_",
+        )
+        _values = tuple(getattr(self, _attr) for _attr in _attrs)
+        to_join = "\n    "
+        return (
+            f"{self.name_}"
+            "(\n    "
+            f"{to_join.join(f'{s} = {v}' for s, v in zip(_attrs, _values))}"
+            "\n)"
+        )
 
     @property
     def train_delta(self) -> timedelta:
@@ -110,7 +131,7 @@ class TimeBasedSplit:
         return timedelta(**{self.frequency_: self.stride_})
 
     def _splits_from_period(
-        self, time_start: datetime | date, time_end: datetime | date
+        self, time_start: DateTimeLike, time_end: DateTimeLike
     ) -> Iterable[SplitState]:
         """
         Generate splits from `time_start` to `time_end` based on the parameters passed
@@ -129,26 +150,74 @@ class TimeBasedSplit:
 
         start_training = current_date = time_start
 
-        while current_date + self.train_delta + self.gap_delta < time_end:
-            end_training: date = current_date + self.train_delta  # type: ignore
+        train_delta = self.train_delta
+        forecast_delta = self.forecast_delta
+        gap_delta = self.gap_delta
+        stride_delta = self.stride_delta
 
-            start_forecast = end_training + self.gap_delta
-            end_forecast = end_training + self.gap_delta + self.forecast_delta
+        while current_date + train_delta + gap_delta < time_end:
+            end_training = current_date + train_delta
 
-            current_date = current_date + self.stride_delta
+            start_forecast = end_training + gap_delta
+            end_forecast = end_training + gap_delta + forecast_delta
+
+            current_date = current_date + stride_delta
 
             yield SplitState(start_training, end_training, start_forecast, end_forecast)
 
             if self.window_ == "rolling":
                 start_training = current_date
 
+    def n_splits_of(self, time_series: SeriesLike) -> int:
+        """Returns the number of splits that can be generated from `time_series`"""
+
+        time_start, time_end = time_series.min(), time_series.max()
+
+        return len(tuple(self._splits_from_period(time_start, time_end)))
+
+    def split(self, *args, **kwargs):
+        """Template method that returns a generator of splits."""
+        raise NotImplementedError
+
+
+class TimeBasedSplit(_BaseTimeSplit):
+    """
+    Class that generates splits which as time based splits, indepedently from the number
+    of samples in each split.
+
+    Arguments:
+        frequency: The frequency of the time series. Must be one of "days", "seconds",
+            "microseconds", "milliseconds", "minutes", "hours", "weeks".
+            These are the only valid values for the `unit` argument of the `timedelta`.
+        train_size: The size of the training set.
+        forecast_horizon: The size of the forecast horizon.
+        gap: The size of the gap between the training set and the forecast horizon.
+        stride: The size of the stride between consecutive splits.
+        window: The type of window to use. Must be one of "rolling" or "expanding".
+        indexing_methods: A dictionary mapping types to indexing methods.
+    """
+
+    name_ = "TimeBasedSplit"
+
     def split(
         self,
         *arrays: TensorLike,
-        time_series: SeriesLike,
-    ) -> Iterable[Tuple[TensorLike, ...]]:
+        time_series: SeriesLike[DateTimeLike],
+        return_splitstate: bool = False,
+    ) -> Iterable[
+        Union[Tuple[TensorLike, ...], Tuple[Tuple[TensorLike, ...], SplitState]]
+    ]:
         """
         Returns a generator of splits.
+
+        Arguments:
+            *arrays: The arrays to split. Must have the same length as `time_series`.
+            time_series: The time series used to create boolean mask for splits.
+            return_splitstate: Whether to return the `SplitState` instance for each
+                split.
+
+        Returns:
+            A generator of splits.
         """
         n_arrays = len(arrays)
         if n_arrays == 0:
@@ -156,7 +225,7 @@ class TimeBasedSplit:
 
         a0 = arrays[0]
 
-        if not all(a.shape[0] == a0.shape[0] for a in arrays[1:]):
+        if n_arrays > 1 and not all(a.shape[0] == a0.shape[0] for a in arrays[1:]):
             raise ValueError(
                 "All arrays must have the same length. "
                 f"Got {[a.shape[0] for a in arrays]}"
@@ -168,37 +237,37 @@ class TimeBasedSplit:
                 f"Got {a0.shape[0]} and {time_series.shape[0]}"
             )
 
-        index_method = BACKEND_TO_INDEXING_METHOD.get(type(a0), DEFAULT_INDEXING_METHOD)
+        index_method = BACKEND_TO_INDEXING_METHOD.get(type(a0), default_indexing_method)
 
         time_start, time_end = time_series.min(), time_series.max()
 
         for split in self._splits_from_period(time_start, time_end):
             train_mask = (time_series >= split.train_start) & (
-                time_series <= split.train_end
+                time_series < split.train_end
             )
             forecast_mask = (time_series >= split.forecast_start) & (
-                time_series <= split.forecast_end
+                time_series < split.forecast_end
             )
 
-            yield tuple(
+            train_forecast_arrays = tuple(
                 chain.from_iterable(
                     (index_method(a, train_mask), index_method(a, forecast_mask))
                     for a in arrays
                 )
             )
 
-    def n_splits_of(self, time_series) -> int:
-        """Returns the number of splits that can be generated from `time_series`"""
-
-        time_start, time_end = time_series.min(), time_series.max()
-
-        return len(tuple(self._splits_from_period(time_start, time_end)))
+            if return_splitstate:
+                yield train_forecast_arrays, split
+            else:
+                yield train_forecast_arrays
 
 
 class ExpandingTimeSplit(TimeBasedSplit):
     """
     Alias for `TimeBasedSplit` with `window="expanding"`.
     """
+
+    name_ = "ExpandingTimeSplit"
 
     def __init__(
         self,
@@ -222,6 +291,8 @@ class RollingTimeSplit(TimeBasedSplit):
     """
     Alias for `TimeBasedSplit` with `window="rolling"`.
     """
+
+    name_ = "RollingTimeSplit"
 
     def __init__(
         self,

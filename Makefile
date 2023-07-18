@@ -9,16 +9,21 @@ clean-notebooks:
 	jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace notebooks/*.ipynb
 
 clean-folders:
-	rm -rf .ipynb_checkpoints __pycache__ .pytest_cache */.ipynb_checkpoints */__pycache__ */.pytest_cache
-	rm -rf site build dist htmlcov .coverage .tox .mypy_cache
+	rm -rf __pycache__ */__pycache__ */**/__pycache__ \
+		.pytest_cache */.pytest_cache */**/.pytest_cache \
+		.ruff_cache */.ruff_cache */**/.ruff_cache \
+		.mypy_cache */.mypy_cache */**/.mypy_cache \
+		site build dist htmlcov .coverage .tox
 
 interrogate:
-	interrogate -vv --ignore-nested-functions --ignore-module --ignore-init-method --ignore-private --ignore-magic --ignore-property-decorators --fail-under=90 timebasedcv tests
+	interrogate -vv --ignore-nested-functions --ignore-module --ignore-init-method \
+		--ignore-private --ignore-magic --ignore-property-decorators --fail-under=90 \
+		timebasedcv tests
 
 style:
 	black --target-version py38 --line-length 90 timebasedcv tests
 	isort --profile black -l 90 timebasedcv tests
-	ruff timebasedcv tests
+	ruff timebasedcv tests && ruff clean
 
 
 test:

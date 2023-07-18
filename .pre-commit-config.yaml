@@ -22,8 +22,8 @@ repos:
     rev: 23.3.0
     hooks:
       - id: black
-        language_version: python3.8
-        args: [--target-version, py38, --line-length, "90", timebasedcv, tests]
+        language_version: python3.10
+        args: [--target-version, py310, --line-length, "90", timebasedcv, tests]
 -   repo: https://github.com/Lucas-C/pre-commit-hooks-bandit
     rev: v1.0.6
     hooks:

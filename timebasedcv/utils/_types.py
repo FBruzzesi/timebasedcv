@@ -1,6 +1,12 @@
 from __future__ import annotations
 
+from datetime import date, datetime
 from typing import Literal, Protocol, Tuple, TypeVar, Union
+
+import pandas as pd
+
+DateTimeLike = TypeVar("DateTimeLike", datetime, date, pd.Timestamp)
+
 
 FrequencyUnit = Literal[
     "days", "seconds", "microseconds", "milliseconds", "minutes", "hours", "weeks"
@@ -44,10 +50,10 @@ class SeriesLike(Protocol[T]):
         ...
 
 
-T_cov = TypeVar("T_cov", covariant=True)
+T_co = TypeVar("T_co", covariant=True)
 
 
-class TensorLike(Protocol[T_cov]):
+class TensorLike(Protocol[T_co]):
     """
     TensorLike protocol for type hinting purposes.
     """

@@ -1,20 +1,22 @@
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from operator import lt as less_than
+from typing import Generic
 
 import pandas as pd
 
-from timebasedcv._utils import pairwise, pairwise_comparison
+from timebasedcv.utils._funcs import pairwise, pairwise_comparison
+from timebasedcv.utils._types import DateTimeLike
 
 
 @dataclass(frozen=True, slots=True)
-class SplitState:
+class SplitState(Generic[DateTimeLike]):
     """Class that represents the state of a split."""
 
-    train_start: datetime | date | pd.Timestamp
-    train_end: datetime | date | pd.Timestamp
-    forecast_start: datetime | date | pd.Timestamp
-    forecast_end: datetime | date | pd.Timestamp
+    train_start: DateTimeLike
+    train_end: DateTimeLike
+    forecast_start: DateTimeLike
+    forecast_end: DateTimeLike
 
     def __post_init__(self):
         """
@@ -60,19 +62,19 @@ class SplitState:
     @property
     def train_time(self) -> timedelta:
         """Returns the time between `train_start` and `train_end`"""
-        return self.train_end - self.train_start  # type: ignore
+        return self.train_end - self.train_start
 
     @property
     def forecast_time(self) -> timedelta:
         """Returns the time between `forecast_start` and `forecast_end`"""
-        return self.forecast_end - self.forecast_start  # type: ignore
+        return self.forecast_end - self.forecast_start
 
     @property
     def gap(self) -> timedelta:
         """Returns the time between `train_end` and `forecast_start`"""
-        return self.forecast_start - self.train_end  # type: ignore
+        return self.forecast_start - self.train_end
 
     @property
     def total_time(self) -> timedelta:
         """Returns the time between `train_start` and `forecast_end`"""
-        return self.forecast_end - self.train_start  # type: ignore
+        return self.forecast_end - self.train_start
