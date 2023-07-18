@@ -1,19 +1,13 @@
 from datetime import date, datetime, timedelta
 from itertools import chain
-from typing import Iterable, Literal
-
-import numpy as np
-import pandas as pd
+from typing import Iterable, Tuple, get_args
 
 from timebasedcv._backends import BACKEND_TO_INDEXING_METHOD, DEFAULT_INDEXING_METHOD
+from timebasedcv._types import FrequencyUnit, SeriesLike, TensorLike, WindowType
 from timebasedcv.splitstate import SplitState
 
-ArrayLike = pd.DataFrame | np.ndarray  # |  pl.DataFrame
-SeriesLike = pd.Series | np.ndarray  # |  pl.Series
-
-FrequencyUnit = Literal[
-    "days", "seconds", "microseconds", "milliseconds", "minutes", "hours", "weeks"
-]
+_frequency_values = get_args(FrequencyUnit)
+_window_values = get_args(WindowType)
 
 
 class TimeBasedSplit:
@@ -40,7 +34,7 @@ class TimeBasedSplit:
         forecast_horizon: int,
         gap: int = 1,
         stride: int = 1,
-        window: Literal["rolling", "expanding"] = "rolling",
+        window: WindowType = "rolling",
     ):
         self.frequency_ = frequency
         self.train_size_ = train_size
@@ -66,24 +60,12 @@ class TimeBasedSplit:
         """
 
         # Validate frequency
-        _frequency_values = (
-            "days",
-            "seconds",
-            "microseconds",
-            "milliseconds",
-            "minutes",
-            "hours",
-            "weeks",
-        )
-
         if self.frequency_ not in _frequency_values:
             raise ValueError(
                 f"`frequency` must be one of {_frequency_values}. Found {self.frequency_}"
             )
 
         # Validate window
-        _window_values = ("rolling", "expanding")
-
         if self.window_ not in _window_values:
             raise ValueError(
                 f"`window` must be one of {_window_values}. Found {self.window_}"
@@ -162,9 +144,9 @@ class TimeBasedSplit:
 
     def split(
         self,
-        *arrays: tuple[ArrayLike, ...],
+        *arrays: TensorLike,
         time_series: SeriesLike,
-    ) -> Iterable[tuple[ArrayLike, ...]]:
+    ) -> Iterable[Tuple[TensorLike, ...]]:
         """
         Returns a generator of splits.
         """
@@ -173,6 +155,12 @@ class TimeBasedSplit:
             raise ValueError("At least one array required as input")
 
         a0 = arrays[0]
+
+        if not all(a.shape[0] == a0.shape[0] for a in arrays[1:]):
+            raise ValueError(
+                "All arrays must have the same length. "
+                f"Got {[a.shape[0] for a in arrays]}"
+            )
 
         if a0.shape[0] != time_series.shape[0]:
             raise ValueError(
