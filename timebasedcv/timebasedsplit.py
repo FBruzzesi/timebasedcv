@@ -31,15 +31,15 @@ class _BaseTimeSplit:
         frequency: FrequencyUnit,
         train_size: int,
         forecast_horizon: int,
-        gap: int = 1,
-        stride: int = 1,
+        gap: int = 0,
+        stride: int | None = None,
         window: WindowType = "rolling",
     ):
         self.frequency_ = frequency
         self.train_size_ = train_size
         self.forecast_horizon_ = forecast_horizon
         self.gap_ = gap
-        self.stride_ = stride
+        self.stride_ = stride or forecast_horizon
         self.window_ = window
 
         self.__post_init__()
@@ -73,18 +73,20 @@ class _BaseTimeSplit:
         # Validate positive integer arguments
         _slot_names = ("train_size_", "forecast_horizon_", "gap_", "stride_")
         _values = tuple(getattr(self, _attr) for _attr in _slot_names)
+        _lower_bounds = (1, 1, 0, 1)
+
         _types = tuple(type(v) for v in _values)
 
         if not all(t is int for t in _types):
-            print(_types)
             raise TypeError(
                 f"(`{'`, `'.join(_slot_names)}`) arguments must be of type `int`. "
                 f"Found (`{'`, `'.join(t._name_ for t in _types)}`)"
             )
 
-        if not all(v > 0 for v in _values):
+        if not all(v >= lb for v, lb in zip(_values, _lower_bounds)):
             raise ValueError(
-                f"(`{'`, `'.join(_slot_names)}`) must be greater than 0. "
+                f"(`{'`, `'.join(_slot_names)}`) must be greater or equal than"
+                f"({', '.join(map(str, _lower_bounds))}).\n"
                 f"Found ({', '.join(str(v) for v in _values)})"
             )
 
@@ -148,13 +150,18 @@ class _BaseTimeSplit:
 
         start_training = current_date = time_start
 
-        while current_date + self.train_delta + self.gap_delta < time_end:
-            end_training = current_date + self.train_delta
+        train_delta = self.train_delta
+        forecast_delta = self.forecast_delta
+        gap_delta = self.gap_delta
+        stride_delta = self.stride_delta
 
-            start_forecast = end_training + self.gap_delta
-            end_forecast = end_training + self.gap_delta + self.forecast_delta
+        while current_date + train_delta + gap_delta < time_end:
+            end_training = current_date + train_delta
 
-            current_date = current_date + self.stride_delta
+            start_forecast = end_training + gap_delta
+            end_forecast = end_training + gap_delta + forecast_delta
+
+            current_date = current_date + stride_delta
 
             yield SplitState(start_training, end_training, start_forecast, end_forecast)
 
@@ -236,10 +243,10 @@ class TimeBasedSplit(_BaseTimeSplit):
 
         for split in self._splits_from_period(time_start, time_end):
             train_mask = (time_series >= split.train_start) & (
-                time_series <= split.train_end
+                time_series < split.train_end
             )
             forecast_mask = (time_series >= split.forecast_start) & (
-                time_series <= split.forecast_end
+                time_series < split.forecast_end
             )
 
             train_forecast_arrays = tuple(
