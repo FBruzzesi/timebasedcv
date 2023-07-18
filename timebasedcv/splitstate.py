@@ -1,23 +1,22 @@
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from operator import lt as less_than
-from typing import Generic, TypeVar
+from typing import Generic
 
 import pandas as pd
 
 from timebasedcv.utils._funcs import pairwise, pairwise_comparison
-
-DT = TypeVar("DT", datetime, date, pd.Timestamp, covariant=True)
+from timebasedcv.utils._types import DateTimeLike
 
 
 @dataclass(frozen=True, slots=True)
-class SplitState(Generic[DT]):
+class SplitState(Generic[DateTimeLike]):
     """Class that represents the state of a split."""
 
-    train_start: DT
-    train_end: DT
-    forecast_start: DT
-    forecast_end: DT
+    train_start: DateTimeLike
+    train_end: DateTimeLike
+    forecast_start: DateTimeLike
+    forecast_end: DateTimeLike
 
     def __post_init__(self):
         """

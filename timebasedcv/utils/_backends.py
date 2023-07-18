@@ -1,6 +1,10 @@
 from typing import Callable, Type
 
-DEFAULT_INDEXING_METHOD = lambda arr, mask: arr[mask]
+
+def default_indexing_method(arr, mask):
+    return arr[mask]
+
+
 BACKEND_TO_INDEXING_METHOD: dict[Type, Callable] = {}
 
 try:

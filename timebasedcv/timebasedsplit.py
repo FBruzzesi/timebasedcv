@@ -7,7 +7,13 @@ from timebasedcv.utils._backends import (
     BACKEND_TO_INDEXING_METHOD,
     DEFAULT_INDEXING_METHOD,
 )
-from timebasedcv.utils._types import FrequencyUnit, SeriesLike, TensorLike, WindowType
+from timebasedcv.utils._types import (
+    DateTimeLike,
+    FrequencyUnit,
+    SeriesLike,
+    TensorLike,
+    WindowType,
+)
 
 _frequency_values = get_args(FrequencyUnit)
 _window_values = get_args(WindowType)
@@ -165,7 +171,7 @@ class TimeBasedSplit(_BaseTimeSplit):
     def split(
         self,
         *arrays: TensorLike,
-        time_series: SeriesLike,
+        time_series: SeriesLike[DateTimeLike],
         return_splitstate: bool = False,
     ) -> Iterable[
         Union[Tuple[TensorLike, ...], Tuple[Tuple[TensorLike, ...], SplitState]]
