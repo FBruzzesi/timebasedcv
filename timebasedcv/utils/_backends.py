@@ -2,6 +2,13 @@ from typing import Callable, Type
 
 
 def default_indexing_method(arr, mask):
+    """
+    Default indexing method for arrays.
+
+    Arguments:
+        arr: The array-like to index.
+        mask: The boolean mask to use for indexing.
+    """
     return arr[mask]
 
 
