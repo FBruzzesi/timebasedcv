@@ -56,6 +56,9 @@ line_length = 90
 
 [tool.ruff]
 line-length = 90
+ignore = [
+    "E731",  # do not assign a `lambda` expression, use a `def`
+    ]
 
 [tool.mypy]
 ignore_missing_imports = true

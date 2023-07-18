@@ -7,6 +7,7 @@ try:
     import numpy as np
 
     BACKEND_TO_INDEXING_METHOD[np.ndarray] = lambda arr, mask: arr[mask]
+
 except ImportError:
     pass
 
@@ -22,5 +23,6 @@ try:
     import polars as pl
 
     BACKEND_TO_INDEXING_METHOD[pl.DataFrame] = lambda df, mask: df.filter(mask)
+
 except ImportError:
     pass
