@@ -5,7 +5,7 @@ from typing import Iterable, Tuple, Union, get_args
 from timebasedcv.splitstate import SplitState
 from timebasedcv.utils._backends import (
     BACKEND_TO_INDEXING_METHOD,
-    DEFAULT_INDEXING_METHOD,
+    default_indexing_method,
 )
 from timebasedcv.utils._types import (
     DateTimeLike,
@@ -206,7 +206,7 @@ class TimeBasedSplit(_BaseTimeSplit):
                 f"Got {a0.shape[0]} and {time_series.shape[0]}"
             )
 
-        index_method = BACKEND_TO_INDEXING_METHOD.get(type(a0), DEFAULT_INDEXING_METHOD)
+        index_method = BACKEND_TO_INDEXING_METHOD.get(type(a0), default_indexing_method)
 
         time_start, time_end = time_series.min(), time_series.max()
 
