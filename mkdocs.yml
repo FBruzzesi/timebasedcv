@@ -1,0 +1,113 @@
+# Project information
+site_name: Timebased CV
+site_url: https://fbruzzesi.github.io/timebasedcv/
+site_author: Francesco Bruzzesi
+site_description: Time based splits for cross validation
+
+# Repository information
+repo_name: FBruzzesi/timebased-cv
+repo_url: https://github.com/fbruzzesi/timebased-cv
+edit_uri: edit/main/docs/
+
+# Configuration
+watch:
+  - timebasedcv
+use_directory_urls: true
+theme:
+  name: material
+  font:
+    text: Ubuntu
+    code: Ubuntu Mono
+  palette:
+  - media: '(prefers-color-scheme: light)'
+    scheme: default
+    primary: teal
+    accent: deep-orange
+    toggle:
+      icon: material/lightbulb
+      name: Switch to light mode
+  - media: '(prefers-color-scheme: dark)'
+    scheme: slate
+    primary: teal
+    accent: deep-orange
+    toggle:
+      icon: material/lightbulb-outline
+      name: Switch to dark mode
+  features:
+    - content.action.edit
+    - content.action.view
+    - content.code.annotate
+    - content.code.copy
+    - content.tooltips
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+    - navigation.footer
+    - navigation.indexes
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - search.suggest
+    - toc.follow
+  logo: img/deczoo-logo.png
+  favicon: img/deczoo-logo.png
+
+# Plugins
+plugins:
+  - mkdocstrings
+  - search:
+      separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
+
+# Customization
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/fbruzzesi
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/in/francesco-bruzzesi/
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/deczoo/
+
+# Extensions
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - codehilite
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink:
+      repo_url_shorthand: true
+      user: squidfunk
+      repo: mkdocs-material
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+nav:
+  - Home: index.md
+  # - Quickstart: quickstart.md
+  - API:
+    - Time based splits: api/timebasedsplit.md
+    - Split state: api/splitstate.md
+    - Available types: api/types.md
+  # - Contributing: contribute.md

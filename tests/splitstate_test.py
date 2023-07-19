@@ -59,7 +59,7 @@ def test_splitstate_valid(
 
     assert split_state.train_time == expected_train_time
     assert split_state.forecast_time == expected_forecast_time
-    assert split_state.gap == expected_gap
+    assert split_state.gap_time == expected_gap
     assert split_state.total_time == expected_total_time
 
 

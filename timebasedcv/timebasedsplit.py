@@ -66,7 +66,6 @@ class _CoreTimeBasedSplit:
                 ...
                 yield X_train, y_test
     ```
-
     """
 
     name_ = "_CoreTimeBasedSplit"
@@ -173,6 +172,9 @@ class _CoreTimeBasedSplit:
         Generate splits from `time_start` to `time_end` based on the parameters passed
         to the class instance.
 
+        This is the core iteration that generates splits. It is used by the `split`
+        method to generate splits from the time series.
+
         Arguments:
             time_start: The start of the time period.
             time_end: The end of the time period.
@@ -212,7 +214,12 @@ class _CoreTimeBasedSplit:
         return len(tuple(self._splits_from_period(time_start, time_end)))
 
     def split(self, *args, **kwargs):
-        """Template method that returns a generator of splits."""
+        """
+        Template method that returns a generator of splits.
+
+        Raises:
+            NotImplementedError: The method is not implemented directly
+        """
         raise NotImplementedError
 
 
@@ -273,6 +280,35 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
     for X_train, X_forecast, y_train, y_forecast in tbs.split(X, y, time_series=dates):
         print(f"Train: {X_train.shape}, Forecast: {X_forecast.shape}")
     ```
+
+    A few examples on how splits are generated given the parameters. Let:
+
+    - `=` = train period unit
+    - `*` = forecast period unit
+    - `/` = gap period unit
+    - `>` = stride period unit (absorbed in `T` if window="expanding")
+
+    Recall also that if `stride` is not provided, it is set to `forecast_horizon`:
+    ```
+    train_size, forecast_horizon, gap, stride, window = (4, 3, 0, None, "rolling")
+    | ======= *****               |
+    | >>>>> ======= *****         |
+    |       >>>>> ======= *****   |
+    |             >>>>> ======= * |
+
+    train_size, forecast_horizon, gap, stride, window = (4, 3, 2, 2, "rolling")
+
+    | ======= /// *****           |
+    | >>> ======= /// *****       |
+    |     >>> ======= /// *****   |
+    |         >>> ======= /// *** |
+
+    train_size, forecast_horizon, gap, stride, window = (4, 3, 2, 2, "expanding")
+    | ======= /// *****           |
+    | =========== /// *****       |
+    | =============== /// *****   |
+    | =================== /// *** |
+    ```
     """
 
     name_ = "TimeBasedSplit"
@@ -292,6 +328,7 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
             *arrays: The arrays to split. Must have the same length as `time_series`.
             time_series: The time series used to create boolean mask for splits.
                 It is not required to be sorted, but it must support:
+
                 - comparison operators (with other date-like objects).
                 - bitwise operators (with other boolean arrays).
                 - `.min()` and `.max()` methods.
