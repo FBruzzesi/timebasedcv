@@ -19,12 +19,56 @@ _frequency_values = get_args(FrequencyUnit)
 _window_values = get_args(WindowType)
 
 
-class _BaseTimeSplit:
+class _CoreTimeBasedSplit:
     """
-    Base class for time based splits.
+    Base class for time based splits. This class is not meant to be used directly.
+
+    `_CoreTimeBasedSplit` implements all the logics to set up a time based splits class.
+
+    In particular it implements `_splits_from_period` which is used to generate splits
+    from a given time period (from start to end dates) from the given arguments of the
+    class (frequency, train_size, forecast_horizon, gap, stride and window type).
+
+    Arguments:
+        frequency: The frequency of the time series. Must be one of "days", "seconds",
+            "microseconds", "milliseconds", "minutes", "hours", "weeks".
+            These are the only valid values for the `unit` argument of the `timedelta`.
+        train_size: The size of the training set.
+        forecast_horizon: The size of the forecast horizon.
+        gap: The size of the gap between the training set and the forecast horizon.
+        stride: The size of the stride between consecutive splits.
+        window: The type of window to use. Must be one of "rolling" or "expanding".
+
+    Raises:
+        ValueError: If `frequency` is not one of "days", "seconds", "microseconds",
+            "milliseconds", "minutes", "hours", "weeks".
+        ValueError: If `window` is not one of "rolling" or "expanding".
+        TypeError: If `train_size`, `forecast_horizon`, `gap` or `stride` are not of
+            type `int`.
+        ValueError: If `train_size`, `forecast_horizon`, `gap` or `stride` are not
+            strictly positive.
+
+    Although `_CoreTimeBasedSplit` is not meant to be used directly, it can be used as
+    a template to create new time based splits classes.
+
+    Usage:
+    ```python
+    from timebasedcv import _CoreTimeBasedSplit
+
+    class MyTimeBasedSplit(_CoreTimeBasedSplit):
+
+        def split(self, X, timeseries):
+            # Implement the split method to return a generator
+
+            for split in self._splits_from_period(timeseries.min(), timeseries.max()):
+
+                # Do something with the split to compute the train and forecast sets
+                ...
+                yield X_train, y_test
+    ```
     """
 
-    name_ = "_BaseTimeSplit"
+    name_ = "_CoreTimeBasedSplit"
 
     def __init__(
         self,
@@ -32,7 +76,7 @@ class _BaseTimeSplit:
         train_size: int,
         forecast_horizon: int,
         gap: int = 0,
-        stride: int | None = None,
+        stride: Union[int, None] = None,
         window: WindowType = "rolling",
     ):
         self.frequency_ = frequency
@@ -47,15 +91,6 @@ class _BaseTimeSplit:
     def __post_init__(self):
         """
         Post init used to validate the TimeSpacedSplit attributes
-
-        Raises:
-            ValueError: If `frequency` is not one of "days", "seconds", "microseconds",
-                "milliseconds", "minutes", "hours", "weeks".
-            ValueError: If `window` is not one of "rolling" or "expanding".
-            TypeError: If `train_size`, `forecast_horizon`, `gap` or `stride` are not of
-                type `int`.
-            ValueError: If `train_size`, `forecast_horizon`, `gap` or `stride` are not
-                strictly positive.
         """
 
         # Validate frequency
@@ -137,6 +172,9 @@ class _BaseTimeSplit:
         Generate splits from `time_start` to `time_end` based on the parameters passed
         to the class instance.
 
+        This is the core iteration that generates splits. It is used by the `split`
+        method to generate splits from the time series.
+
         Arguments:
             time_start: The start of the time period.
             time_end: The end of the time period.
@@ -176,14 +214,19 @@ class _BaseTimeSplit:
         return len(tuple(self._splits_from_period(time_start, time_end)))
 
     def split(self, *args, **kwargs):
-        """Template method that returns a generator of splits."""
+        """
+        Template method that returns a generator of splits.
+
+        Raises:
+            NotImplementedError: The method is not implemented directly
+        """
         raise NotImplementedError
 
 
-class TimeBasedSplit(_BaseTimeSplit):
+class TimeBasedSplit(_CoreTimeBasedSplit):
     """
-    Class that generates splits which as time based splits, indepedently from the number
-    of samples in each split.
+    Class that generates splits based on time values, indepedently from the number of
+    samples in each split.
 
     Arguments:
         frequency: The frequency of the time series. Must be one of "days", "seconds",
@@ -194,7 +237,78 @@ class TimeBasedSplit(_BaseTimeSplit):
         gap: The size of the gap between the training set and the forecast horizon.
         stride: The size of the stride between consecutive splits.
         window: The type of window to use. Must be one of "rolling" or "expanding".
-        indexing_methods: A dictionary mapping types to indexing methods.
+
+    Raises:
+        ValueError: If `frequency` is not one of "days", "seconds", "microseconds",
+            "milliseconds", "minutes", "hours", "weeks".
+        ValueError: If `window` is not one of "rolling" or "expanding".
+        TypeError: If `train_size`, `forecast_horizon`, `gap` or `stride` are not of
+            type `int`.
+        ValueError: If `train_size`, `forecast_horizon`, `gap` or `stride` are not
+            strictly positive.
+
+    Usage:
+    ```python
+    import pandas as pd
+    import numpy as np
+
+    from timebasedcv import TimeBasedSplit
+
+    tbs = TimeBasedSplit(
+        frequency="days",
+        train_size=30,
+        forecast_horizon=7,
+        gap=0,
+        stride=3,
+        window="rolling",
+    )
+
+    dates = pd.date_range("2023-01-01", "2023-12-31", freq="D")
+    size = len(dates)
+
+    df = (pd.DataFrame(data=np.random.randn(size, 2), columns=["a", "b"])
+        .assign(
+            date=dates,
+            y=np.arange(size),
+            )
+        )
+
+    X, y = df[["a", "b"]], df["y"]
+
+    print(f"Number of splits: {tbs.n_splits_of(dates)})
+
+    for X_train, X_forecast, y_train, y_forecast in tbs.split(X, y, time_series=dates):
+        print(f"Train: {X_train.shape}, Forecast: {X_forecast.shape}")
+    ```
+
+    A few examples on how splits are generated given the parameters. Let:
+
+    - `=` = train period unit
+    - `*` = forecast period unit
+    - `/` = gap period unit
+    - `>` = stride period unit (absorbed in `T` if window="expanding")
+
+    Recall also that if `stride` is not provided, it is set to `forecast_horizon`:
+    ```
+    train_size, forecast_horizon, gap, stride, window = (4, 3, 0, None, "rolling")
+    | ======= *****               |
+    | >>>>> ======= *****         |
+    |       >>>>> ======= *****   |
+    |             >>>>> ======= * |
+
+    train_size, forecast_horizon, gap, stride, window = (4, 3, 2, 2, "rolling")
+
+    | ======= /// *****           |
+    | >>> ======= /// *****       |
+    |     >>> ======= /// *****   |
+    |         >>> ======= /// *** |
+
+    train_size, forecast_horizon, gap, stride, window = (4, 3, 2, 2, "expanding")
+    | ======= /// *****           |
+    | =========== /// *****       |
+    | =============== /// *****   |
+    | =================== /// *** |
+    ```
     """
 
     name_ = "TimeBasedSplit"
@@ -208,16 +322,37 @@ class TimeBasedSplit(_BaseTimeSplit):
         Union[Tuple[TensorLike, ...], Tuple[Tuple[TensorLike, ...], SplitState]]
     ]:
         """
-        Returns a generator of splits.
+        Returns a generator of splitted arrays.
 
         Arguments:
             *arrays: The arrays to split. Must have the same length as `time_series`.
             time_series: The time series used to create boolean mask for splits.
-            return_splitstate: Whether to return the `SplitState` instance for each
-                split.
+                It is not required to be sorted, but it must support:
+
+                - comparison operators (with other date-like objects).
+                - bitwise operators (with other boolean arrays).
+                - `.min()` and `.max()` methods.
+                - `.shape` attribute.
+            return_splitstate: Whether to return the `SplitState` instance for each split.
+                If True, the generator yields tuples of the form
+                `(train_forecast_arrays, split_state)`, where `train_forecast_arrays` is a
+                tuple of arrays containing the training and forecast data,
+                and `split_state` is a `SplitState` instance representing the current
+                split. If False, the generator yields tuples of the form
+                `train_forecast_arrays`.
 
         Returns:
-            A generator of splits.
+            A generator of tuples of arrays containing the training and forecast data.
+                Each tuple corresponds to a split generated by the `TimeBasedSplit`
+                instance. If `return_splitstate` is True, each tuple is of the form
+                `(train_forecast_arrays, split_state)`, othersiwe it is of the form
+                `train_forecast_arrays`.
+
+        Raises:
+            ValueError: If no arrays are provided as input.
+            ValueError: If the arrays provided have different lengths.
+            ValueError: If the length of the time series does not match the length of the
+                arrays.
         """
         n_arrays = len(arrays)
         if n_arrays == 0:
@@ -274,8 +409,8 @@ class ExpandingTimeSplit(TimeBasedSplit):
         frequency: FrequencyUnit,
         train_size: int,
         forecast_horizon: int,
-        gap: int = 1,
-        stride: int = 1,
+        gap: int = 0,
+        stride: Union[int, None] = None,
     ):
         super().__init__(
             frequency,
@@ -299,8 +434,8 @@ class RollingTimeSplit(TimeBasedSplit):
         frequency: FrequencyUnit,
         train_size: int,
         forecast_horizon: int,
-        gap: int = 1,
-        stride: int = 1,
+        gap: int = 0,
+        stride: Union[int, None] = None,
     ):
         super().__init__(
             frequency,

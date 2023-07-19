@@ -20,6 +20,13 @@ T = TypeVar("T")
 class SeriesLike(Protocol[T]):
     """
     SeriesLike protocol for type hinting purposes.
+
+    This protocol is used to indicate that the class should supports:
+
+    - comparison operators: `__lt__`, `__gt__`, `__le__`, `__ge__`
+    - logical operators: `__and__`
+    - `.min()` and `.max()` methods
+    - `.shape` attribute
     """
 
     def min(self) -> T:
@@ -56,6 +63,10 @@ T_co = TypeVar("T_co", covariant=True)
 class TensorLike(Protocol[T_co]):
     """
     TensorLike protocol for type hinting purposes.
+
+    This protocol is used to indicate that the class should supports:
+
+    - `.shape` attribute
     """
 
     @property
