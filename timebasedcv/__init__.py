@@ -5,6 +5,7 @@ from timebasedcv.timebasedsplit import (
     ExpandingTimeSplit,
     RollingTimeSplit,
     TimeBasedSplit,
+    _CoreTimeBasedSplit,
 )
 
 __title__ = __name__
@@ -15,4 +16,5 @@ __all__ = (
     "TimeBasedSplit",
     "ExpandingTimeSplit",
     "RollingTimeSplit",
+    "_CoreTimeBasedSplit",
 )

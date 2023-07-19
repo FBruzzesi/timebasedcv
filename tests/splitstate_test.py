@@ -69,7 +69,6 @@ def test_splitstate_valid(
         (date(2023, 1, 1), pytest.raises(TypeError)),
         (pd.Timestamp(2023, 1, 1), pytest.raises(TypeError)),
         ("2023-01-01", pytest.raises(TypeError)),
-        (datetime(2023, 1, 31), pytest.raises(ValueError)),
         (datetime(2023, 2, 1), pytest.raises(ValueError)),
     ],
 )

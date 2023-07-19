@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
-from operator import lt as less_than
+from operator import le as less_equal
 from typing import Generic
 
 import pandas as pd
@@ -52,7 +52,7 @@ class SplitState(Generic[DateTimeLike]):
             )
 
         # Validate order
-        _ordered = tuple(pairwise_comparison(_values, less_than))
+        _ordered = tuple(pairwise_comparison(_values, less_equal))
 
         if not all(_ordered):
             _error_msg = "\n".join(

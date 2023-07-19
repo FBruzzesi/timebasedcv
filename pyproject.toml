@@ -12,10 +12,15 @@ readme = "README.md"
 requires-python = ">=3.8"
 authors = [{name = "Francesco Bruzzesi"}]
 
+dependencies = [
+    "pandas"
+]
+
 [project.urls]
 # documentation = "https://fbruzzesi.github.io/timebased-cv/"
 repository = "https://github.com/fbruzzesi/timebased-cv"
 issue-tracker = "https://github.com/fbruzzesi/timebased-cv/issues"
+
 
 
 [project.optional-dependencies]
