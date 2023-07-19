@@ -36,7 +36,7 @@ from timebasedcv.splitstate import SplitState
     ],
 )
 @pytest.mark.parametrize(
-    "expected_train_time, expected_forecast_time, expected_gap, expected_total_time",
+    "expected_train_len, expected_forecast_len, expected_gap_len, expected_total_len",
     [(timedelta(days=30), timedelta(days=27), timedelta(days=1), timedelta(days=58))],
 )
 def test_splitstate_valid(
@@ -44,10 +44,10 @@ def test_splitstate_valid(
     train_end,
     forecast_start,
     forecast_end,
-    expected_train_time,
-    expected_forecast_time,
-    expected_gap,
-    expected_total_time,
+    expected_train_len,
+    expected_forecast_len,
+    expected_gap_len,
+    expected_total_len,
 ):
     """Test the SplitState class with different input values types."""
     split_state = SplitState(
@@ -57,10 +57,10 @@ def test_splitstate_valid(
         forecast_end=forecast_end,
     )
 
-    assert split_state.train_time == expected_train_time
-    assert split_state.forecast_time == expected_forecast_time
-    assert split_state.gap_time == expected_gap
-    assert split_state.total_time == expected_total_time
+    assert split_state.train_length == expected_train_len
+    assert split_state.forecast_length == expected_forecast_len
+    assert split_state.gap_length == expected_gap_len
+    assert split_state.total_length == expected_total_len
 
 
 @pytest.mark.parametrize(

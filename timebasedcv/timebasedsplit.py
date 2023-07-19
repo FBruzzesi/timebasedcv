@@ -2,6 +2,8 @@ from datetime import timedelta
 from itertools import chain
 from typing import Iterable, Tuple, Union, get_args
 
+import numpy as np
+
 from timebasedcv.splitstate import SplitState
 from timebasedcv.utils._backends import (
     BACKEND_TO_INDEXING_METHOD,
@@ -317,12 +319,31 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
         self,
         *arrays: TensorLike,
         time_series: SeriesLike[DateTimeLike],
+        start_dt: Union[DateTimeLike, None] = None,
+        end_dt: Union[DateTimeLike, None] = None,
         return_splitstate: bool = False,
     ) -> Iterable[
         Union[Tuple[TensorLike, ...], Tuple[Tuple[TensorLike, ...], SplitState]]
     ]:
         """
-        Returns a generator of splitted arrays.
+        Returns a generator of splitted arrays based on the `time_series`.
+
+        The `time_series` argument is used to create boolean masks with which the
+        arrays are split into train and test.
+
+        The `start_dt` and `end_dt` arguments can be used to specify the start and end
+        of the time period. If provided, they are used in place of the `time_series.min()`
+        and `time_series.max()` respectively.
+
+        This is useful because the series does not necessarely starts from the first date
+        and/or terminates in the last date of the time period of interest.
+
+        The `return_splitstate` argument can be used to return the `SplitState` instance
+        for each split. This can be useful if a particular logic has to be applied only
+        on specific cases (e.g. if first day of the week, then retrain a model).
+
+        By returning the split state, the user has the freedom and flexibility to apply
+        any logic.
 
         Arguments:
             *arrays: The arrays to split. Must have the same length as `time_series`.
@@ -333,6 +354,10 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
                 - bitwise operators (with other boolean arrays).
                 - `.min()` and `.max()` methods.
                 - `.shape` attribute.
+            start_dt: The start of the time period. If provided, it is used in place of
+                 the `time_series.min()`.
+            end_dt: The end of the time period. If provided,it is used in place of
+                 the `time_series.max()`.
             return_splitstate: Whether to return the `SplitState` instance for each split.
                 If True, the generator yields tuples of the form
                 `(train_forecast_arrays, split_state)`, where `train_forecast_arrays` is a
@@ -374,7 +399,10 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
 
         index_method = BACKEND_TO_INDEXING_METHOD.get(type(a0), default_indexing_method)
 
-        time_start, time_end = time_series.min(), time_series.max()
+        time_start, time_end = start_dt or time_series.min(), end_dt or time_series.max()
+
+        if time_start >= time_end:
+            raise ValueError("`time_start` must be before `time_end`.")
 
         for split in self._splits_from_period(time_start, time_end):
             train_mask = (time_series >= split.train_start) & (
@@ -445,3 +473,77 @@ class RollingTimeSplit(TimeBasedSplit):
             stride,
             window="rolling",
         )
+
+
+class TimeBasedCVSplitter(TimeBasedSplit):
+    """
+    Scikit-learn compatible splitter that generates splits based on time values,
+    indepedently from the number of samples in each split.
+
+    Since scikit-learn CV Splitters `split` method only takes `X`, `y` and `groups`
+    as input, the `TimeBasedCVSplitter` class is a wrapper around the `TimeBasedSplit`
+    class that takes the `split` arguments as input in the constructor
+    (a.k.a. `__init__` method) and stores them as attributes to be used in the `split`
+    and `get_n_splits` methods.
+
+    """
+
+    def __init__(
+        self,
+        frequency: FrequencyUnit,
+        train_size: int,
+        forecast_horizon: int,
+        time_series: SeriesLike[DateTimeLike],
+        gap: int = 0,
+        stride: Union[int, None] = None,
+        window: WindowType = "rolling",
+        start_dt: Union[DateTimeLike, None] = None,
+        end_dt: Union[DateTimeLike, None] = None,
+    ):
+        super().__init__(
+            frequency=frequency,
+            train_size=train_size,
+            forecast_horizon=forecast_horizon,
+            gap=gap,
+            stride=stride,
+            window=window,
+        )
+
+        self.time_series_ = time_series
+        self.start_dt_ = start_dt
+        self.end_dt_ = end_dt
+
+    def split(
+        self,
+        X: Union[TensorLike, SeriesLike, None] = None,
+        y: Union[TensorLike, SeriesLike, None] = None,
+        groups: Union[TensorLike, SeriesLike, None] = None,
+    ) -> Iterable[Tuple[np.ndarray, np.ndarray]]:
+        """
+        Split method compatible with scikit-learn CV splitters.
+
+        Args:
+            X: Unused, only for compatibility with scikit-learn CV splitters.
+            y: Unused, only for compatibility with scikit-learn CV splitters.
+            groups: Unused, only for compatibility with scikit-learn CV splitters.
+
+        Returns:
+            _type_: _description_
+        """
+        _indexes = np.arange(self.time_series_.shape[0])
+        return super().split(
+            _indexes,
+            time_series=self.time_series_,
+            start_dt=self.start_dt_,
+            end_dt=self.end_dt_,
+            return_splitstate=False,
+        )
+
+    def get_n_splits(self) -> int:
+        """
+        Returns the number of splits that can be generated from `time_series`.
+        """
+        time_start = self.start_dt_ or self.time_series_.min()
+        time_end = self.end_dt_ or self.time_series_.max()
+
+        return len(tuple(self._splits_from_period(time_start, time_end)))

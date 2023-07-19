@@ -68,7 +68,7 @@ class SplitState(Generic[DateTimeLike]):
             )
 
     @property
-    def train_time(self) -> timedelta:
+    def train_length(self) -> timedelta:
         """
         Returns the time between `train_start` and `train_end`.
 
@@ -79,7 +79,7 @@ class SplitState(Generic[DateTimeLike]):
         return self.train_end - self.train_start
 
     @property
-    def forecast_time(self) -> timedelta:
+    def forecast_length(self) -> timedelta:
         """
         Returns the time between `forecast_start` and `forecast_end`
 
@@ -90,7 +90,7 @@ class SplitState(Generic[DateTimeLike]):
         return self.forecast_end - self.forecast_start
 
     @property
-    def gap_time(self) -> timedelta:
+    def gap_length(self) -> timedelta:
         """
         Returns the time between `train_end` and `forecast_start`
 
@@ -101,7 +101,7 @@ class SplitState(Generic[DateTimeLike]):
         return self.forecast_start - self.train_end
 
     @property
-    def total_time(self) -> timedelta:
+    def total_length(self) -> timedelta:
         """Returns the time between `train_start` and `forecast_end`
 
         Returns:
