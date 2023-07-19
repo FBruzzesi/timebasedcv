@@ -513,6 +513,8 @@ class TimeBasedCVSplitter(TimeBasedSplit):
         self.start_dt_ = start_dt
         self.end_dt_ = end_dt
 
+        self.n_splits = self._compute_n_splits()
+
     def split(
         self,
         X: Union[TensorLike, SeriesLike, None] = None,
@@ -522,15 +524,33 @@ class TimeBasedCVSplitter(TimeBasedSplit):
         """
         Split method compatible with scikit-learn CV splitters.
 
-        Args:
-            X: Unused, only for compatibility with scikit-learn CV splitters.
-            y: Unused, only for compatibility with scikit-learn CV splitters.
-            groups: Unused, only for compatibility with scikit-learn CV splitters.
+        Arguments:
+            X: Unused is the split, exists for compatibility, checked if not None.
+            y: Unused is the split, exists for compatibility, checked if not None.
+            groups: Unused is the split, exists for compatibility, checked if not None.
 
         Returns:
             _type_: _description_
         """
-        _indexes = np.arange(self.time_series_.shape[0])
+        n_samples = self.time_series_.shape[0]
+        if X is not None and X.shape[0] != n_samples:
+            raise ValueError(
+                f"X.shape[0] ({X.shape[0]}) != time_series.shape[0] ({n_samples})"
+            )
+
+        if y is not None and y.shape[0] != n_samples:
+            raise ValueError(
+                f"y.shape[0] ({y.shape[0]}) != time_series.shape[0] ({n_samples})"
+            )
+
+        if groups is not None and groups.shape[0] != n_samples:
+            raise ValueError(
+                f"groups.shape[0] ({groups.shape[0]}) != "
+                f"time_series.shape[0] ({n_samples})"
+            )
+
+        _indexes = np.arange(n_samples)
+
         return super().split(
             _indexes,
             time_series=self.time_series_,
@@ -539,11 +559,16 @@ class TimeBasedCVSplitter(TimeBasedSplit):
             return_splitstate=False,
         )
 
-    def get_n_splits(self) -> int:
-        """
-        Returns the number of splits that can be generated from `time_series`.
-        """
+    def _compute_n_splits(self) -> int:
+        """Computes number of splits just once in the init"""
+
         time_start = self.start_dt_ or self.time_series_.min()
         time_end = self.end_dt_ or self.time_series_.max()
 
         return len(tuple(self._splits_from_period(time_start, time_end)))
+
+    def get_n_splits(self) -> int:
+        """
+        Returns the number of splits that can be generated from `time_series`.
+        """
+        return self.n_splits
