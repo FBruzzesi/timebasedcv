@@ -140,33 +140,33 @@ class _CoreTimeBasedSplit:
             "window_",
         )
         _values = tuple(getattr(self, _attr) for _attr in _attrs)
-        to_join = "\n    "
+        _new_line_tab = "\n    "
         return (
             f"{self.name_}"
             "(\n    "
-            f"{to_join.join(f'{s} = {v}' for s, v in zip(_attrs, _values))}"
+            f"{_new_line_tab.join(f'{s} = {v}' for s, v in zip(_attrs, _values))}"
             "\n)"
         )
 
     @property
     def train_delta(self) -> timedelta:
         """Returns the `timedelta` object corresponding to the `train_size`"""
-        return timedelta(**{self.frequency_: self.train_size_})
+        return timedelta(**{str(self.frequency_): self.train_size_})
 
     @property
     def forecast_delta(self) -> timedelta:
         """Returns the `timedelta` object corresponding to the `forecast_horizon`"""
-        return timedelta(**{self.frequency_: self.forecast_horizon_})
+        return timedelta(**{str(self.frequency_): self.forecast_horizon_})
 
     @property
     def gap_delta(self) -> timedelta:
         """Returns the `timedelta` object corresponding to the `gap` and `frequency`."""
-        return timedelta(**{self.frequency_: self.gap_})
+        return timedelta(**{str(self.frequency_): self.gap_})
 
     @property
     def stride_delta(self) -> timedelta:
         """Returns the `timedelta` object corresponding to `stride`."""
-        return timedelta(**{self.frequency_: self.stride_})
+        return timedelta(**{str(self.frequency_): self.stride_})
 
     def _splits_from_period(
         self, time_start: DateTimeLike, time_end: DateTimeLike
@@ -515,13 +515,13 @@ class TimeBasedCVSplitter(TimeBasedSplit):
             window=window,
         )
 
-        self.time_series_ = time_series
-        self.start_dt_ = start_dt
-        self.end_dt_ = end_dt
+        self.time_series_ = time_series  # type: ignore
+        self.start_dt_ = start_dt  # type: ignore
+        self.end_dt_ = end_dt  # type: ignore
 
         self.n_splits = self._compute_n_splits()
 
-    def split(
+    def split(  # type: ignore
         self,
         X: Union[TensorLike, SeriesLike, None] = None,
         y: Union[TensorLike, SeriesLike, None] = None,
@@ -563,7 +563,7 @@ class TimeBasedCVSplitter(TimeBasedSplit):
             start_dt=self.start_dt_,
             end_dt=self.end_dt_,
             return_splitstate=False,
-        )
+        )  # type: ignore
 
     def _compute_n_splits(self) -> int:
         """Computes number of splits just once in the init"""
