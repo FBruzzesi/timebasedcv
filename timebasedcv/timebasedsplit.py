@@ -38,7 +38,8 @@ class _CoreTimeBasedSplit:
         train_size: The size of the training set.
         forecast_horizon: The size of the forecast horizon.
         gap: The size of the gap between the training set and the forecast horizon.
-        stride: The size of the stride between consecutive splits.
+        stride: The size of the stride between consecutive splits. Notice that if stride
+            is not provided (or set to 0), it is set to `forecast_horizon`.
         window: The type of window to use. Must be one of "rolling" or "expanding".
 
     Raises:
@@ -88,9 +89,9 @@ class _CoreTimeBasedSplit:
         self.stride_ = stride or forecast_horizon
         self.window_ = window
 
-        self.__post_init__()
+        self._validate_arguments()
 
-    def __post_init__(self):
+    def _validate_arguments(self):
         """
         Post init used to validate the TimeSpacedSplit attributes
         """
@@ -117,7 +118,7 @@ class _CoreTimeBasedSplit:
         if not all(t is int for t in _types):
             raise TypeError(
                 f"(`{'`, `'.join(_slot_names)}`) arguments must be of type `int`. "
-                f"Found (`{'`, `'.join(t._name_ for t in _types)}`)"
+                f"Found (`{'`, `'.join(str(t) for t in _types)}`)"
             )
 
         if not all(v >= lb for v, lb in zip(_values, _lower_bounds)):
@@ -237,7 +238,8 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
         train_size: The size of the training set.
         forecast_horizon: The size of the forecast horizon.
         gap: The size of the gap between the training set and the forecast horizon.
-        stride: The size of the stride between consecutive splits.
+        stride: The size of the stride between consecutive splits. Notice that if stride
+            is not provided (or set to 0), it is set to `forecast_horizon`.
         window: The type of window to use. Must be one of "rolling" or "expanding".
 
     Raises:
@@ -328,8 +330,10 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
         """
         Returns a generator of splitted arrays based on the `time_series`.
 
-        The `time_series` argument is used to create boolean masks with which the
-        arrays are split into train and test.
+        The `time_series` argument is split on split state values to create boolean
+        masks for training [from train_start (included) to train_end (excluded)] and
+        forecast [from forecast_start (included) to forecast_end (excluded)]. These
+        masks are then used to index the arrays passed as arguments.
 
         The `start_dt` and `end_dt` arguments can be used to specify the start and end
         of the time period. If provided, they are used in place of the `time_series.min()`
@@ -384,14 +388,15 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
             raise ValueError("At least one array required as input")
 
         a0 = arrays[0]
+        arr_len = a0.shape[0]
 
-        if n_arrays > 1 and not all(a.shape[0] == a0.shape[0] for a in arrays[1:]):
+        if n_arrays > 1 and not all(a.shape[0] == arr_len for a in arrays[1:]):
             raise ValueError(
                 "All arrays must have the same length. "
                 f"Got {[a.shape[0] for a in arrays]}"
             )
 
-        if a0.shape[0] != time_series.shape[0]:
+        if arr_len != time_series.shape[0]:
             raise ValueError(
                 "Time series and arrays must have the same length."
                 f"Got {a0.shape[0]} and {time_series.shape[0]}"
@@ -485,8 +490,9 @@ class TimeBasedCVSplitter(TimeBasedSplit):
     class that takes the `split` arguments as input in the constructor
     (a.k.a. `__init__` method) and stores them as attributes to be used in the `split`
     and `get_n_splits` methods.
-
     """
+
+    name_ = "TimeBasedCVSplitter"
 
     def __init__(
         self,
