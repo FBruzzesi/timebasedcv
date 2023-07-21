@@ -512,6 +512,55 @@ class TimeBasedCVSplitter(TimeBasedSplit):
     class that takes the `split` arguments as input in the constructor
     (a.k.a. `__init__` method) and stores them as attributes to be used in the `split`
     and `get_n_splits` methods.
+
+    Usage:
+    ```python
+    import pandas as pd
+    import numpy as np
+
+    from sklearn.linear_model import Ridge
+    from sklearn.model_selection import RandomizedSearchCV
+
+    from timebasedcv import TimeBasedCVSplitter, TimeBasedSplit, _CoreTimeBasedSplit
+
+    start_dt = pd.Timestamp(2023, 1, 1)
+    end_dt = pd.Timestamp(2023, 1, 31)
+
+    time_series = pd.Series(pd.date_range(start_dt, end_dt, freq="D"))
+    size = len(time_series)
+
+    df = pd.DataFrame(data=np.random.randn(size, 2), columns=["a", "b"]).assign(
+        y=lambda t: t[["a", "b"]].sum(axis=1),
+    )
+
+    X, y = df[["a", "b"]], df["y"]
+
+    cv = TimeBasedCVSplitter(
+        frequency = "days",
+        train_size = 7,
+        forecast_horizon = 1,
+        gap = 0,
+        stride = 1,
+        window = "rolling",
+        time_series=time_series,
+        start_dt=start_dt,
+        end_dt=end_dt,
+        **valid_kwargs,
+    )
+
+    param_grid = {
+        "alpha": np.linspace(0.1, 2, 10),
+        "fit_intercept": [True, False],
+        "positive": [True, False],
+    }
+
+    random_search_cv = RandomizedSearchCV(
+        estimator=Ridge(),
+        param_distributions=param_grid,
+        cv=cv,
+        n_jobs=-1,
+    ).fit(X, y)
+    ```
     """
 
     name_ = "TimeBasedCVSplitter"
