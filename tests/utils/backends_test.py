@@ -49,6 +49,6 @@ def test_backend_to_indexing_method(arr, mask, expected):
     """
     Tests the `BACKEND_TO_INDEXING_METHOD` dictionary with different backends.
     """
-    _type = type(arr)
+    _type = str(type(arr))
     result = BACKEND_TO_INDEXING_METHOD[_type](arr, mask)
     assert np.array_equal(result, expected)

@@ -1,4 +1,4 @@
-from typing import Callable, Type
+from typing import Callable
 
 import numpy as np
 import pandas as pd
@@ -19,16 +19,17 @@ def default_indexing_method(arr, mask):
     return arr[mask]
 
 
-BACKEND_TO_INDEXING_METHOD: dict[Type, Callable] = {
-    np.ndarray: default_indexing_method,
-    pd.DataFrame: lambda df, mask: df.loc[mask],
-    pd.Series: lambda s, mask: s.loc[mask],
+BACKEND_TO_INDEXING_METHOD: dict[str, Callable] = {
+    str(np.ndarray): default_indexing_method,
+    str(pd.DataFrame): lambda df, mask: df.loc[mask],
+    str(pd.Series): lambda s, mask: s.loc[mask],
 }
 
 try:
     import polars as pl
 
-    BACKEND_TO_INDEXING_METHOD[pl.DataFrame] = lambda df, mask: df.filter(mask)
+    BACKEND_TO_INDEXING_METHOD[str(pl.DataFrame)] = lambda df, mask: df.filter(mask)
+    BACKEND_TO_INDEXING_METHOD[str(pl.Series)] = lambda s, mask: s.filter(mask)
 
 except ImportError:
     pass

@@ -400,6 +400,12 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
         if n_arrays == 0:
             raise ValueError("At least one array required as input")
 
+        ts_shape = time_series.shape
+        if len(ts_shape) != 1:
+            raise ValueError(
+                f"Time series must be 1-dimensional. Got {len(ts_shape)} dimensions."
+            )
+
         a0 = arrays[0]
         arr_len = a0.shape[0]
 
@@ -409,10 +415,10 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
                 f"Got {[a.shape[0] for a in arrays]}"
             )
 
-        if arr_len != time_series.shape[0]:
+        if arr_len != ts_shape[0]:
             raise ValueError(
                 "Time series and arrays must have the same length."
-                f"Got {a0.shape[0]} and {time_series.shape[0]}"
+                f"Got {arr_len} and {ts_shape[0]}"
             )
 
         time_start, time_end = start_dt or time_series.min(), end_dt or time_series.max()
@@ -420,7 +426,7 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
         if time_start >= time_end:
             raise ValueError("`time_start` must be before `time_end`.")
 
-        _arr_types = tuple(type(a) for a in arrays)
+        _arr_types = tuple(str(type(a)) for a in arrays)
         _index_methods = tuple(
             BACKEND_TO_INDEXING_METHOD.get(_type, default_indexing_method)
             for _type in _arr_types
