@@ -9,7 +9,7 @@ from timebasedcv.utils._funcs import pairwise, pairwise_comparison
 from timebasedcv.utils._types import DateTimeLike
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class SplitState(Generic[DateTimeLike]):
     """
     The `SplitState` class represents the state of a split, which is a
@@ -33,6 +33,13 @@ class SplitState(Generic[DateTimeLike]):
             `pd.Timestamp`.
         ValueError: If the attributes are not ordered chronologically.
     """
+
+    __slots__ = (
+        "train_start",
+        "train_end",
+        "forecast_start",
+        "forecast_end",
+    )
 
     train_start: DateTimeLike
     train_end: DateTimeLike
