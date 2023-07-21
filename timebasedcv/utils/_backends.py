@@ -1,4 +1,4 @@
-from typing import Callable, TypeVar
+from typing import Callable, Dict, TypeVar
 
 import numpy as np
 import pandas as pd
@@ -33,7 +33,7 @@ def pd_indexing_method(_dfs: T_PD, mask) -> T_PD:
     return _dfs.loc[mask]
 
 
-BACKEND_TO_INDEXING_METHOD: dict[str, Callable] = {
+BACKEND_TO_INDEXING_METHOD: Dict[str, Callable] = {
     str(np.ndarray): default_indexing_method,
     str(pd.DataFrame): pd_indexing_method,
     str(pd.Series): pd_indexing_method,
