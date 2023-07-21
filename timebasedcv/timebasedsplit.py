@@ -536,6 +536,7 @@ class TimeBasedCVSplitter(TimeBasedSplit):
         self.end_dt_ = end_dt  # type: ignore
 
         self.n_splits = self._compute_n_splits()
+        self.size_ = time_series.shape[0]
 
     def split(  # type: ignore
         self,
@@ -552,26 +553,11 @@ class TimeBasedCVSplitter(TimeBasedSplit):
             groups: Unused is the split, exists for compatibility, checked if not None.
 
         Returns:
-            _type_: _description_
+            A generator of tuples of arrays containing the training and forecast data.
         """
-        n_samples = self.time_series_.shape[0]
-        if X is not None and X.shape[0] != n_samples:
-            raise ValueError(
-                f"X.shape[0] ({X.shape[0]}) != time_series.shape[0] ({n_samples})"
-            )
+        self._validate_split_args(self.size_, X, y, groups)
 
-        if y is not None and y.shape[0] != n_samples:
-            raise ValueError(
-                f"y.shape[0] ({y.shape[0]}) != time_series.shape[0] ({n_samples})"
-            )
-
-        if groups is not None and groups.shape[0] != n_samples:
-            raise ValueError(
-                f"groups.shape[0] ({groups.shape[0]}) != "
-                f"time_series.shape[0] ({n_samples})"
-            )
-
-        _indexes = np.arange(n_samples)
+        _indexes = np.arange(self.size_)
 
         return super().split(
             _indexes,
@@ -581,6 +567,24 @@ class TimeBasedCVSplitter(TimeBasedSplit):
             return_splitstate=False,
         )  # type: ignore
 
+    def get_n_splits(
+        self,
+        X: Union[TensorLike, SeriesLike, None] = None,
+        y: Union[TensorLike, SeriesLike, None] = None,
+        groups: Union[TensorLike, SeriesLike, None] = None,
+    ) -> int:
+        """
+        Arguments:
+            X: Unused, exists for compatibility, checked if not None.
+            y: Unused, exists for compatibility, checked if not None.
+            groups: Unused, exists for compatibility, checked if not None.
+
+        Returns:
+            The number of splits that can be generated from `time_series`.
+        """
+        self._validate_split_args(self.size_, X, y, groups)
+        return self.n_splits
+
     def _compute_n_splits(self) -> int:
         """Computes number of splits just once in the init"""
 
@@ -589,8 +593,28 @@ class TimeBasedCVSplitter(TimeBasedSplit):
 
         return len(tuple(self._splits_from_period(time_start, time_end)))
 
-    def get_n_splits(self) -> int:
+    @staticmethod
+    def _validate_split_args(
+        size: int,
+        X: Union[TensorLike, SeriesLike, None] = None,
+        y: Union[TensorLike, SeriesLike, None] = None,
+        groups: Union[TensorLike, SeriesLike, None] = None,
+    ) -> None:
         """
-        Returns the number of splits that can be generated from `time_series`.
+        Validates the arguments passed to the `split` and `get_n_splits` methods.
         """
-        return self.n_splits
+        if X is not None and X.shape[0] != size:
+            raise ValueError(
+                f"X.shape[0] ({X.shape[0]}) != time_series.shape[0] ({size})"
+            )
+
+        if y is not None and y.shape[0] != size:
+            raise ValueError(
+                f"y.shape[0] ({y.shape[0]}) != time_series.shape[0] ({size})"
+            )
+
+        if groups is not None and groups.shape[0] != size:
+            raise ValueError(
+                f"groups.shape[0] ({groups.shape[0]}) != "
+                f"time_series.shape[0] ({size})"
+            )

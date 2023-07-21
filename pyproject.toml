@@ -36,7 +36,8 @@ dev = [
     "pytest==7.2.0",
     "pytest-xdist==3.2.1",
     "coverage==7.2.1",
-    "ruff"
+    "ruff",
+    "scikit-learn>=0.19",
 ]
 
 docs = [

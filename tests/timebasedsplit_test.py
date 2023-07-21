@@ -1,9 +1,12 @@
 from contextlib import nullcontext as does_not_raise
 from datetime import date, datetime, timedelta
+from typing import Tuple
 
 import numpy as np
 import pandas as pd
 import pytest
+from sklearn.linear_model import Ridge
+from sklearn.model_selection import RandomizedSearchCV
 
 from timebasedcv import TimeBasedCVSplitter, TimeBasedSplit, _CoreTimeBasedSplit
 
@@ -17,12 +20,16 @@ valid_kwargs = {
     "window": "rolling",
 }
 
-time_series = pd.Series(pd.date_range("2023-01-01", "2023-01-31", freq="D"))
+
+start_dt = pd.Timestamp(2023, 1, 1)
+end_dt = pd.Timestamp(2023, 1, 31)
+
+time_series = pd.Series(pd.date_range(start_dt, end_dt, freq="D"))
 size = len(time_series)
 
 df = pd.DataFrame(data=np.random.randn(size, 2), columns=["a", "b"]).assign(
     date=time_series,
-    y=np.arange(size),
+    y=lambda t: t[["a", "b"]].sum(axis=1),
 )
 
 X, y = df[["a", "b"]], df["y"]
@@ -257,3 +264,65 @@ def test_timebasedcv_split(kwargs):
 
 
 # Tests for TimeBasedCVSplitter
+
+
+def test_cv_splitter():
+    """
+    Tests the TimeBasedCVSplitter `__init__` and `split` methods as well as its
+    compatibility with sklearn's _CV Splitter_s.
+    """
+    cv = TimeBasedCVSplitter(
+        time_series=time_series,  # type: ignore
+        start_dt=start_dt,
+        end_dt=end_dt,
+        **valid_kwargs,
+    )
+
+    assert cv.time_series_ is not None
+    assert cv.start_dt_ is not None
+    assert cv.end_dt_ is not None
+    assert isinstance(cv.n_splits, int)
+    assert isinstance(cv.size_, int)
+
+    param_grid = {
+        "alpha": np.linspace(0.1, 2, 10),
+        "fit_intercept": [True, False],
+        "positive": [True, False],
+    }
+
+    random_search_cv = RandomizedSearchCV(
+        estimator=Ridge(),
+        param_distributions=param_grid,
+        cv=cv,  # type: ignore
+        n_jobs=-1,
+    ).fit(X, y)
+
+    assert random_search_cv.best_estimator_ is not None
+
+
+@pytest.mark.parametrize("size", [size])
+@pytest.mark.parametrize(
+    "X_shape, y_shape, g_shape, context",
+    [
+        ((size, 2), (size,), (size, 2), does_not_raise()),
+        ((size + 1, 2), (size,), (size, 2), pytest.raises(ValueError)),
+        ((size, 2), (size + 1,), (size, 2), pytest.raises(ValueError)),
+        ((size, 2), (size,), (size + 1, 2), pytest.raises(ValueError)),
+    ],
+)
+def test_cv_splitter_validate_split(
+    size: int,
+    X_shape: Tuple[int, int],
+    y_shape: Tuple[int],
+    g_shape: Tuple[int, int],
+    context,
+):
+    """Test the TimeBasedCVSplitter._validate_split_args static method."""
+
+    with context:
+        TimeBasedCVSplitter._validate_split_args(
+            size=size,
+            X=np.random.randn(*X_shape),
+            y=np.random.randn(*y_shape),
+            groups=np.random.randn(*g_shape),
+        )
