@@ -189,30 +189,43 @@ class _CoreTimeBasedSplit:
         if time_start >= time_end:
             raise ValueError("`time_start` must be before `time_end`.")
 
-        start_training = current_date = time_start
+        train_start = current_time = time_start
 
         train_delta = self.train_delta
         forecast_delta = self.forecast_delta
         gap_delta = self.gap_delta
         stride_delta = self.stride_delta
 
-        while current_date + train_delta + gap_delta < time_end:
-            end_training = current_date + train_delta
+        while current_time + train_delta + gap_delta < time_end:
+            train_end = current_time + train_delta
+            forecast_start = train_end + gap_delta
+            forecast_end = forecast_start + forecast_delta
 
-            start_forecast = end_training + gap_delta
-            end_forecast = end_training + gap_delta + forecast_delta
+            current_time = current_time + stride_delta
 
-            current_date = current_date + stride_delta
-
-            yield SplitState(start_training, end_training, start_forecast, end_forecast)
+            yield SplitState(train_start, train_end, forecast_start, forecast_end)
 
             if self.window_ == "rolling":
-                start_training = current_date
+                train_start = current_time
 
-    def n_splits_of(self, time_series: SeriesLike) -> int:
+    def n_splits_of(
+        self,
+        *,
+        time_series: Union[SeriesLike[DateTimeLike], None] = None,
+        start_dt: Union[DateTimeLike, None] = None,
+        end_dt: Union[DateTimeLike, None] = None,
+    ) -> int:
         """Returns the number of splits that can be generated from `time_series`"""
 
-        time_start, time_end = time_series.min(), time_series.max()
+        if time_series is None and (start_dt is None or end_dt is None):
+            raise ValueError(
+                "Either `time_series` or `start_dt` and `end_dt` must be provided."
+            )
+
+        if (start_dt and end_dt) and (start_dt >= end_dt):
+            raise ValueError("`start_dt` must be before `end_dt`.")
+
+        time_start, time_end = start_dt or time_series.min(), end_dt or time_series.max()
 
         return len(tuple(self._splits_from_period(time_start, time_end)))
 
