@@ -400,6 +400,12 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
         if n_arrays == 0:
             raise ValueError("At least one array required as input")
 
+        ts_shape = time_series.shape
+        if len(ts_shape) != 1:
+            raise ValueError(
+                f"Time series must be 1-dimensional. Got {len(ts_shape)} dimensions."
+            )
+
         a0 = arrays[0]
         arr_len = a0.shape[0]
 
@@ -409,10 +415,10 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
                 f"Got {[a.shape[0] for a in arrays]}"
             )
 
-        if arr_len != time_series.shape[0]:
+        if arr_len != ts_shape[0]:
             raise ValueError(
                 "Time series and arrays must have the same length."
-                f"Got {a0.shape[0]} and {time_series.shape[0]}"
+                f"Got {arr_len} and {ts_shape[0]}"
             )
 
         time_start, time_end = start_dt or time_series.min(), end_dt or time_series.max()
@@ -420,7 +426,7 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
         if time_start >= time_end:
             raise ValueError("`time_start` must be before `time_end`.")
 
-        _arr_types = tuple(type(a) for a in arrays)
+        _arr_types = tuple(str(type(a)) for a in arrays)
         _index_methods = tuple(
             BACKEND_TO_INDEXING_METHOD.get(_type, default_indexing_method)
             for _type in _arr_types
@@ -506,6 +512,55 @@ class TimeBasedCVSplitter(TimeBasedSplit):
     class that takes the `split` arguments as input in the constructor
     (a.k.a. `__init__` method) and stores them as attributes to be used in the `split`
     and `get_n_splits` methods.
+
+    Usage:
+    ```python
+    import pandas as pd
+    import numpy as np
+
+    from sklearn.linear_model import Ridge
+    from sklearn.model_selection import RandomizedSearchCV
+
+    from timebasedcv import TimeBasedCVSplitter, TimeBasedSplit, _CoreTimeBasedSplit
+
+    start_dt = pd.Timestamp(2023, 1, 1)
+    end_dt = pd.Timestamp(2023, 1, 31)
+
+    time_series = pd.Series(pd.date_range(start_dt, end_dt, freq="D"))
+    size = len(time_series)
+
+    df = pd.DataFrame(data=np.random.randn(size, 2), columns=["a", "b"]).assign(
+        y=lambda t: t[["a", "b"]].sum(axis=1),
+    )
+
+    X, y = df[["a", "b"]], df["y"]
+
+    cv = TimeBasedCVSplitter(
+        frequency = "days",
+        train_size = 7,
+        forecast_horizon = 1,
+        gap = 0,
+        stride = 1,
+        window = "rolling",
+        time_series=time_series,
+        start_dt=start_dt,
+        end_dt=end_dt,
+        **valid_kwargs,
+    )
+
+    param_grid = {
+        "alpha": np.linspace(0.1, 2, 10),
+        "fit_intercept": [True, False],
+        "positive": [True, False],
+    }
+
+    random_search_cv = RandomizedSearchCV(
+        estimator=Ridge(),
+        param_distributions=param_grid,
+        cv=cv,
+        n_jobs=-1,
+    ).fit(X, y)
+    ```
     """
 
     name_ = "TimeBasedCVSplitter"
