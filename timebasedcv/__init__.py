@@ -4,6 +4,7 @@ from timebasedcv.splitstate import SplitState
 from timebasedcv.timebasedsplit import (
     ExpandingTimeSplit,
     RollingTimeSplit,
+    TimeBasedCVSplitter,
     TimeBasedSplit,
     _CoreTimeBasedSplit,
 )
@@ -16,5 +17,6 @@ __all__ = (
     "TimeBasedSplit",
     "ExpandingTimeSplit",
     "RollingTimeSplit",
+    "TimeBasedCVSplitter",
     "_CoreTimeBasedSplit",
 )

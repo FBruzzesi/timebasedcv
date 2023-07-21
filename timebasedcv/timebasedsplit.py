@@ -280,7 +280,7 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
         window="rolling",
     )
 
-    dates = pd.date_range("2023-01-01", "2023-12-31", freq="D")
+    dates = pd.Series(pd.date_range("2023-01-01", "2023-12-31", freq="D"))
     size = len(dates)
 
     df = (pd.DataFrame(data=np.random.randn(size, 2), columns=["a", "b"])
@@ -292,7 +292,7 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
 
     X, y = df[["a", "b"]], df["y"]
 
-    print(f"Number of splits: {tbs.n_splits_of(dates)})
+    print(f"Number of splits: {tbs.n_splits_of(time_series=dates)})
 
     for X_train, X_forecast, y_train, y_forecast in tbs.split(X, y, time_series=dates):
         print(f"Train: {X_train.shape}, Forecast: {X_forecast.shape}")
@@ -415,13 +415,16 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
                 f"Got {a0.shape[0]} and {time_series.shape[0]}"
             )
 
-        index_method = BACKEND_TO_INDEXING_METHOD.get(type(a0), default_indexing_method)
-
         time_start, time_end = start_dt or time_series.min(), end_dt or time_series.max()
 
         if time_start >= time_end:
             raise ValueError("`time_start` must be before `time_end`.")
 
+        _arr_types = tuple(type(a) for a in arrays)
+        _index_methods = tuple(
+            BACKEND_TO_INDEXING_METHOD.get(_type, default_indexing_method)
+            for _type in _arr_types
+        )
         for split in self._splits_from_period(time_start, time_end):
             train_mask = (time_series >= split.train_start) & (
                 time_series < split.train_end
@@ -432,8 +435,8 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
 
             train_forecast_arrays = tuple(
                 chain.from_iterable(
-                    (index_method(a, train_mask), index_method(a, forecast_mask))
-                    for a in arrays
+                    (_idx_method(_arr, train_mask), _idx_method(_arr, forecast_mask))
+                    for _arr, _idx_method in zip(arrays, _index_methods)
                 )
             )
 
@@ -443,7 +446,7 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
                 yield train_forecast_arrays
 
 
-class ExpandingTimeSplit(TimeBasedSplit):
+class ExpandingTimeSplit(TimeBasedSplit):  # pragma: no cover
     """
     Alias for `TimeBasedSplit` with `window="expanding"`.
     """
@@ -468,7 +471,7 @@ class ExpandingTimeSplit(TimeBasedSplit):
         )
 
 
-class RollingTimeSplit(TimeBasedSplit):
+class RollingTimeSplit(TimeBasedSplit):  # pragma: no cover
     """
     Alias for `TimeBasedSplit` with `window="rolling"`.
     """

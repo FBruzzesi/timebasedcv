@@ -71,3 +71,12 @@ ignore = [
 
 [tool.mypy]
 ignore_missing_imports = true
+
+[tool.coverage.run]
+source = [
+    "timebasedcv/",
+    ]
+
+omit = [
+    "timebasedcv/utils/_types.py",  # collection of type hints and protocols
+]

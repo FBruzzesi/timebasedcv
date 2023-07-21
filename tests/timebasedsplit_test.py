@@ -1,10 +1,11 @@
 from contextlib import nullcontext as does_not_raise
 from datetime import date, datetime, timedelta
 
+import numpy as np
 import pandas as pd
 import pytest
 
-from timebasedcv import _CoreTimeBasedSplit
+from timebasedcv import TimeBasedCVSplitter, TimeBasedSplit, _CoreTimeBasedSplit
 
 # Define a fix set of valid arguments
 valid_kwargs = {
@@ -17,6 +18,16 @@ valid_kwargs = {
 }
 
 time_series = pd.Series(pd.date_range("2023-01-01", "2023-01-31", freq="D"))
+size = len(time_series)
+
+df = pd.DataFrame(data=np.random.randn(size, 2), columns=["a", "b"]).assign(
+    date=time_series,
+    y=np.arange(size),
+)
+
+X, y = df[["a", "b"]], df["y"]
+
+# Tests for _CoreTimeBasedSplit
 
 
 @pytest.mark.parametrize(
@@ -172,3 +183,77 @@ def test_core_split():
 
     with pytest.raises(NotImplementedError):
         _CoreTimeBasedSplit(**valid_kwargs).split()
+
+
+# Tests for TimeBasedSplit
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"arrays": ()},  # empty arrays
+        {"arrays": (X, y[:-1])},  # arrays different shape
+        {"time_series": time_series[:-1]},
+        # arrays shape different from time_series shape
+        {"start_dt": pd.Timestamp(2023, 1, 1), "end_dt": pd.Timestamp(2023, 1, 1)},
+        # start_dt >= end_dt
+    ],
+)
+def test_timebasedcv_split_invalid(kwargs):
+    """
+    Test the TimeBasedSplit.split method with invalid arguments.
+    """
+    cv = TimeBasedSplit(**valid_kwargs)
+    arrays_ = kwargs.get("arrays", (X, y))
+    time_series_ = kwargs.get("time_series", time_series)
+    start_dt_ = kwargs.get("start_dt")
+    end_dt_ = kwargs.get("end_dt")
+
+    with pytest.raises(ValueError):
+        next(
+            cv.split(
+                *arrays_, time_series=time_series_, start_dt=start_dt_, end_dt=end_dt_
+            ),  # type: ignore
+        )
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"arrays": (X,)},
+        {"arrays": (X, y, X.to_numpy())},  # multi-type arrays
+        # arrays shape different from time_series shape
+        {"start_dt": pd.Timestamp(2023, 1, 1), "end_dt": pd.Timestamp(2023, 1, 31)},
+        {"return_splitstate": True},
+    ],
+)
+def test_timebasedcv_split(kwargs):
+    """Tests the TimeBasedSplit.split method."""
+    cv = TimeBasedSplit(**valid_kwargs)
+
+    arrays_ = kwargs.get("arrays", (X, y))
+    time_series_ = kwargs.get("time_series", time_series)
+    start_dt_ = kwargs.get("start_dt")
+    end_dt_ = kwargs.get("end_dt")
+    return_splitstate_ = kwargs.get("return_splitstate", False)
+
+    n_arrays = len(arrays_)
+    split_results = next(
+        cv.split(
+            *arrays_,
+            time_series=time_series_,
+            start_dt=start_dt_,
+            end_dt=end_dt_,
+            return_splitstate=return_splitstate_,
+        ),  # type: ignore
+    )
+
+    if return_splitstate_:
+        train_forecast, _ = split_results
+    else:
+        train_forecast = split_results
+
+    assert len(train_forecast) == n_arrays * 2
+
+
+# Tests for TimeBasedCVSplitter

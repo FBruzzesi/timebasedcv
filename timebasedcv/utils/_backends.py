@@ -22,6 +22,7 @@ def default_indexing_method(arr, mask):
 BACKEND_TO_INDEXING_METHOD: dict[Type, Callable] = {
     np.ndarray: default_indexing_method,
     pd.DataFrame: lambda df, mask: df.loc[mask],
+    pd.Series: lambda s, mask: s.loc[mask],
 }
 
 try:
