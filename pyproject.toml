@@ -13,6 +13,7 @@ requires-python = ">=3.8"
 authors = [{name = "Francesco Bruzzesi"}]
 
 dependencies = [
+    "numpy",
     "pandas"
 ]
 
@@ -24,6 +25,9 @@ issue-tracker = "https://github.com/fbruzzesi/timebased-cv/issues"
 
 
 [project.optional-dependencies]
+
+polars = ["polars"]
+
 dev = [
     "black==23.3.0",
     "interrogate==1.5.0",
@@ -32,7 +36,8 @@ dev = [
     "pytest==7.2.0",
     "pytest-xdist==3.2.1",
     "coverage==7.2.1",
-    "ruff"
+    "ruff",
+    "scikit-learn>=0.19",
 ]
 
 docs = [
@@ -41,7 +46,7 @@ docs = [
     "mkdocstrings[python]==0.20.0",
 ]
 
-all = ["timebasedcv[dev,docs]"]
+all = ["timebasedcv[dev,docs,polars]"]
 
 [tool.setuptools.packages.find]
 include = ["timebasedcv*"]
@@ -67,3 +72,12 @@ ignore = [
 
 [tool.mypy]
 ignore_missing_imports = true
+
+[tool.coverage.run]
+source = [
+    "timebasedcv/",
+    ]
+
+omit = [
+    "timebasedcv/utils/_types.py",  # collection of type hints and protocols
+]

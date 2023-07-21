@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
-from operator import le as less_equal
+from operator import le as less_or_equal
 from typing import Generic
 
 import pandas as pd
@@ -12,13 +12,21 @@ from timebasedcv.utils._types import DateTimeLike
 @dataclass(frozen=True, slots=True)
 class SplitState(Generic[DateTimeLike]):
     """
-    Class that represents the state of a split.
+    The `SplitState` class represents the state of a split, which is a
+    set of split points where to partition a time series into
+    training set and forecast set.
+
+    The class ensures that the split is valid by checking that the
+    attributes are of the correct type and are ordered chronologically.
+
+    The class provides properties to calculate the length of the training set,
+    forecast set, gap between them, and the total length of the split.
 
     Arguments:
-        train_start: The start of the training set (inclusive).
-        train_end: The end of the training set (exclusive).
-        forecast_start: The start of the forecast set (inclusive).
-        forecast_end: The end of the forecast set (exclusive).
+        train_start: The start of the training set.
+        train_end: The end of the training set.
+        forecast_start: The start of the forecast set.
+        forecast_end: The end of the forecast set.
 
     Raises:
         TypeError: If any of the attributes is not of type `datetime`, `date` or
@@ -52,7 +60,7 @@ class SplitState(Generic[DateTimeLike]):
             )
 
         # Validate order
-        _ordered = tuple(pairwise_comparison(_values, less_equal))
+        _ordered = tuple(pairwise_comparison(_values, less_or_equal))
 
         if not all(_ordered):
             _error_msg = "\n".join(
@@ -68,7 +76,7 @@ class SplitState(Generic[DateTimeLike]):
             )
 
     @property
-    def train_time(self) -> timedelta:
+    def train_length(self) -> timedelta:
         """
         Returns the time between `train_start` and `train_end`.
 
@@ -79,7 +87,7 @@ class SplitState(Generic[DateTimeLike]):
         return self.train_end - self.train_start
 
     @property
-    def forecast_time(self) -> timedelta:
+    def forecast_length(self) -> timedelta:
         """
         Returns the time between `forecast_start` and `forecast_end`
 
@@ -90,7 +98,7 @@ class SplitState(Generic[DateTimeLike]):
         return self.forecast_end - self.forecast_start
 
     @property
-    def gap_time(self) -> timedelta:
+    def gap_length(self) -> timedelta:
         """
         Returns the time between `train_end` and `forecast_start`
 
@@ -101,7 +109,7 @@ class SplitState(Generic[DateTimeLike]):
         return self.forecast_start - self.train_end
 
     @property
-    def total_time(self) -> timedelta:
+    def total_length(self) -> timedelta:
         """Returns the time between `train_start` and `forecast_end`
 
         Returns:
