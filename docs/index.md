@@ -59,4 +59,4 @@ Please refer to the dedicated page [Getting Started](getting-started/).
 
 ## License
 
-The project has a [MIT Licence](https://github.com/FBruzzesi/deczoo/blob/main/LICENSE)
+The project has a [MIT Licence](https://github.com/FBruzzesi/timebasedcv/blob/main/LICENSE)
