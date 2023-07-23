@@ -6,7 +6,7 @@ site_description: Time based splits for cross validation
 
 # Repository information
 repo_name: FBruzzesi/timebased-cv
-repo_url: https://github.com/fbruzzesi/timebased-cv
+repo_url: https://github.com/fbruzzesi/timebasedcv
 edit_uri: edit/main/docs/
 
 # Configuration
@@ -50,8 +50,8 @@ theme:
     - search.share
     - search.suggest
     - toc.follow
-  logo: img/deczoo-logo.png
-  favicon: img/deczoo-logo.png
+  logo: img/timebasedcv-logo.png
+  favicon: img/timebasedcv-logo.png
 
 # Plugins
 plugins:
@@ -67,7 +67,7 @@ extra:
     - icon: fontawesome/brands/linkedin
       link: https://www.linkedin.com/in/francesco-bruzzesi/
     - icon: fontawesome/brands/python
-      link: https://pypi.org/project/deczoo/
+      link: https://pypi.org/project/timebasedcv/
 
 # Extensions
 markdown_extensions:
@@ -105,9 +105,9 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  # - Quickstart: quickstart.md
+  - Getting Started: getting-started.md
   - API:
     - Time based splits: api/timebasedsplit.md
     - Split state: api/splitstate.md
     - Available types: api/types.md
-  # - Contributing: contribute.md
+  - Contributing: contribute.md

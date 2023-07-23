@@ -284,15 +284,12 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
     size = len(dates)
 
     df = (pd.DataFrame(data=np.random.randn(size, 2), columns=["a", "b"])
-        .assign(
-            date=dates,
-            y=np.arange(size),
-            )
+        .assign(y=lambda t : t[["a", "b"]].sum(axis=1))
         )
 
     X, y = df[["a", "b"]], df["y"]
 
-    print(f"Number of splits: {tbs.n_splits_of(time_series=dates)})
+    print(f"Number of splits: {tbs.n_splits_of(time_series=dates)}")
 
     for X_train, X_forecast, y_train, y_forecast in tbs.split(X, y, time_series=dates):
         print(f"Train: {X_train.shape}, Forecast: {X_forecast.shape}")
@@ -300,10 +297,10 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
 
     A few examples on how splits are generated given the parameters. Let:
 
-    - `=` = train period unit
-    - `*` = forecast period unit
-    - `/` = gap period unit
-    - `>` = stride period unit (absorbed in `T` if window="expanding")
+    - `=` : train period unit
+    - `*` : forecast period unit
+    - `/` : gap period unit
+    - `>` : stride period unit (absorbed in `=` if `window="expanding"`)
 
     Recall also that if `stride` is not provided, it is set to `forecast_horizon`:
     ```
@@ -508,10 +505,41 @@ class TimeBasedCVSplitter(TimeBasedSplit):
     indepedently from the number of samples in each split.
 
     Since scikit-learn CV Splitters `split` method only takes `X`, `y` and `groups`
-    as input, the `TimeBasedCVSplitter` class is a wrapper around the `TimeBasedSplit`
+    as input, the `TimeBasedCVSplitter` class is a wrapper over `TimeBasedSplit`
     class that takes the `split` arguments as input in the constructor
     (a.k.a. `__init__` method) and stores them as attributes to be used in the `split`
     and `get_n_splits` methods.
+
+    Arguments:
+        frequency: The frequency of the time series. Must be one of "days", "seconds",
+            "microseconds", "milliseconds", "minutes", "hours", "weeks".
+            These are the only valid values for the `unit` argument of the `timedelta`.
+        train_size: The size of the training set.
+        forecast_horizon: The size of the forecast horizon.
+        time_series: The time series used to create boolean mask for splits.
+            It is not required to be sorted, but it must support:
+
+            - comparison operators (with other date-like objects).
+            - bitwise operators (with other boolean arrays).
+            - `.min()` and `.max()` methods.
+            - `.shape` attribute.
+        gap: The size of the gap between the training set and the forecast horizon.
+        stride: The size of the stride between consecutive splits. Notice that if stride
+            is not provided (or set to 0), it is set to `forecast_horizon`.
+        window: The type of window to use. Must be one of "rolling" or "expanding".
+        start_dt: The start of the time period. If provided, it is used in place of
+            the `time_series.min()`.
+        end_dt: The end of the time period. If provided,it is used in place of
+            the `time_series.max()`.
+
+    Raises:
+        ValueError: If `frequency` is not one of "days", "seconds", "microseconds",
+            "milliseconds", "minutes", "hours", "weeks".
+        ValueError: If `window` is not one of "rolling" or "expanding".
+        TypeError: If `train_size`, `forecast_horizon`, `gap` or `stride` are not of
+            type `int`.
+        ValueError: If `train_size`, `forecast_horizon`, `gap` or `stride` are not
+            strictly positive.
 
     Usage:
     ```python
@@ -529,8 +557,8 @@ class TimeBasedCVSplitter(TimeBasedSplit):
     time_series = pd.Series(pd.date_range(start_dt, end_dt, freq="D"))
     size = len(time_series)
 
-    df = pd.DataFrame(data=np.random.randn(size, 2), columns=["a", "b"]).assign(
-        y=lambda t: t[["a", "b"]].sum(axis=1),
+    df = (pd.DataFrame(data=np.random.randn(size, 2), columns=["a", "b"])
+        .assign(y=lambda t: t[["a", "b"]].sum(axis=1)),
     )
 
     X, y = df[["a", "b"]], df["y"]
@@ -629,6 +657,8 @@ class TimeBasedCVSplitter(TimeBasedSplit):
         groups: Union[TensorLike, SeriesLike, None] = None,
     ) -> int:
         """
+        Returns the number of splits that can be generated from the instance.
+
         Arguments:
             X: Unused, exists for compatibility, checked if not None.
             y: Unused, exists for compatibility, checked if not None.
