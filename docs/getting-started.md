@@ -149,7 +149,7 @@ Now let's plot train and forecasting splits with different split strategies (or 
 
 The gren dots represent the train points, while the red dots represent the forecastng points.
 
-<img src="img/cross-validation.png" align="center">
+<img src="../img/cross-validation.png" align="center">
 
 
 Here is the code to replicate the results:
