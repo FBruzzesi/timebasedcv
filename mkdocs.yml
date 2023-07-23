@@ -109,5 +109,5 @@ nav:
   - API:
     - Time based splits: api/timebasedsplit.md
     - Split state: api/splitstate.md
-    - Available types: api/types.md
+    - Types and protocols: api/types.md
   - Contributing: contribute.md

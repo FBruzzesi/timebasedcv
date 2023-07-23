@@ -501,14 +501,18 @@ class RollingTimeSplit(TimeBasedSplit):  # pragma: no cover
 
 class TimeBasedCVSplitter(TimeBasedSplit):
     """
-    Scikit-learn compatible splitter that generates splits based on time values,
-    indepedently from the number of samples in each split.
+    The TimeBasedCVSplitter class conforms with scikit-learn CV Splitters API
+    and generates splits based on time values, indepedently from the number
+    of samples in each split.
 
-    Since scikit-learn CV Splitters `split` method only takes `X`, `y` and `groups`
-    as input, the `TimeBasedCVSplitter` class is a wrapper over `TimeBasedSplit`
-    class that takes the `split` arguments as input in the constructor
-    (a.k.a. `__init__` method) and stores them as attributes to be used in the `split`
-    and `get_n_splits` methods.
+    In order to achive such behaviour we include the arguments of
+    `TimeBasedSplit.split()` method (namely `time_series`, `start_dt` and
+    `end_dt`) in the constructor (a.k.a. `__init__` method) and store them
+    for future use in its `split` and `get_n_splits` methods.
+
+    In this way we can restrict the arguments of `split` and `get_n_splits` to
+    the arrays to split (i.e. `X`, `y` and `groups`), which are the only
+    arguments required by scikit-learn CV Splitters.
 
     Arguments:
         frequency: The frequency of the time series. Must be one of "days", "seconds",
@@ -549,7 +553,7 @@ class TimeBasedCVSplitter(TimeBasedSplit):
     from sklearn.linear_model import Ridge
     from sklearn.model_selection import RandomizedSearchCV
 
-    from timebasedcv import TimeBasedCVSplitter, TimeBasedSplit, _CoreTimeBasedSplit
+    from timebasedcv import TimeBasedCVSplitter
 
     start_dt = pd.Timestamp(2023, 1, 1)
     end_dt = pd.Timestamp(2023, 1, 31)
@@ -564,16 +568,15 @@ class TimeBasedCVSplitter(TimeBasedSplit):
     X, y = df[["a", "b"]], df["y"]
 
     cv = TimeBasedCVSplitter(
-        frequency = "days",
-        train_size = 7,
-        forecast_horizon = 1,
-        gap = 0,
-        stride = 1,
-        window = "rolling",
+        frequency="days",
+        train_size=7,
+        forecast_horizon=11,
+        gap=0,
+        stride=1,
+        window="rolling",
         time_series=time_series,
         start_dt=start_dt,
         end_dt=end_dt,
-        **valid_kwargs,
     )
 
     param_grid = {
