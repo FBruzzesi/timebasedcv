@@ -506,7 +506,7 @@
 <h1 id="getting-started">Getting Started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h1>
 <p>The following sections will guide you through the basic usage of the library.</p>
 <h2 id="timebasedsplit">TimeBasedSplit<a class="headerlink" href="#timebasedsplit" title="Permanent link">&para;</a></h2>
-<p>The <a href="api/timebasedsplit/#timebasedcv.timebasedsplit.TimeBasedSplit"><code>TimeBasedSplit</code></a> class allows to define a time based split with a given frequency, train size, test size, gap, stride and window type.</p>
+<p>The <a href="../api/timebasedsplit/#timebasedcv.timebasedsplit.TimeBasedSplit"><code>TimeBasedSplit</code></a> class allows to define a time based split with a given frequency, train size, test size, gap, stride and window type.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span> <span class="nn">timebasedcv</span> <span class="kn">import</span> <span class="n">TimeBasedSplit</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">tbs</span> <span class="o">=</span> <span class="n">TimeBasedSplit</span><span class="p">(</span>
@@ -555,7 +555,7 @@
 </code></pre></div>
 <p>Another optional parameter that can be passed to the <code>split</code> method is <code>return_splitstate</code>. If <code>True</code>, the method will return a <a href="api/splitstate/"><code>SplitState</code></a> dataclass which contains the "split" points for training and test, namely <code>train_start</code>, <code>train_end</code>, <code>forecast_start</code> and <code>forecast_end</code>. These can be useful if a particular logic needs to be applied to the data before training and/or forecasting.</p>
 <h2 id="timebasedcvsplitter">TimeBasedCVSplitter<a class="headerlink" href="#timebasedcvsplitter" title="Permanent link">&para;</a></h2>
-<p>The <a href="api/timebasedsplit/#timebasedcv.timebasedsplit.TimeBasedCVSplitter"><code>TimeBasedCVSplitter</code></a> class conforms with scikit-learn CV Splitters. In order to achive such behaviour we combine the arguments of <a href="api/timebasedsplit/#timebasedcv.timebasedsplit.TimeBasedSplit"><code>TimeBasedSplit</code></a> <code>__init__</code> and <code>split</code> methods, so that it is possible to restrict the arguments of
+<p>The <a href="../api/timebasedsplit/#timebasedcv.timebasedsplit.TimeBasedCVSplitter"><code>TimeBasedCVSplitter</code></a> class conforms with scikit-learn CV Splitters. In order to achive such behaviour we combine the arguments of <a href="../api/timebasedsplit/#timebasedcv.timebasedsplit.TimeBasedSplit"><code>TimeBasedSplit</code></a> <code>__init__</code> and <code>split</code> methods, so that it is possible to restrict the arguments of
 <code>split</code> and <code>get_n_splits</code> to the arrays to split (i.e. <code>X</code>, <code>y</code> and <code>groups</code>), which are the only arguments required by scikit-learn CV Splitters.</p>
 <p>That is because a CV Splitter needs to know a priori the number of splits and the <code>split</code> method shouldn't take any extra arguments as input other than the arrays to split.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -600,7 +600,7 @@
 <h2 id="examples-of-cross-validation">Examples of Cross Validation<a class="headerlink" href="#examples-of-cross-validation" title="Permanent link">&para;</a></h2>
 <p>The following examples show how the CV works with different parameters.</p>
 <p>First and foremost let's generate some random data. The following code generates a time series with randomly spaced points between 2023-01-01 and 2023-01-31.</p>
-<p><div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
 <a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
@@ -625,7 +625,7 @@
 <a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a><span class="c1"># 2023-01-04    11</span>
 <a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a><span class="c1"># 2023-01-05    1</span>
 </code></pre></div>
-As we can see every day has a different number of points.</p>
+<p>As we can see every day has a different number of points.</p>
 <p>Now let's plot train and forecasting splits with different split strategies (or configurations).</p>
 <p>The gren dots represent the train points, while the red dots represent the forecastng points.</p>
 <p><img src="../img/cross-validation.png" align="center"></p>
