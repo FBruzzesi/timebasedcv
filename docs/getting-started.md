@@ -4,7 +4,7 @@ The following sections will guide you through the basic usage of the library.
 
 ## TimeBasedSplit
 
-The [`TimeBasedSplit`](api/timebasedsplit/#timebasedcv.timebasedsplit.TimeBasedSplit) class allows to define a time based split with a given frequency, train size, test size, gap, stride and window type.
+The [`TimeBasedSplit`](../api/timebasedsplit/#timebasedcv.timebasedsplit.TimeBasedSplit) class allows to define a time based split with a given frequency, train size, test size, gap, stride and window type.
 
 ```python
 from timebasedcv import TimeBasedSplit
@@ -64,7 +64,7 @@ Another optional parameter that can be passed to the `split` method is `return_s
 
 ## TimeBasedCVSplitter
 
-The [`TimeBasedCVSplitter`](api/timebasedsplit/#timebasedcv.timebasedsplit.TimeBasedCVSplitter) class conforms with scikit-learn CV Splitters. In order to achive such behaviour we combine the arguments of [`TimeBasedSplit`](api/timebasedsplit/#timebasedcv.timebasedsplit.TimeBasedSplit) `__init__` and `split` methods, so that it is possible to restrict the arguments of
+The [`TimeBasedCVSplitter`](../api/timebasedsplit/#timebasedcv.timebasedsplit.TimeBasedCVSplitter) class conforms with scikit-learn CV Splitters. In order to achive such behaviour we combine the arguments of [`TimeBasedSplit`](../api/timebasedsplit/#timebasedcv.timebasedsplit.TimeBasedSplit) `__init__` and `split` methods, so that it is possible to restrict the arguments of
 `split` and `get_n_splits` to the arrays to split (i.e. `X`, `y` and `groups`), which are the only arguments required by scikit-learn CV Splitters.
 
 That is because a CV Splitter needs to know a priori the number of splits and the `split` method shouldn't take any extra arguments as input other than the arrays to split.
@@ -143,6 +143,7 @@ df.set_index("time").resample("D").count().head(5)
 # 2023-01-04	11
 # 2023-01-05	1
 ```
+
 As we can see every day has a different number of points.
 
 Now let's plot train and forecasting splits with different split strategies (or configurations).
@@ -150,7 +151,6 @@ Now let's plot train and forecasting splits with different split strategies (or 
 The gren dots represent the train points, while the red dots represent the forecastng points.
 
 <img src="../img/cross-validation.png" align="center">
-
 
 Here is the code to replicate the results:
 
