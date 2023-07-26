@@ -555,8 +555,8 @@
 
 <a id="timebasedcv.splitstate.SplitState"></a>
   <div class="doc doc-contents first">
-          <p class="doc doc-class-bases">
-            Bases: <code><span title="typing.Generic">Generic</span>[<span title="timebasedcv.utils._types.DateTimeLike">DateTimeLike</span>]</code></p>
+      <p class="doc doc-class-bases">
+        Bases: <code><span title="typing.Generic">Generic</span>[<span title="timebasedcv.utils._types.DateTimeLike">DateTimeLike</span>]</code></p>
 
   
       <p>The <code>SplitState</code> class represents the state of a split, which is a
@@ -566,8 +566,6 @@ training set and forecast set.</p>
 attributes are of the correct type and are ordered chronologically.</p>
 <p>The class provides properties to calculate the length of the training set,
 forecast set, gap between them, and the total length of the split.</p>
-
-
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -585,11 +583,7 @@ forecast set, gap between them, and the total length of the split.</p>
           <td>
                 <code><span title="timebasedcv.utils._types.DateTimeLike">DateTimeLike</span></code>
           </td>
-          <td>
-            <div class="doc-md-description">
-              <p>The start of the training set.</p>
-            </div>
-          </td>
+          <td><p>The start of the training set.</p></td>
           <td>
               <em>required</em>
           </td>
@@ -599,11 +593,7 @@ forecast set, gap between them, and the total length of the split.</p>
           <td>
                 <code><span title="timebasedcv.utils._types.DateTimeLike">DateTimeLike</span></code>
           </td>
-          <td>
-            <div class="doc-md-description">
-              <p>The end of the training set.</p>
-            </div>
-          </td>
+          <td><p>The end of the training set.</p></td>
           <td>
               <em>required</em>
           </td>
@@ -613,11 +603,7 @@ forecast set, gap between them, and the total length of the split.</p>
           <td>
                 <code><span title="timebasedcv.utils._types.DateTimeLike">DateTimeLike</span></code>
           </td>
-          <td>
-            <div class="doc-md-description">
-              <p>The start of the forecast set.</p>
-            </div>
-          </td>
+          <td><p>The start of the forecast set.</p></td>
           <td>
               <em>required</em>
           </td>
@@ -627,19 +613,13 @@ forecast set, gap between them, and the total length of the split.</p>
           <td>
                 <code><span title="timebasedcv.utils._types.DateTimeLike">DateTimeLike</span></code>
           </td>
-          <td>
-            <div class="doc-md-description">
-              <p>The end of the forecast set.</p>
-            </div>
-          </td>
+          <td><p>The end of the forecast set.</p></td>
           <td>
               <em>required</em>
           </td>
         </tr>
     </tbody>
   </table>
-
-
 
   <p><strong>Raises:</strong></p>
   <table>
@@ -654,29 +634,22 @@ forecast set, gap between them, and the total length of the split.</p>
           <td>
                 <code>TypeError</code>
           </td>
-          <td>
-            <div class="doc-md-description">
-              <p>If any of the attributes is not of type <code>datetime</code>, <code>date</code> or
-<code>pd.Timestamp</code>.</p>
-            </div>
-          </td>
+          <td><p>If any of the attributes is not of type <code>datetime</code>, <code>date</code> or
+<code>pd.Timestamp</code>.</p></td>
         </tr>
         <tr>
           <td>
                 <code>ValueError</code>
           </td>
-          <td>
-            <div class="doc-md-description">
-              <p>If the attributes are not ordered chronologically.</p>
-            </div>
-          </td>
+          <td><p>If the attributes are not ordered chronologically.</p></td>
         </tr>
     </tbody>
   </table>
 
-            <details class="quote">
-              <summary>Source code in <code>timebasedcv/splitstate.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-12"> 12</a></span>
+
+        <details class="quote">
+          <summary>Source code in <code>timebasedcv/splitstate.py</code></summary>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-12"> 12</a></span>
 <span class="normal"><a href="#__codelineno-0-13"> 13</a></span>
 <span class="normal"><a href="#__codelineno-0-14"> 14</a></span>
 <span class="normal"><a href="#__codelineno-0-15"> 15</a></span>
@@ -906,7 +879,7 @@ forecast set, gap between them, and the total length of the split.</p>
 <a id="__codelineno-0-125" name="__codelineno-0-125"></a><span class="sd">        &quot;&quot;&quot;</span>
 <a id="__codelineno-0-126" name="__codelineno-0-126"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">forecast_end</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_start</span>
 </code></pre></div></td></tr></table></div>
-            </details>
+        </details>
 
   
 
@@ -936,8 +909,6 @@ forecast set, gap between them, and the total length of the split.</p>
   
       <p>Returns the time between <code>forecast_start</code> and <code>forecast_end</code></p>
 
-
-
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -951,12 +922,8 @@ forecast set, gap between them, and the total length of the split.</p>
           <td>
                 <code><span title="datetime.timedelta">timedelta</span></code>
           </td>
-          <td>
-            <div class="doc-md-description">
-              <p>A <code>timedelta</code> object representing the time between <code>forecast_start</code> and
-<code>forecast_end</code>.</p>
-            </div>
-          </td>
+          <td><p>A <code>timedelta</code> object representing the time between <code>forecast_start</code> and
+<code>forecast_end</code>.</p></td>
         </tr>
     </tbody>
   </table>
@@ -982,8 +949,6 @@ forecast set, gap between them, and the total length of the split.</p>
   
       <p>Returns the time between <code>train_end</code> and <code>forecast_start</code></p>
 
-
-
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -997,12 +962,8 @@ forecast set, gap between them, and the total length of the split.</p>
           <td>
                 <code><span title="datetime.timedelta">timedelta</span></code>
           </td>
-          <td>
-            <div class="doc-md-description">
-              <p>A <code>timedelta</code> object representing the time between <code>train_end</code> and
-<code>forecast_start</code>.</p>
-            </div>
-          </td>
+          <td><p>A <code>timedelta</code> object representing the time between <code>train_end</code> and
+<code>forecast_start</code>.</p></td>
         </tr>
     </tbody>
   </table>
@@ -1028,8 +989,6 @@ forecast set, gap between them, and the total length of the split.</p>
   
       <p>Returns the time between <code>train_start</code> and <code>forecast_end</code></p>
 
-
-
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -1043,12 +1002,8 @@ forecast set, gap between them, and the total length of the split.</p>
           <td>
                 <code><span title="datetime.timedelta">timedelta</span></code>
           </td>
-          <td>
-            <div class="doc-md-description">
-              <p>A <code>timedelta</code> object representing the time between <code>train_start</code> and
-<code>forecast_end</code>.</p>
-            </div>
-          </td>
+          <td><p>A <code>timedelta</code> object representing the time between <code>train_start</code> and
+<code>forecast_end</code>.</p></td>
         </tr>
     </tbody>
   </table>
@@ -1074,8 +1029,6 @@ forecast set, gap between them, and the total length of the split.</p>
   
       <p>Returns the time between <code>train_start</code> and <code>train_end</code>.</p>
 
-
-
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -1089,19 +1042,14 @@ forecast set, gap between them, and the total length of the split.</p>
           <td>
                 <code><span title="datetime.timedelta">timedelta</span></code>
           </td>
-          <td>
-            <div class="doc-md-description">
-              <p>A <code>timedelta</code> object representing the time between <code>train_start</code> and
-<code>train_end</code>.</p>
-            </div>
-          </td>
+          <td><p>A <code>timedelta</code> object representing the time between <code>train_start</code> and
+<code>train_end</code>.</p></td>
         </tr>
     </tbody>
   </table>
   </div>
 
 </div>
-
 
 
 
@@ -1119,9 +1067,9 @@ forecast set, gap between them, and the total length of the split.</p>
   
       <p>Post init used to validate the <code>SplitState</code> instance attributes.</p>
 
-          <details class="quote">
-            <summary>Source code in <code>timebasedcv/splitstate.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-49">49</a></span>
+      <details class="quote">
+        <summary>Source code in <code>timebasedcv/splitstate.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-49">49</a></span>
 <span class="normal"><a href="#__codelineno-0-50">50</a></span>
 <span class="normal"><a href="#__codelineno-0-51">51</a></span>
 <span class="normal"><a href="#__codelineno-0-52">52</a></span>
@@ -1191,7 +1139,7 @@ forecast set, gap between them, and the total length of the split.</p>
 <a id="__codelineno-0-82" name="__codelineno-0-82"></a>            <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="s1">&#39;`, `&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_slots</span><span class="p">)</span><span class="si">}</span><span class="s2">` must be ordered. Found:</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_error_msg</span><span class="si">}</span><span class="s2">&quot;</span>
 <a id="__codelineno-0-83" name="__codelineno-0-83"></a>        <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-          </details>
+      </details>
   </div>
 
 </div>
