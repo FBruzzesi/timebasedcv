@@ -20,7 +20,6 @@
 
 This codebase is experimental and is working for my use cases. It is very probable that there are cases not covered and for which it breaks (badly). If you find them, please feel free to open an issue in the [issue page](https://github.com/FBruzzesi/timebasedcv/issues) of the repo.
 
-
 ## Description
 
 The current implementation of [scikit-learn TimeSeriesSplit](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.TimeSeriesSplit.html) lacks the flexibility of having multiple samples within the same time period/unit.
@@ -32,26 +31,19 @@ We introduce two main classes:
 - [`TimeBasedSplit`](https://fbruzzesi.github.io/timebasedcv/api/timebasedsplit/#timebasedcv.timebasedsplit.TimeBasedSplit): a class that allows to define a time based split with a given frequency, train size, test size, gap, stride and window type. It's core method `split` requires to pass a time series as input to create the boolean masks for train and test from the instance information defined above. Therefore it is not compatible with [scikit-learn CV Splitters](https://scikit-learn.org/stable/common_pitfalls.html#id3).
 - [`TimeBasedCVSplitter`](https://fbruzzesi.github.io/timebasedcv/api/timebasedsplit/#timebasedcv.timebasedsplit.TimeBasedCVSplitter): a class that conforms with scikit-learn CV Splitters but requires to pass the time series as input to the instance. That is because a CV Splitter needs to know a priori the number of splits and the `split` method shouldn't take any extra arguments as input other than the arrays to split.
 
-
 ## Installation
 
-**timebasedcv** is _not_ published as a Python package on [pypi](https://pypi.org/), therefore it cannot be installed with pip directly.
+**timebasedcv** is a published Python package on [pypi](https://pypi.org/), therefore it can be installed directly via pip, as well as from source using pip and git, or with a local clone:
 
-However it is possible to install it from source using pip and git, or with a local clone:
+- **pip**: `python -m pip install timebasedcv` (suggested)
+- **pip + source/git**: `python -m pip install git+https://github.com/FBruzzesi/timebasedcv.git`
+- **local clone**:
 
-### source/git
-
-```bash
-python -m pip install git+https://github.com/FBruzzesi/timebasedcv.git
-```
-
-### local clone
-
-```bash
-git clone https://github.com/FBruzzesi/timebasedcv.git
-cd timebasedcv
-python -m pip install .
-```
+    ```bash
+    git clone https://github.com/FBruzzesi/timebasedcv.git
+    cd timebasedcv
+    python -m pip install .
+    ```
 
 ## Getting started
 
