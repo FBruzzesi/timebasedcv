@@ -14,7 +14,8 @@ authors = [{name = "Francesco Bruzzesi"}]
 
 dependencies = [
     "numpy",
-    "pandas"
+    "pandas",
+    "typing-extensions; python_version < '3.11'",
 ]
 
 [project.urls]

@@ -8,7 +8,7 @@ def default_indexing_method(arr, mask):
     """
     Default indexing method for arrays.
 
-    Remark that `arr` should support indexing with an array.
+    ! Remark that `arr` should support indexing with an array.
 
     Arguments:
         arr: The array-like to index.
