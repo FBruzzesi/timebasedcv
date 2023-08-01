@@ -45,11 +45,10 @@ We introduce two main classes:
     python -m pip install .
     ```
 
-## Getting started
+## Quickstart
 
-Please refer to the [Getting Started](https://fbruzzesi.github.io/timebasedcv/getting-started/) section of the documentation site for a detailed guide on how to use the library.
-
-As a quickstart, you can use the following code snippet to get started.
+As a **quickstart**, you can use the following code snippet to get started.
+Consider checkout out the [Getting Started](https://fbruzzesi.github.io/timebasedcv/getting-started/) section of for a detailed guide on how to use the library.
 
 First let's generate some data with different number of points per day:
 
