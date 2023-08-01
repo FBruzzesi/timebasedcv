@@ -49,6 +49,71 @@ We introduce two main classes:
 
 Please refer to the [Getting Started](https://fbruzzesi.github.io/timebasedcv/getting-started/) section of the documentation site for a detailed guide on how to use the library.
 
+As a quickstart, you can use the following code snippet to get started.
+
+First let's generate some data with different number of points per day:
+
+```python
+import pandas as pd
+import numpy as np
+np.random.seed(42)
+
+dates = pd.Series(pd.date_range("2023-01-01", "2023-01-31", freq="D"))
+size = len(dates)
+
+df = pd.concat([
+    pd.DataFrame({
+        "time": pd.date_range(start, end, periods=_size, inclusive="left"),
+        "value": np.random.randn(_size-1)/25,
+    })
+    for start, end, _size in zip(dates[:size], dates[1:], np.random.randint(2, 24, size-1))
+]).reset_index(drop=True)
+
+time_series, X = df["time"], df["value"]
+df.set_index("time").resample("D").count().head(5)
+
+# time	        value
+# 2023-01-01	14
+# 2023-01-02	2
+# 2023-01-03	22
+# 2023-01-04	11
+# 2023-01-05	1
+```
+
+Now let's run the split with a given frequency, train size, test size, gap, stride and window type:
+
+```python
+from timebasedcv import TimeBasedSplit
+
+configs = [
+    {
+        "frequency": "days",
+        "train_size": 14,
+        "forecast_horizon": 7,
+        "gap": 2,
+        "stride": 5,
+        "window": "expanding"
+    },
+    ...
+]
+
+tbs = TimeBasedSplit(
+        **config,
+    )
+
+
+fmt = "%Y-%m-%d"
+for train_set, forecast_set in tbs.split(X, time_series=time_series):
+
+    # Do some magic here
+```
+
+Let's see how `train_set` and `forecasting_set` splits would look likes for different split strategies (or configurations).
+
+The green dots represent the train points, while the red dots represent the forecastng points.
+
+<img src="docs/img/cross-validation.png" align="center">
+
 ## Contributing
 
 Please read the [Contributing guidelines](https://fbruzzesi.github.io/timebasedcv/contribute/) in the documentation site.
