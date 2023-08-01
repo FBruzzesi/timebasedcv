@@ -17,6 +17,21 @@ from timebasedcv.utils._types import (
     WindowType,
 )
 
+try:
+    from typing import ParamSpec  # py3.10+
+except ImportError:
+    from typing_extensions import ParamSpec  # < py3.10
+
+
+try:
+    from typing import Self  # py3.11+
+except ImportError:
+    from typing_extensions import Self  # < py3.11
+
+
+PS = ParamSpec("PS")
+
+
 _frequency_values = get_args(FrequencyUnit)
 _window_values = get_args(WindowType)
 
@@ -74,7 +89,7 @@ class _CoreTimeBasedSplit:
     name_ = "_CoreTimeBasedSplit"
 
     def __init__(
-        self,
+        self: Self,
         frequency: FrequencyUnit,
         train_size: int,
         forecast_horizon: int,
@@ -91,7 +106,7 @@ class _CoreTimeBasedSplit:
 
         self._validate_arguments()
 
-    def _validate_arguments(self):
+    def _validate_arguments(self: Self) -> None:
         """
         Post init used to validate the TimeSpacedSplit attributes
         """
@@ -128,7 +143,7 @@ class _CoreTimeBasedSplit:
                 f"Found ({', '.join(str(v) for v in _values)})"
             )
 
-    def __repr__(self) -> str:
+    def __repr__(self: Self) -> str:
         """Custom repr method"""
 
         _attrs = (
@@ -149,27 +164,27 @@ class _CoreTimeBasedSplit:
         )
 
     @property
-    def train_delta(self) -> timedelta:
+    def train_delta(self: Self) -> timedelta:
         """Returns the `timedelta` object corresponding to the `train_size`"""
         return timedelta(**{str(self.frequency_): self.train_size_})
 
     @property
-    def forecast_delta(self) -> timedelta:
+    def forecast_delta(self: Self) -> timedelta:
         """Returns the `timedelta` object corresponding to the `forecast_horizon`"""
         return timedelta(**{str(self.frequency_): self.forecast_horizon_})
 
     @property
-    def gap_delta(self) -> timedelta:
+    def gap_delta(self: Self) -> timedelta:
         """Returns the `timedelta` object corresponding to the `gap` and `frequency`."""
         return timedelta(**{str(self.frequency_): self.gap_})
 
     @property
-    def stride_delta(self) -> timedelta:
+    def stride_delta(self: Self) -> timedelta:
         """Returns the `timedelta` object corresponding to `stride`."""
         return timedelta(**{str(self.frequency_): self.stride_})
 
     def _splits_from_period(
-        self, time_start: DateTimeLike, time_end: DateTimeLike
+        self: Self, time_start: DateTimeLike, time_end: DateTimeLike
     ) -> Iterable[SplitState]:
         """
         Generate splits from `time_start` to `time_end` based on the parameters passed
@@ -209,7 +224,7 @@ class _CoreTimeBasedSplit:
                 train_start = current_time
 
     def n_splits_of(
-        self,
+        self: Self,
         *,
         time_series: Union[SeriesLike[DateTimeLike], None] = None,
         start_dt: Union[DateTimeLike, None] = None,
@@ -229,7 +244,7 @@ class _CoreTimeBasedSplit:
 
         return len(tuple(self._splits_from_period(time_start, time_end)))
 
-    def split(self, *args, **kwargs):
+    def split(self: Self, *args: PS.args, **kwargs: PS.kwargs):
         """
         Template method that returns a generator of splits.
 
@@ -328,7 +343,7 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
     name_ = "TimeBasedSplit"
 
     def split(
-        self,
+        self: Self,
         *arrays: TensorLike,
         time_series: SeriesLike[DateTimeLike],
         start_dt: Union[DateTimeLike, None] = None,
@@ -457,7 +472,7 @@ class ExpandingTimeSplit(TimeBasedSplit):  # pragma: no cover
     name_ = "ExpandingTimeSplit"
 
     def __init__(
-        self,
+        self: Self,
         frequency: FrequencyUnit,
         train_size: int,
         forecast_horizon: int,
@@ -482,7 +497,7 @@ class RollingTimeSplit(TimeBasedSplit):  # pragma: no cover
     name_ = "RollingTimeSplit"
 
     def __init__(
-        self,
+        self: Self,
         frequency: FrequencyUnit,
         train_size: int,
         forecast_horizon: int,
@@ -597,7 +612,7 @@ class TimeBasedCVSplitter(TimeBasedSplit):
     name_ = "TimeBasedCVSplitter"
 
     def __init__(
-        self,
+        self: Self,
         frequency: FrequencyUnit,
         train_size: int,
         forecast_horizon: int,
@@ -625,7 +640,7 @@ class TimeBasedCVSplitter(TimeBasedSplit):
         self.size_ = time_series.shape[0]
 
     def split(  # type: ignore
-        self,
+        self: Self,
         X: Union[TensorLike, SeriesLike, None] = None,
         y: Union[TensorLike, SeriesLike, None] = None,
         groups: Union[TensorLike, SeriesLike, None] = None,
@@ -654,7 +669,7 @@ class TimeBasedCVSplitter(TimeBasedSplit):
         )  # type: ignore
 
     def get_n_splits(
-        self,
+        self: Self,
         X: Union[TensorLike, SeriesLike, None] = None,
         y: Union[TensorLike, SeriesLike, None] = None,
         groups: Union[TensorLike, SeriesLike, None] = None,

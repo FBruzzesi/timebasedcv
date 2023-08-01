@@ -8,6 +8,11 @@ import pandas as pd
 from timebasedcv.utils._funcs import pairwise, pairwise_comparison
 from timebasedcv.utils._types import DateTimeLike
 
+try:
+    from typing import Self  # py3.11+
+except ImportError:
+    from typing_extensions import Self  # < py3.11
+
 
 @dataclass(frozen=True)
 class SplitState(Generic[DateTimeLike]):
@@ -46,7 +51,7 @@ class SplitState(Generic[DateTimeLike]):
     forecast_start: DateTimeLike
     forecast_end: DateTimeLike
 
-    def __post_init__(self):
+    def __post_init__(self: Self) -> None:
         """
         Post init used to validate the `SplitState` instance attributes.
         """
@@ -83,7 +88,7 @@ class SplitState(Generic[DateTimeLike]):
             )
 
     @property
-    def train_length(self) -> timedelta:
+    def train_length(self: Self) -> timedelta:
         """
         Returns the time between `train_start` and `train_end`.
 
@@ -94,7 +99,7 @@ class SplitState(Generic[DateTimeLike]):
         return self.train_end - self.train_start
 
     @property
-    def forecast_length(self) -> timedelta:
+    def forecast_length(self: Self) -> timedelta:
         """
         Returns the time between `forecast_start` and `forecast_end`
 
@@ -105,7 +110,7 @@ class SplitState(Generic[DateTimeLike]):
         return self.forecast_end - self.forecast_start
 
     @property
-    def gap_length(self) -> timedelta:
+    def gap_length(self: Self) -> timedelta:
         """
         Returns the time between `train_end` and `forecast_start`
 
@@ -116,7 +121,7 @@ class SplitState(Generic[DateTimeLike]):
         return self.forecast_start - self.train_end
 
     @property
-    def total_length(self) -> timedelta:
+    def total_length(self: Self) -> timedelta:
         """Returns the time between `train_start` and `forecast_end`
 
         Returns:
