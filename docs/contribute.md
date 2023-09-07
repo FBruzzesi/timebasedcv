@@ -36,8 +36,7 @@ isort --profile black -l 90 timebasedcv tests
 black --target-version py38 --line-length 90 timebasedcv tests
 ```
 
-
-As part of the checks on pull requests, it is checked whether the code follows those standards. To ensure that the standard is met, it is recommanded to install [pre-commit hooks](https://pre-commit.com/):
+As part of the checks on pull requests, it is checked whether the code follows those standards. To ensure that the standard is met, it is recommended to install [pre-commit hooks](https://pre-commit.com/):
 
 ```bash
 python -m pip install pre-commit
