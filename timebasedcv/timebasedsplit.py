@@ -256,7 +256,7 @@ class _CoreTimeBasedSplit:
 
 class TimeBasedSplit(_CoreTimeBasedSplit):
     """
-    Class that generates splits based on time values, indepedently from the number of
+    Class that generates splits based on time values, independently from the number of
     samples in each split.
 
     Arguments:
@@ -517,7 +517,7 @@ class RollingTimeSplit(TimeBasedSplit):  # pragma: no cover
 class TimeBasedCVSplitter(TimeBasedSplit):
     """
     The TimeBasedCVSplitter class conforms with scikit-learn CV Splitters API
-    and generates splits based on time values, indepedently from the number
+    and generates splits based on time values, independently from the number
     of samples in each split.
 
     In order to achive such behaviour we include the arguments of
