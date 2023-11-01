@@ -2,7 +2,7 @@
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.5.0
     hooks:
     -   id: trailing-whitespace
     -   id: name-tests-test
@@ -19,7 +19,7 @@ repos:
         name: isort (python)
         args: [--profile, black, -l, "90", timebasedcv, tests]
 -   repo: https://github.com/psf/black
-    rev: 23.9.1
+    rev: 23.10.1
     hooks:
       - id: black
         language_version: python3.10
