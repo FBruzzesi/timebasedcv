@@ -1,19 +1,21 @@
 from __future__ import annotations
 
+import sys
 from datetime import date, datetime
 from typing import Literal, Protocol, Tuple, TypeVar, Union
 
 import pandas as pd
 
-try:
-    from typing import TypeAlias  # py3.10+
-except ImportError:
-    from typing_extensions import TypeAlias  # < py3.10
+if sys.version_info >= (3, 10):
+    from typing import TypeAlias
+else:
+    from typing_extensions import TypeAlias
 
-try:
-    from typing import Self  # py3.11+
-except ImportError:
-    from typing_extensions import Self  # < py3.11
+
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
 
 DateTimeLike = TypeVar("DateTimeLike", datetime, date, pd.Timestamp)
 
@@ -21,15 +23,13 @@ DateTimeLike = TypeVar("DateTimeLike", datetime, date, pd.Timestamp)
 FrequencyUnit: TypeAlias = Literal[
     "days", "seconds", "microseconds", "milliseconds", "minutes", "hours", "weeks"
 ]
-
 WindowType: TypeAlias = Literal["rolling", "expanding"]
 
 T = TypeVar("T")
 
 
 class SeriesLike(Protocol[T]):
-    """
-    SeriesLike protocol for type hinting purposes.
+    """SeriesLike protocol for type hinting purposes.
 
     This protocol is used to indicate that the class should supports:
 
@@ -71,8 +71,7 @@ T_co = TypeVar("T_co", covariant=True)
 
 
 class TensorLike(Protocol[T_co]):
-    """
-    TensorLike protocol for type hinting purposes.
+    """TensorLike protocol for type hinting purposes.
 
     This protocol is used to indicate that the class should supports:
 

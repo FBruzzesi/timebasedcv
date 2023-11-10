@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "timebasedcv"
-version = "0.0.1"
+version = "0.0.2"
 description = "Time based cross validation"
 
 license = {file = "LICENSE"}
@@ -15,7 +15,7 @@ authors = [{name = "Francesco Bruzzesi"}]
 dependencies = [
     "numpy",
     "pandas",
-    "typing-extensions; python_version < '3.11'",
+    "typing-extensions",
 ]
 
 [project.urls]
@@ -60,16 +60,16 @@ exclude = ["docs", "tests", "data", "docker", "results", "notebooks", "kubernete
 timebasedcv = ["py.typed"]
 
 [tool.black]
-line-length = 90
+line-length = 120
 target_version = ['py38']
 
 [tool.isort]
 py_version = 310
 profile = "black"
-line_length = 90
+line_length = 120
 
 [tool.ruff]
-line-length = 90
+line-length = 120
 ignore = [
     "E731",  # do not assign a `lambda` expression, use a `def`
     ]
