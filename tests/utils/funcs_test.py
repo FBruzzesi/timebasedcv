@@ -19,8 +19,6 @@ def test_pairwise(sample_list: List[int], sample_pairs: List[Tuple[int, int]]):
         (operator.eq, [False, False, False, False]),
     ],
 )
-def test_pairwise_comparison(
-    sample_list: List[int], _operation: Callable[[int, int], bool], expected: List[bool]
-):
+def test_pairwise_comparison(sample_list: List[int], _operation: Callable[[int, int], bool], expected: List[bool]):
     """Tests pairwise_comparison function."""
     assert list(pairwise_comparison(sample_list, _operation)) == expected

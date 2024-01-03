@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "timebasedcv"
-version = "0.0.1"
+version = "0.0.2"
 description = "Time based cross validation"
 
 license = {file = "LICENSE"}
@@ -15,42 +15,55 @@ authors = [{name = "Francesco Bruzzesi"}]
 dependencies = [
     "numpy",
     "pandas",
-    "typing-extensions; python_version < '3.11'",
+    "typing-extensions>=4.4.0; python_version < '3.11'",
+]
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
 ]
 
 [project.urls]
-# documentation = "https://fbruzzesi.github.io/timebased-cv/"
-repository = "https://github.com/fbruzzesi/timebased-cv"
-issue-tracker = "https://github.com/fbruzzesi/timebased-cv/issues"
-
-
+documentation = "https://fbruzzesi.github.io/timebasedcv/"
+repository = "https://github.com/fbruzzesi/timebasedcv"
+issue-tracker = "https://github.com/fbruzzesi/timebasedcv/issues"
 
 [project.optional-dependencies]
-
 polars = ["polars"]
 
 dev = [
-    "black==23.3.0",
-    "interrogate==1.5.0",
-    "isort==5.12.0",
     "pre-commit==2.21.0",
-    "ruff",
+    "hatch"
+]
+
+lint = [
+    "ruff>=0.1.0"
 ]
 
 docs = [
-    "mkdocs==1.4.2",
-    "mkdocs-material==9.1.2",
-    "mkdocstrings[python]==0.20.0",
+    "mkdocs>=1.4.2",
+    "mkdocs-material>=9.2.0",
+    "mkdocstrings[python]>=0.20.0",
+    "mkdocs-autorefs",
 ]
 
 test = [
+    "interrogate>=1.5.0",
     "pytest==7.2.0",
     "pytest-xdist==3.2.1",
     "coverage==7.2.1",
     "scikit-learn>=0.19",
 ]
 
-all = ["timebasedcv[dev,docs,polars,test]"]
+all = ["timebasedcv[polars]"]
+all-dev = ["timebasedcv[dev,docs,lint,polars,test]"]
 
 [tool.setuptools.packages.find]
 include = ["timebasedcv*"]
@@ -59,28 +72,31 @@ exclude = ["docs", "tests", "data", "docker", "results", "notebooks", "kubernete
 [tool.setuptools.package-data]
 timebasedcv = ["py.typed"]
 
-[tool.black]
-line-length = 90
-target_version = ['py38']
-
-[tool.isort]
-py_version = 310
-profile = "black"
-line_length = 90
-
 [tool.ruff]
-line-length = 90
+line-length = 120
+extend-select = ["I"]
 ignore = [
     "E731",  # do not assign a `lambda` expression, use a `def`
     ]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.interrogate]
+ignore-nested-functions = true
+ignore-module = true
+ignore-init-method = true
+ignore-private = true
+ignore-magic = true
+ignore-property-decorators = true
+fail-under = 95
+verbose = 2 # 0 (minimal output), 1 (-v), 2 (-vv)
 
 [tool.mypy]
 ignore_missing_imports = true
 
 [tool.coverage.run]
-source = [
-    "timebasedcv/",
-    ]
+source = ["timebasedcv/"]
 
 omit = [
     "timebasedcv/utils/_types.py",  # collection of type hints and protocols
