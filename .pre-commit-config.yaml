@@ -12,18 +12,13 @@ repos:
     -   id: check-yaml
     -   id: check-ast
     -   id: check-added-large-files
--   repo: https://github.com/pycqa/isort
-    rev: 5.13.2
-    hooks:
-      - id: isort
-        name: isort (python)
-        args: [--profile, black, -l, "90", timebasedcv, tests]
--   repo: https://github.com/psf/black
-    rev: 23.12.1
-    hooks:
-      - id: black
-        language_version: python3.10
-        args: [--target-version, py310, --line-length, "90", timebasedcv, tests]
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.1.9 # Ruff version.
+  hooks:
+    - id: ruff  # Run the linter.
+      args: [--fix, timebasedcv, tests]
+    - id: ruff-format # Run the formatter.
+      args: [timebasedcv, tests]
 -   repo: https://github.com/Lucas-C/pre-commit-hooks-bandit
     rev: v1.0.6
     hooks:
@@ -38,3 +33,7 @@ repos:
     rev: v1.10.0
     hooks:
     -   id: python-no-eval
+-   repo: https://github.com/crate-ci/typos
+    rev: v1.16.26
+    hooks:
+    -   id: typos

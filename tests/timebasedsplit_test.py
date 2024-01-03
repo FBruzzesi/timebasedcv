@@ -218,9 +218,7 @@ def test_timebasedcv_split_invalid(kwargs):
 
     with pytest.raises(ValueError):
         next(
-            cv.split(
-                *arrays_, time_series=time_series_, start_dt=start_dt_, end_dt=end_dt_
-            ),  # type: ignore
+            cv.split(*arrays_, time_series=time_series_, start_dt=start_dt_, end_dt=end_dt_),  # type: ignore
         )
 
 

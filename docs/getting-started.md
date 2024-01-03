@@ -30,7 +30,7 @@ The available values for the parameters are:
 
 Once the instance is created, it is possible to split the data using the `split` method. This method requires to pass a `time_series` as input to create the boolean masks for train and test.
 
-Optionally it is possible to pass a `start_dt` and `end_dt` arguments as well. If provided, they are used in place of the `time_series.min()` and `time_series.max()` respectively to determing the period.
+Optionally it is possible to pass a `start_dt` and `end_dt` arguments as well. If provided, they are used in place of the `time_series.min()` and `time_series.max()` respectively to determine the period.
 
 This is useful because the series does not necessarely starts from the first date and/or terminates in the last date of the time period of interest.
 
@@ -61,10 +61,9 @@ for X_train, X_forecast, y_train, y_forecast in tbs.split(X, y, time_series=time
 
 Another optional parameter that can be passed to the `split` method is `return_splitstate`. If `True`, the method will return a [`SplitState`](api/splitstate/) dataclass which contains the "split" points for training and test, namely `train_start`, `train_end`, `forecast_start` and `forecast_end`. These can be useful if a particular logic needs to be applied to the data before training and/or forecasting.
 
-
 ## TimeBasedCVSplitter
 
-The [`TimeBasedCVSplitter`](../api/timebasedsplit/#timebasedcv.timebasedsplit.TimeBasedCVSplitter) class conforms with scikit-learn CV Splitters. In order to achive such behaviour we combine the arguments of [`TimeBasedSplit`](../api/timebasedsplit/#timebasedcv.timebasedsplit.TimeBasedSplit) `__init__` and `split` methods, so that it is possible to restrict the arguments of
+The [`TimeBasedCVSplitter`](../api/timebasedsplit/#timebasedcv.timebasedsplit.TimeBasedCVSplitter) class conforms with scikit-learn CV Splitters. In order to achieve such behaviour we combine the arguments of [`TimeBasedSplit`](../api/timebasedsplit/#timebasedcv.timebasedsplit.TimeBasedSplit) `__init__` and `split` methods, so that it is possible to restrict the arguments of
 `split` and `get_n_splits` to the arrays to split (i.e. `X`, `y` and `groups`), which are the only arguments required by scikit-learn CV Splitters.
 
 That is because a CV Splitter needs to know a priori the number of splits and the `split` method shouldn't take any extra arguments as input other than the arrays to split.
@@ -109,7 +108,6 @@ random_search_cv = RandomizedSearchCV(
 random_search_cv.best_params_
 # {'positive': True, 'fit_intercept': False, 'alpha': 0.1}
 ```
-
 
 ## Examples of Cross Validation
 

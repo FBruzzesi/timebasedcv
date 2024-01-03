@@ -5,10 +5,10 @@ import pandas as pd
 
 
 def default_indexing_method(arr, mask):
-    """
-    Default indexing method for arrays.
+    """Default indexing method for arrays.
 
-    ! Remark that `arr` should support indexing with an array.
+    !!! warning
+        Remark that `arr` should support indexing with an array.
 
     Arguments:
         arr: The array-like to index.
@@ -23,8 +23,7 @@ T_PD = TypeVar("T_PD", pd.DataFrame, pd.Series)
 
 
 def pd_indexing_method(_dfs: T_PD, mask) -> T_PD:
-    """
-    Indexing method for pandas dataframes and series.
+    """Indexing method for pandas dataframes and series.
 
     Arguments:
         df: The pandas dataframe or series to index.
@@ -45,8 +44,7 @@ try:
     T_PL = TypeVar("T_PL", pl.DataFrame, pl.Series)
 
     def pl_indexing_method(_dfs: T_PL, mask) -> T_PL:
-        """
-        Indexing method for polars dataframes and series.
+        """Indexing method for polars dataframes and series.
 
         Arguments:
             _dfs: The polars dataframe or series to index.
