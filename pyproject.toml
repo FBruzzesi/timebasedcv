@@ -65,12 +65,11 @@ test = [
 all = ["timebasedcv[polars]"]
 all-dev = ["timebasedcv[dev,docs,lint,polars,test]"]
 
-[tool.setuptools.packages.find]
-include = ["timebasedcv*"]
-exclude = ["docs", "tests", "data", "docker", "results", "notebooks", "kubernetes"]
+[tool.hatch.build.targets.sdist]
+only-include = ["timebasedcv"]
 
-[tool.setuptools.package-data]
-timebasedcv = ["py.typed"]
+[tool.hatch.build.targets.wheel]
+packages = ["timebasedcv"]
 
 [tool.ruff]
 line-length = 120
