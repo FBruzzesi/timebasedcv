@@ -1,8 +1,10 @@
 <img src="img/timebasedcv-logo.svg" width=185 height=185 align="right">
 
-![](https://img.shields.io/github/license/FBruzzesi/timebasedcv)
-<img src ="img/interrogate-shield.svg">
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+![license-shield](https://img.shields.io/github/license/FBruzzesi/timebasedcv)
+![interrogate-badge](img/interrogate-shield.svg)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+![coverage-badge](img/coverage.svg)
+![versions-shield](https://img.shields.io/pypi/pyversions/timebasedcv)
 
 # Timebased Cross Validation
 
@@ -10,9 +12,7 @@
 
 ---
 
-**Documentation**: https://fbruzzesi.github.io/timebasedcv
-
-**Source Code**: https://github.com/fbruzzesi/timebasedcv
+[Documentation](https://fbruzzesi.github.io/timebasedcv) | [Repository](https://github.com/fbruzzesi/timebasedcv) | [Issue Tracker](https://github.com/fbruzzesi/timebasedcv/issues)
 
 ---
 
@@ -28,8 +28,8 @@ This codebase addresses such problem by providing a cross validation strategy ba
 
 We introduce two main classes:
 
-- [`TimeBasedSplit`](api/timebasedsplit/#timebasedcv.timebasedsplit.TimeBasedSplit): a class that allows to define a time based split with a given frequency, train size, test size, gap, stride and window type. It's core method `split` requires to pass a time series as input to create the boolean masks for train and test from the instance information defined above. Therefore it is not compatible with [scikit-learn CV Splitters](https://scikit-learn.org/stable/common_pitfalls.html#id3).
-- [`TimeBasedCVSplitter`](api/timebasedsplit/#timebasedcv.timebasedsplit.TimeBasedCVSplitter): a class that conforms with scikit-learn CV Splitters but requires to pass the time series as input to the instance. That is because a CV Splitter needs to know a priori the number of splits and the `split` method shouldn't take any extra arguments as input other than the arrays to split.
+- [`TimeBasedSplit`](api/timebasedsplit.md#timebasedcv.timebasedsplit.TimeBasedSplit): a class that allows to define a time based split with a given frequency, train size, test size, gap, stride and window type. It's core method `split` requires to pass a time series as input to create the boolean masks for train and test from the instance information defined above. Therefore it is not compatible with [scikit-learn CV Splitters](https://scikit-learn.org/stable/common_pitfalls.html#id3).
+- [`TimeBasedCVSplitter`](api/timebasedsplit.md#timebasedcv.timebasedsplit.TimeBasedCVSplitter): a class that conforms with scikit-learn CV Splitters but requires to pass the time series as input to the instance. That is because a CV Splitter needs to know a priori the number of splits and the `split` method shouldn't take any extra arguments as input other than the arrays to split.
 
 ## Installation
 
@@ -57,7 +57,7 @@ We introduce two main classes:
 
 ## Getting Started
 
-Please refer to the dedicated page [Getting Started](getting-started/).
+Please refer to the dedicated page [Getting Started](getting-started.md).
 
 ## License
 
