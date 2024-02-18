@@ -44,7 +44,7 @@ dev = [
 ]
 
 lint = [
-    "ruff>=0.1.0"
+    "ruff>=0.1.6"
 ]
 
 docs = [
