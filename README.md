@@ -1,10 +1,10 @@
 <img src="docs/img/timebasedcv-logo.svg" width=185 height=185 align="right">
 
-![](https://img.shields.io/github/license/FBruzzesi/timebasedcv)
-<img src ="docs/img/interrogate-shield.svg">
+![license-shield](https://img.shields.io/github/license/FBruzzesi/timebasedcv)
+![interrogate-badge](docs/img/interrogate-shield.svg)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
-<img src="docs/img/coverage.svg">
-<img src="https://img.shields.io/pypi/pyversions/timebasedcv">
+![coverage-badge](docs/img/coverage.svg)
+![versions-shield](https://img.shields.io/pypi/pyversions/timebasedcv)
 
 # Time based cross validation
 
@@ -12,9 +12,7 @@
 
 ---
 
-**Documentation**: https://fbruzzesi.github.io/timebasedcv
-
-**Source Code**: https://github.com/fbruzzesi/timebasedcv
+[Documentation](https://fbruzzesi.github.io/timebasedcv) | [Repository](https://github.com/fbruzzesi/timebasedcv) | [Issue Tracker](https://github.com/fbruzzesi/timebasedcv/issues)
 
 ---
 
@@ -113,7 +111,7 @@ Let's see how `train_set` and `forecasting_set` splits would look likes for diff
 
 The green dots represent the train points, while the red dots represent the forecastng points.
 
-<img src="docs/img/cross-validation.png" align="center">
+![cv](docs/img/cross-validation.png)
 
 ## Contributing
 
