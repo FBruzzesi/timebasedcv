@@ -146,7 +146,7 @@ As we can see every day has a different number of points.
 
 Now let's plot train and forecasting splits with different split strategies (or configurations).
 
-The green dots represent the train points, while the red dots represent the forecastng points.
+The blue dots represent the train points, while the red dots represent the forecastng points.
 
 ![cross-validation](img/cross-validation.png)
 

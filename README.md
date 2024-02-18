@@ -35,8 +35,18 @@ We introduce two main classes:
 
 **timebasedcv** is a published Python package on [pypi](https://pypi.org/), therefore it can be installed directly via pip, as well as from source using pip and git, or with a local clone:
 
-- **pip**: `python -m pip install timebasedcv` (suggested)
-- **pip + source/git**: `python -m pip install git+https://github.com/FBruzzesi/timebasedcv.git`
+- **pip** (suggested):
+
+    ```bash
+    python -m pip install timebasedcv
+    ```
+
+- **pip + source/git**:
+
+    ```bash
+    python -m pip install git+https://github.com/FBruzzesi/timebasedcv.git
+    ```
+
 - **local clone**:
 
     ```bash
@@ -96,9 +106,7 @@ configs = [
     ...
 ]
 
-tbs = TimeBasedSplit(
-        **config,
-    )
+tbs = TimeBasedSplit(**config)
 
 
 fmt = "%Y-%m-%d"
@@ -109,9 +117,9 @@ for train_set, forecast_set in tbs.split(X, time_series=time_series):
 
 Let's see how `train_set` and `forecasting_set` splits would look likes for different split strategies (or configurations).
 
-The green dots represent the train points, while the red dots represent the forecastng points.
+The blue dots represent the train points, while the red dots represent the forecastng points.
 
-![cv](docs/img/cross-validation.png)
+![cross-validation](docs/img/cross-validation.png)
 
 ## Contributing
 

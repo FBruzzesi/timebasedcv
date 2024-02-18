@@ -34,22 +34,28 @@ theme:
       icon: material/lightbulb-outline
       name: Switch to dark mode
   features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.expand
+    - navigation.path
+    - navigation.indexes
+    - navigation.footer
+    - navigation.top
+    - navigation.tracking
+
     - content.action.edit
     - content.action.view
     - content.code.annotate
     - content.code.copy
     - content.tooltips
-    - search.suggest
-    - search.highlight
     - content.tabs.link
-    - navigation.footer
-    - navigation.indexes
-    - navigation.top
-    - navigation.tracking
+    
+    - search.suggest
     - search.highlight
     - search.share
-    - search.suggest
+  
     - toc.follow
+
   logo: img/timebasedcv-logo.png
   favicon: img/timebasedcv-logo.png
 
