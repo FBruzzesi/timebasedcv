@@ -13,7 +13,7 @@ repos:
     -   id: check-ast
     -   id: check-added-large-files
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.3.0 # Ruff version.
+  rev: v0.3.4 # Ruff version.
   hooks:
     - id: ruff  # Run the linter.
       args: [--fix, timebasedcv, tests]
@@ -34,6 +34,6 @@ repos:
     hooks:
     -   id: python-no-eval
 -   repo: https://github.com/crate-ci/typos
-    rev: typos-v0.10.21
+    rev: v1.19.0
     hooks:
     -   id: typos
