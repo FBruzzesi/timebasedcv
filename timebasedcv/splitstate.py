@@ -4,8 +4,6 @@ from datetime import date, datetime, timedelta
 from operator import le as less_or_equal
 from typing import Generic
 
-import pandas as pd
-
 from timebasedcv.utils._funcs import pairwise, pairwise_comparison
 from timebasedcv.utils._types import DateTimeLike
 
@@ -13,6 +11,8 @@ if sys.version_info >= (3, 11):
     from typing import Self  # pragma: no cover
 else:
     from typing_extensions import Self  # pragma: no cover
+
+from narwhals.dependencies import get_pandas
 
 
 @dataclass(frozen=True)
@@ -57,10 +57,12 @@ class SplitState(Generic[DateTimeLike]):
         _values = tuple(getattr(self, _attr) for _attr in _slots)
         _types = tuple(type(_value) for _value in _values)
 
+        pd = get_pandas()
+
         if not (
             all(_type is datetime for _type in _types)
             or all(_type is date for _type in _types)
-            or all(_type is pd.Timestamp for _type in _types)
+            or (pd is not None and all(_type is pd.Timestamp for _type in _types))
         ):
             # cfr: https://stackoverflow.com/questions/16991948/detect-if-a-variable-is-a-datetime-object
             raise TypeError("All attributes must be of type `datetime`, `date` or `pd.Timestamp`.")
