@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "timebasedcv"
-version = "0.0.2"
+version = "0.1.0"
 description = "Time based cross validation"
 
 license = {file = "LICENSE"}
@@ -45,7 +45,7 @@ dev = [
 ]
 
 lint = [
-    "ruff>=0.1.6"
+    "ruff>=0.4.0"
 ]
 
 docs = [
@@ -76,7 +76,15 @@ packages = ["timebasedcv"]
 line-length = 120
 
 [tool.ruff.lint]
-extend-select = ["I"]
+extend-select = [
+    "E",
+    "F",
+    "I",
+    # "N",  # pep8-naming
+    "W",
+    "PERF",
+    "RUF",
+]
 ignore = [
     "E731",  # do not assign a `lambda` expression, use a `def`
     ]

@@ -1,9 +1,9 @@
 from contextlib import nullcontext as does_not_raise
 
+import narwhals as nw
 import numpy as np
 import pandas as pd
 import pytest
-import narwhals as nw
 
 from timebasedcv.utils._backends import (
     BACKEND_TO_INDEXING_METHOD,

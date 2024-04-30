@@ -1,7 +1,7 @@
 from typing import Callable, Dict, TypeVar
 
-import numpy as np
 import narwhals as nw
+import numpy as np
 
 
 def default_indexing_method(arr, mask):
