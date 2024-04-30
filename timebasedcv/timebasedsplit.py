@@ -2,8 +2,8 @@ import sys
 from datetime import timedelta
 from itertools import chain
 from typing import Generator, Tuple, Union, get_args
-import narwhals as nw
 
+import narwhals as nw
 import numpy as np
 
 from timebasedcv.splitstate import SplitState
@@ -371,7 +371,7 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
         ts_shape = time_series.shape
         if len(ts_shape) != 1:
             raise ValueError(f"Time series must be 1-dimensional. Got {len(ts_shape)} dimensions.")
-        
+
         arrays = tuple([nw.from_native(array, eager_only=True, allow_series=True, strict=False) for array in arrays])
         time_series = nw.from_native(time_series, series_only=True, strict=False)
         a0 = arrays[0]
@@ -396,7 +396,10 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
 
             train_forecast_arrays = tuple(
                 chain.from_iterable(
-                    (nw.to_native(_idx_method(_arr, train_mask), strict=False), nw.to_native(_idx_method(_arr, forecast_mask), strict=False))
+                    (
+                        nw.to_native(_idx_method(_arr, train_mask), strict=False),
+                        nw.to_native(_idx_method(_arr, forecast_mask), strict=False),
+                    )
                     for _arr, _idx_method in zip(arrays, _index_methods)
                 )
             )

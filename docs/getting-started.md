@@ -52,11 +52,12 @@ print(f"Number of splits: {tbs.n_splits_of(time_series=time_series)}")
 
 for X_train, X_forecast, y_train, y_forecast in tbs.split(X, y, time_series=time_series):
     print(f"Train: {X_train.shape}, Forecast: {X_forecast.shape}")
-
-# Train: (30, 2), Forecast: (7, 2)
-# Train: (30, 2), Forecast: (7, 2)
-# ...
-# Train: (30, 2), Forecast: (7, 2)
+```
+```terminal
+Train: (30, 2), Forecast: (7, 2)
+Train: (30, 2), Forecast: (7, 2)
+...
+Train: (30, 2), Forecast: (7, 2)
 ```
 
 Another optional parameter that can be passed to the `split` method is `return_splitstate`. If `True`, the method will return a [`SplitState`](api/splitstate.md) dataclass which contains the "split" points for training and test, namely `train_start`, `train_end`, `forecast_start` and `forecast_end`. These can be useful if a particular logic needs to be applied to the data before training and/or forecasting.
@@ -106,7 +107,10 @@ random_search_cv = RandomizedSearchCV(
 ).fit(X, y)
 
 random_search_cv.best_params_
-# {'positive': True, 'fit_intercept': False, 'alpha': 0.1}
+```
+
+```terminal
+{'positive': True, 'fit_intercept': False, 'alpha': 0.1}
 ```
 
 ## Examples of Cross Validation
@@ -133,13 +137,15 @@ df = pd.concat([
 
 time_series, X = df["time"], df["value"]
 df.set_index("time").resample("D").count().head(5)
+```
 
-# time	        value
-# 2023-01-01	14
-# 2023-01-02	2
-# 2023-01-03	22
-# 2023-01-04	11
-# 2023-01-05	1
+```terminal
+time	        value
+2023-01-01	14
+2023-01-02	2
+2023-01-03	22
+2023-01-04	11
+2023-01-05	1
 ```
 
 As we can see every day has a different number of points.
