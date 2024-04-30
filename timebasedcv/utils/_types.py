@@ -2,9 +2,7 @@ from __future__ import annotations
 
 import sys
 from datetime import date, datetime
-from typing import Literal, Protocol, Tuple, TypeVar, Union
-
-import pandas as pd
+from typing import Literal, Protocol, Tuple, TypeVar, Union, TYPE_CHECKING
 
 if sys.version_info >= (3, 10):
     from typing import TypeAlias  # pragma: no cover
@@ -16,7 +14,11 @@ if sys.version_info >= (3, 11):
 else:
     from typing_extensions import Self  # pragma: no cover
 
-DateTimeLike = TypeVar("DateTimeLike", datetime, date, pd.Timestamp)
+if TYPE_CHECKING:
+    import pandas as pd
+
+
+DateTimeLike = TypeVar("DateTimeLike", datetime, date, "pd.Timestamp")
 FrequencyUnit: TypeAlias = Literal["days", "seconds", "microseconds", "milliseconds", "minutes", "hours", "weeks"]
 WindowType: TypeAlias = Literal["rolling", "expanding"]
 

@@ -14,7 +14,7 @@ authors = [{name = "Francesco Bruzzesi"}]
 
 dependencies = [
     "numpy",
-    "pandas",
+    "narwhals>=0.7.15",
     "typing-extensions>=4.4.0; python_version < '3.11'",
 ]
 
@@ -36,7 +36,8 @@ repository = "https://github.com/fbruzzesi/timebasedcv"
 issue-tracker = "https://github.com/fbruzzesi/timebasedcv/issues"
 
 [project.optional-dependencies]
-polars = ["polars"]
+polars = ["polars>=0.20.3"]
+pandas = ["pandas>=1.2.0"]
 
 dev = [
     "pre-commit==2.21.0",
@@ -62,8 +63,8 @@ test = [
     "scikit-learn>=0.19",
 ]
 
-all = ["timebasedcv[polars]"]
-all-dev = ["timebasedcv[dev,docs,lint,polars,test]"]
+all = ["timebasedcv[pandas,polars]"]
+all-dev = ["timebasedcv[dev,docs,lint,pandas,polars,test]"]
 
 [tool.hatch.build.targets.sdist]
 only-include = ["timebasedcv"]

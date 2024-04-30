@@ -1,7 +1,7 @@
 from typing import Callable, Dict, TypeVar
 
 import numpy as np
-import pandas as pd
+import narwhals as nw
 
 
 def default_indexing_method(arr, mask):
@@ -19,45 +19,21 @@ def default_indexing_method(arr, mask):
     return arr[mask]
 
 
-T_PD = TypeVar("T_PD", pd.DataFrame, pd.Series)
+T_NW = TypeVar("T_NW", nw.DataFrame, nw.Series)
 
 
-def pd_indexing_method(_dfs: T_PD, mask) -> T_PD:
-    """Indexing method for pandas dataframes and series.
+def nw_indexing_method(_dfs: T_NW, mask) -> T_NW:
+    """Indexing method for Narwhals dataframes and series.
 
     Arguments:
-        df: The pandas dataframe or series to index.
+        df: The Narwhals dataframe or series to index.
         mask: The boolean mask to use for indexing.
     """
-    return _dfs.loc[mask]
+    return _dfs.filter(mask)
 
 
 BACKEND_TO_INDEXING_METHOD: Dict[str, Callable] = {
     str(np.ndarray): default_indexing_method,
-    str(pd.DataFrame): pd_indexing_method,
-    str(pd.Series): pd_indexing_method,
+    str(nw.DataFrame): nw_indexing_method,
+    str(nw.Series): nw_indexing_method,
 }
-
-try:
-    import polars as pl
-
-    T_PL = TypeVar("T_PL", pl.DataFrame, pl.Series)
-
-    def pl_indexing_method(_dfs: T_PL, mask) -> T_PL:
-        """Indexing method for polars dataframes and series.
-
-        Arguments:
-            _dfs: The polars dataframe or series to index.
-            mask: The boolean mask to use for indexing.
-        """
-        return _dfs.filter(mask)
-
-    BACKEND_TO_INDEXING_METHOD.update(
-        {
-            str(pl.DataFrame): pl_indexing_method,
-            str(pl.Series): pl_indexing_method,
-        }
-    )
-
-except ImportError:
-    pass

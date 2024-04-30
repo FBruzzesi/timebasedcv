@@ -3,6 +3,7 @@ from contextlib import nullcontext as does_not_raise
 import numpy as np
 import pandas as pd
 import pytest
+import narwhals as nw
 
 from timebasedcv.utils._backends import (
     BACKEND_TO_INDEXING_METHOD,
@@ -49,6 +50,8 @@ def test_backend_to_indexing_method(arr, mask, expected):
     """
     Tests the `BACKEND_TO_INDEXING_METHOD` dictionary with different backends.
     """
+    arr = nw.from_native(arr, allow_series=True, eager_only=True, strict=False)
+    mask = nw.from_native(mask, series_only=True, strict=False)
     _type = str(type(arr))
     result = BACKEND_TO_INDEXING_METHOD[_type](arr, mask)
     assert np.array_equal(result, expected)
