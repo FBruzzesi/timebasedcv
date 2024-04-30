@@ -14,7 +14,7 @@ authors = [{name = "Francesco Bruzzesi"}]
 
 dependencies = [
     "numpy",
-    "narwhals>=0.7.14",
+    "narwhals>=0.7.15",
     "typing-extensions>=4.4.0; python_version < '3.11'",
 ]
 
@@ -36,8 +36,8 @@ repository = "https://github.com/fbruzzesi/timebasedcv"
 issue-tracker = "https://github.com/fbruzzesi/timebasedcv/issues"
 
 [project.optional-dependencies]
-polars = ["polars"]
-pandas = ["pandas"]
+polars = ["polars>=0.20.3"]
+pandas = ["pandas>=1.2.0"]
 
 dev = [
     "pre-commit==2.21.0",
