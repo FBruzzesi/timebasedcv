@@ -15,7 +15,7 @@ authors = [{name = "Francesco Bruzzesi"}]
 dependencies = [
     "numpy",
     "narwhals>=0.7.15",
-    "typing-extensions>=4.4.0; python_version < '3.11'",
+    "typing-extensions>=4.4.0; python_version < '3.10'",
 ]
 
 classifiers = [

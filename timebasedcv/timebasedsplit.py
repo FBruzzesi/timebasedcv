@@ -1,10 +1,12 @@
 import sys
 from datetime import timedelta
 from itertools import chain
-from typing import Generator, Tuple, Union, get_args
+from typing import Generator, Literal, Tuple, Union, get_args, overload
 
 import narwhals as nw
 import numpy as np
+
+from numpy.typing import NDArray
 
 from timebasedcv.splitstate import SplitState
 from timebasedcv.utils._backends import (
@@ -19,11 +21,15 @@ from timebasedcv.utils._types import (
     WindowType,
 )
 
+if sys.version_info >= (3, 12):
+    from typing import override  # pragma: no cover
+else:
+    from typing_extensions import override  # pragma: no cover
+
 if sys.version_info >= (3, 11):
     from typing import Self  # pragma: no cover
 else:
     from typing_extensions import Self  # pragma: no cover
-
 
 _frequency_values = get_args(FrequencyUnit)
 _window_values = get_args(WindowType)
@@ -85,7 +91,7 @@ class _CoreTimeBasedSplit:
         gap: int = 0,
         stride: Union[int, None] = None,
         window: WindowType = "rolling",
-    ):
+    ) -> None:
         self.frequency_ = frequency
         self.train_size_ = train_size
         self.forecast_horizon_ = forecast_horizon
@@ -213,17 +219,17 @@ class _CoreTimeBasedSplit:
         if (start_dt and end_dt) and (start_dt >= end_dt):
             raise ValueError("`start_dt` must be before `end_dt`.")
 
-        time_start, time_end = start_dt or time_series.min(), end_dt or time_series.max()  # type: ignore
+        time_start, time_end = start_dt or time_series.min(), end_dt or time_series.max()
 
         return len(tuple(self._splits_from_period(time_start, time_end)))
 
-    def split(self, *args, **kwargs):
-        """Template method that returns a generator of splits.
+    # def split(self: Self, *args: PS.args, **kwargs: PS.kwargs) -> Any:
+    #     """Template method that returns a generator of splits.
 
-        Raises:
-            NotImplementedError: The method is not implemented directly
-        """
-        raise NotImplementedError
+    #     Raises:
+    #         NotImplementedError: The method is not implemented directly
+    #     """
+    #     raise NotImplementedError
 
 
 class TimeBasedSplit(_CoreTimeBasedSplit):
@@ -308,6 +314,42 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
     """
 
     name_ = "TimeBasedSplit"
+
+    @overload
+    def split(
+        self: Self,
+        *arrays: TensorLike,
+        time_series: SeriesLike[DateTimeLike],
+        start_dt: Union[DateTimeLike, None] = None,
+        end_dt: Union[DateTimeLike, None] = None,
+        return_splitstate: Literal[True],
+    ) -> Generator[Tuple[Tuple[TensorLike, ...], SplitState], None, None]:
+        """Overload signature for `return_splitstate=True`"""
+        ...
+
+    @overload
+    def split(
+        self: Self,
+        *arrays: TensorLike,
+        time_series: SeriesLike[DateTimeLike],
+        start_dt: Union[DateTimeLike, None] = None,
+        end_dt: Union[DateTimeLike, None] = None,
+        return_splitstate: Literal[False],
+    ) -> Generator[Tuple[TensorLike, ...], None, None]:
+        """Overload signature for `return_splitstate=False`"""
+        ...
+
+    @overload
+    def split(
+        self: Self,
+        *arrays: TensorLike,
+        time_series: SeriesLike[DateTimeLike],
+        start_dt: Union[DateTimeLike, None] = None,
+        end_dt: Union[DateTimeLike, None] = None,
+        return_splitstate: bool = False,
+    ) -> Generator[Union[Tuple[TensorLike, ...], Tuple[Tuple[TensorLike, ...], SplitState]], None, None]:
+        """Overload generic signature for `.split(..)` method"""
+        ...
 
     def split(
         self: Self,
@@ -422,7 +464,7 @@ class ExpandingTimeSplit(TimeBasedSplit):  # pragma: no cover
         forecast_horizon: int,
         gap: int = 0,
         stride: Union[int, None] = None,
-    ):
+    ) -> None:
         super().__init__(
             frequency,
             train_size,
@@ -445,7 +487,7 @@ class RollingTimeSplit(TimeBasedSplit):  # pragma: no cover
         forecast_horizon: int,
         gap: int = 0,
         stride: Union[int, None] = None,
-    ):
+    ) -> None:
         super().__init__(
             frequency,
             train_size,
@@ -555,7 +597,7 @@ class TimeBasedCVSplitter(TimeBasedSplit):
         window: WindowType = "rolling",
         start_dt: Union[DateTimeLike, None] = None,
         end_dt: Union[DateTimeLike, None] = None,
-    ):
+    ) -> None:
         super().__init__(
             frequency=frequency,
             train_size=train_size,
@@ -565,19 +607,20 @@ class TimeBasedCVSplitter(TimeBasedSplit):
             window=window,
         )
 
-        self.time_series_ = time_series  # type: ignore
-        self.start_dt_ = start_dt  # type: ignore
-        self.end_dt_ = end_dt  # type: ignore
+        self.time_series_: SeriesLike[DateTimeLike] = time_series
+        self.start_dt_: Union[DateTimeLike, None] = start_dt
+        self.end_dt_: Union[DateTimeLike, None] = end_dt
 
         self.n_splits = self._compute_n_splits()
         self.size_ = time_series.shape[0]
 
-    def split(  # type: ignore
+    @override
+    def split(
         self: Self,
         X: Union[TensorLike, SeriesLike, None] = None,
         y: Union[TensorLike, SeriesLike, None] = None,
         groups: Union[TensorLike, SeriesLike, None] = None,
-    ) -> Generator[Tuple[np.ndarray, np.ndarray], None, None]:
+    ) -> Generator[Tuple[NDArray, NDArray], None, None]:
         """
         Split method compatible with scikit-learn CV splitters.
 
@@ -599,7 +642,7 @@ class TimeBasedCVSplitter(TimeBasedSplit):
             start_dt=self.start_dt_,
             end_dt=self.end_dt_,
             return_splitstate=False,
-        )  # type: ignore
+        )
 
     def get_n_splits(
         self: Self,
