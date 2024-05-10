@@ -1,7 +1,7 @@
 import sys
 from datetime import timedelta
 from itertools import chain
-from typing import Generator, Tuple, Union, get_args
+from typing import Generator, Literal, Tuple, Union, get_args, overload
 
 import narwhals as nw
 import numpy as np
@@ -19,10 +19,10 @@ from timebasedcv.utils._types import (
     WindowType,
 )
 
-if sys.version_info >= (3, 11):
-    from typing import Self  # pragma: no cover
-else:
-    from typing_extensions import Self  # pragma: no cover
+if sys.version_info >= (3, 11):  # pragma: no cover
+    from typing import Self
+else:  # pragma: no cover
+    from typing_extensions import Self
 
 
 _frequency_values = get_args(FrequencyUnit)
@@ -85,7 +85,7 @@ class _CoreTimeBasedSplit:
         gap: int = 0,
         stride: Union[int, None] = None,
         window: WindowType = "rolling",
-    ):
+    ) -> None:
         self.frequency_ = frequency
         self.train_size_ = train_size
         self.forecast_horizon_ = forecast_horizon
@@ -96,15 +96,16 @@ class _CoreTimeBasedSplit:
         self._validate_arguments()
 
     def _validate_arguments(self: Self) -> None:
-        """Post init used to validate the TimeSpacedSplit attributes"""
-
+        """Post init used to validate the TimeSpacedSplit attributes."""
         # Validate frequency
         if self.frequency_ not in _frequency_values:
-            raise ValueError(f"`frequency` must be one of {_frequency_values}. Found {self.frequency_}")
+            msg = f"`frequency` must be one of {_frequency_values}. Found {self.frequency_}"
+            raise ValueError(msg)
 
         # Validate window
         if self.window_ not in _window_values:
-            raise ValueError(f"`window` must be one of {_window_values}. Found {self.window_}")
+            msg = f"`window` must be one of {_window_values}. Found {self.window_}"
+            raise ValueError(msg)
 
         # Validate positive integer arguments
         _slot_names = ("train_size_", "forecast_horizon_", "gap_", "stride_")
@@ -114,21 +115,22 @@ class _CoreTimeBasedSplit:
         _types = tuple(type(v) for v in _values)
 
         if not all(t is int for t in _types):
-            raise TypeError(
+            msg = (
                 f"(`{'`, `'.join(_slot_names)}`) arguments must be of type `int`. "
                 f"Found (`{'`, `'.join(str(t) for t in _types)}`)"
             )
+            raise TypeError(msg)
 
         if not all(v >= lb for v, lb in zip(_values, _lower_bounds)):
-            raise ValueError(
+            msg = (
                 f"(`{'`, `'.join(_slot_names)}`) must be greater or equal than"
                 f"({', '.join(map(str, _lower_bounds))}).\n"
                 f"Found ({', '.join(str(v) for v in _values)})"
             )
+            raise ValueError(msg)
 
     def __repr__(self: Self) -> str:
-        """Custom repr method"""
-
+        """Custom repr method."""
         _attrs = (
             "frequency_",
             "train_size_",
@@ -139,16 +141,17 @@ class _CoreTimeBasedSplit:
         )
         _values = tuple(getattr(self, _attr) for _attr in _attrs)
         _new_line_tab = "\n    "
-        return f"{self.name_}" "(\n    " f"{_new_line_tab.join(f'{s} = {v}' for s, v in zip(_attrs, _values))}" "\n)"
+
+        return f"{self.name_}" "(\n    " f"{_new_line_tab.join(f'{s} = {v}' for s, v in zip(_attrs, _values))}" "\n)"  # noqa: ISC001
 
     @property
     def train_delta(self: Self) -> timedelta:
-        """Returns the `timedelta` object corresponding to the `train_size`"""
+        """Returns the `timedelta` object corresponding to the `train_size`."""
         return timedelta(**{str(self.frequency_): self.train_size_})
 
     @property
     def forecast_delta(self: Self) -> timedelta:
-        """Returns the `timedelta` object corresponding to the `forecast_horizon`"""
+        """Returns the `timedelta` object corresponding to the `forecast_horizon`."""
         return timedelta(**{str(self.frequency_): self.forecast_horizon_})
 
     @property
@@ -162,7 +165,9 @@ class _CoreTimeBasedSplit:
         return timedelta(**{str(self.frequency_): self.stride_})
 
     def _splits_from_period(
-        self: Self, time_start: DateTimeLike, time_end: DateTimeLike
+        self: Self,
+        time_start: DateTimeLike,
+        time_end: DateTimeLike,
     ) -> Generator[SplitState, None, None]:
         """Generate splits from `time_start` to `time_end` based on the parameters passed to the class instance.
 
@@ -176,9 +181,9 @@ class _CoreTimeBasedSplit:
         Returns:
             A generator of `SplitState` instances.
         """
-
         if time_start >= time_end:
-            raise ValueError("`time_start` must be before `time_end`.")
+            msg = "`time_start` must be before `time_end`."
+            raise ValueError(msg)
 
         train_start = current_time = time_start
         train_delta = self.train_delta
@@ -205,19 +210,20 @@ class _CoreTimeBasedSplit:
         start_dt: Union[DateTimeLike, None] = None,
         end_dt: Union[DateTimeLike, None] = None,
     ) -> int:
-        """Returns the number of splits that can be generated from `time_series`"""
-
+        """Returns the number of splits that can be generated from `time_series`."""
         if time_series is None and (start_dt is None or end_dt is None):
-            raise ValueError("Either `time_series` or `start_dt` and `end_dt` must be provided.")
+            msg = "Either `time_series` or `start_dt` and `end_dt` must be provided."
+            raise ValueError(msg)
 
         if (start_dt and end_dt) and (start_dt >= end_dt):
-            raise ValueError("`start_dt` must be before `end_dt`.")
+            msg = "`start_dt` must be before `end_dt`."
+            raise ValueError(msg)
 
         time_start, time_end = start_dt or time_series.min(), end_dt or time_series.max()  # type: ignore
 
         return len(tuple(self._splits_from_period(time_start, time_end)))
 
-    def split(self, *args, **kwargs):
+    def split(self: Self, *args, **kwargs):
         """Template method that returns a generator of splits.
 
         Raises:
@@ -309,6 +315,40 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
 
     name_ = "TimeBasedSplit"
 
+    @overload
+    def split(
+        self: Self,
+        *arrays: TensorLike,
+        time_series: SeriesLike[DateTimeLike],
+        start_dt: Union[DateTimeLike, None] = None,
+        end_dt: Union[DateTimeLike, None] = None,
+        return_splitstate: Literal[False],
+    ) -> Generator[Tuple[TensorLike, ...], None, None]: ...  # pragma: no cover
+
+    @overload
+    def split(
+        self: Self,
+        *arrays: TensorLike,
+        time_series: SeriesLike[DateTimeLike],
+        start_dt: Union[DateTimeLike, None] = None,
+        end_dt: Union[DateTimeLike, None] = None,
+        return_splitstate: Literal[True],
+    ) -> Generator[Tuple[Tuple[TensorLike, ...], SplitState], None, None]: ...  # pragma: no cover
+
+    @overload
+    def split(
+        self: Self,
+        *arrays: TensorLike,
+        time_series: SeriesLike[DateTimeLike],
+        start_dt: Union[DateTimeLike, None] = None,
+        end_dt: Union[DateTimeLike, None] = None,
+        return_splitstate: bool = False,
+    ) -> Generator[
+        Union[Tuple[TensorLike, ...], Tuple[Tuple[TensorLike, ...], SplitState]],
+        None,
+        None,
+    ]: ...  # pragma: no cover
+
     def split(
         self: Self,
         *arrays: TensorLike,
@@ -366,11 +406,13 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
         """
         n_arrays = len(arrays)
         if n_arrays == 0:
-            raise ValueError("At least one array required as input")
+            msg = "At least one array required as input"
+            raise ValueError(msg)
 
         ts_shape = time_series.shape
         if len(ts_shape) != 1:
-            raise ValueError(f"Time series must be 1-dimensional. Got {len(ts_shape)} dimensions.")
+            msg = f"Time series must be 1-dimensional. Got {len(ts_shape)} dimensions."
+            raise ValueError(msg)
 
         arrays = tuple([nw.from_native(array, eager_only=True, allow_series=True, strict=False) for array in arrays])
         time_series = nw.from_native(time_series, series_only=True, strict=False)
@@ -378,15 +420,18 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
         arr_len = a0.shape[0]
 
         if n_arrays > 1 and not all(a.shape[0] == arr_len for a in arrays[1:]):
-            raise ValueError(f"All arrays must have the same length. Got {[a.shape[0] for a in arrays]}")
+            msg = f"All arrays must have the same length. Got {[a.shape[0] for a in arrays]}"
+            raise ValueError(msg)
 
         if arr_len != ts_shape[0]:
-            raise ValueError(f"Time series and arrays must have the same length. Got {arr_len} and {ts_shape[0]}")
+            msg = f"Time series and arrays must have the same length. Got {arr_len} and {ts_shape[0]}"
+            raise ValueError(msg)
 
         time_start, time_end = start_dt or time_series.min(), end_dt or time_series.max()
 
         if time_start >= time_end:
-            raise ValueError("`time_start` must be before `time_end`.")
+            msg = "`time_start` must be before `time_end`."
+            raise ValueError(msg)
 
         _arr_types = tuple(str(type(a)) for a in arrays)
         _index_methods = tuple(BACKEND_TO_INDEXING_METHOD.get(_type, default_indexing_method) for _type in _arr_types)
@@ -401,7 +446,7 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
                         nw.to_native(_idx_method(_arr, forecast_mask), strict=False),
                     )
                     for _arr, _idx_method in zip(arrays, _index_methods)
-                )
+                ),
             )
 
             if return_splitstate:
@@ -422,7 +467,7 @@ class ExpandingTimeSplit(TimeBasedSplit):  # pragma: no cover
         forecast_horizon: int,
         gap: int = 0,
         stride: Union[int, None] = None,
-    ):
+    ) -> None:
         super().__init__(
             frequency,
             train_size,
@@ -445,7 +490,7 @@ class RollingTimeSplit(TimeBasedSplit):  # pragma: no cover
         forecast_horizon: int,
         gap: int = 0,
         stride: Union[int, None] = None,
-    ):
+    ) -> None:
         super().__init__(
             frequency,
             train_size,
@@ -457,8 +502,10 @@ class RollingTimeSplit(TimeBasedSplit):  # pragma: no cover
 
 
 class TimeBasedCVSplitter(TimeBasedSplit):
-    """The TimeBasedCVSplitter class conforms with scikit-learn CV Splitters API and generates splits based on time
-    values, independently from the number of samples in each split.
+    """The `TimeBasedCVSplitter` is a scikit-learn CV Splitters that generates splits based on time values.
+
+    The number of sample in each split is independent of the number of splits but based purely on the timestamp of the
+    sample.
 
     In order to achieve such behaviour we include the arguments of `TimeBasedSplit.split()` method (namely
     `time_series`, `start_dt` and `end_dt`) in the constructor (a.k.a. `__init__` method) and store the for future use
@@ -555,7 +602,7 @@ class TimeBasedCVSplitter(TimeBasedSplit):
         window: WindowType = "rolling",
         start_dt: Union[DateTimeLike, None] = None,
         end_dt: Union[DateTimeLike, None] = None,
-    ):
+    ) -> None:
         super().__init__(
             frequency=frequency,
             train_size=train_size,
@@ -572,14 +619,13 @@ class TimeBasedCVSplitter(TimeBasedSplit):
         self.n_splits = self._compute_n_splits()
         self.size_ = time_series.shape[0]
 
-    def split(  # type: ignore
+    def split(
         self: Self,
         X: Union[TensorLike, SeriesLike, None] = None,
         y: Union[TensorLike, SeriesLike, None] = None,
         groups: Union[TensorLike, SeriesLike, None] = None,
     ) -> Generator[Tuple[np.ndarray, np.ndarray], None, None]:
-        """
-        Split method compatible with scikit-learn CV splitters.
+        """Split method compatible with scikit-learn CV splitters.
 
         Arguments:
             X: Unused is the split, exists for compatibility, checked if not None.
@@ -620,9 +666,8 @@ class TimeBasedCVSplitter(TimeBasedSplit):
         self._validate_split_args(self.size_, X, y, groups)
         return self.n_splits
 
-    def _compute_n_splits(self) -> int:
+    def _compute_n_splits(self: Self) -> int:
         """Computes number of splits just once in the init"""
-
         time_start = self.start_dt_ or self.time_series_.min()
         time_end = self.end_dt_ or self.time_series_.max()
 
@@ -637,10 +682,13 @@ class TimeBasedCVSplitter(TimeBasedSplit):
     ) -> None:
         """Validates the arguments passed to the `split` and `get_n_splits` methods."""
         if X is not None and X.shape[0] != size:
-            raise ValueError(f"X.shape[0] ({X.shape[0]}) != time_series.shape[0] ({size})")
+            msg = f"X.shape[0] ({X.shape[0]}) != time_series.shape[0] ({size})"
+            raise ValueError(msg)
 
         if y is not None and y.shape[0] != size:
-            raise ValueError(f"y.shape[0] ({y.shape[0]}) != time_series.shape[0] ({size})")
+            msg = f"y.shape[0] ({y.shape[0]}) != time_series.shape[0] ({size})"
+            raise ValueError(msg)
 
         if groups is not None and groups.shape[0] != size:
-            raise ValueError(f"groups.shape[0] ({groups.shape[0]}) != " f"time_series.shape[0] ({size})")
+            msg = f"groups.shape[0] ({groups.shape[0]}) != time_series.shape[0] ({size})"
+            raise ValueError(msg)

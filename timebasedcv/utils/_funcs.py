@@ -15,7 +15,9 @@ def pairwise(iterable: Iterable[T]) -> Iterable[Tuple[T, T]]:
 
 
 def pairwise_comparison(iterable: Iterable[T], comparison_op: Callable[[T, T], bool]) -> Iterable[bool]:
-    """Returns an iterator that yields the result of applying the given comparison operator to pairs of consecutive
+    """Apply pairwise comparison on consecutive elements.
+
+    Returns an iterator that yields the result of applying the given comparison operator to pairs of consecutive
     elements from the given iterable.
 
     s -> (s0, s1), (s1, s2), ... -> comparison_op(s0, s1), comparison_op(s1, s2), ...
@@ -28,5 +30,4 @@ def pairwise_comparison(iterable: Iterable[T], comparison_op: Callable[[T, T], b
     Returns:
         An iterator that yields the result of applying the given comparison operator.
     """
-
     return (comparison_op(a, b) for a, b in pairwise(iterable))

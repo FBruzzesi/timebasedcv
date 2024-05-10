@@ -7,18 +7,19 @@ from typing import Generic
 from timebasedcv.utils._funcs import pairwise, pairwise_comparison
 from timebasedcv.utils._types import DateTimeLike
 
-if sys.version_info >= (3, 11):
-    from typing import Self  # pragma: no cover
-else:
-    from typing_extensions import Self  # pragma: no cover
+if sys.version_info >= (3, 11):  # pragma: no cover
+    from typing import Self
+else:  # pragma: no cover
+    from typing_extensions import Self
 
 from narwhals.dependencies import get_pandas
 
 
 @dataclass(frozen=True)
 class SplitState(Generic[DateTimeLike]):
-    """The `SplitState` class represents the state of a split, which is a set of split points where to partition a time
-    series into training set and forecast set.
+    """The `SplitState` class represents the state of a split.
+
+    This is a set of split points where to partition a time series into training set and forecast set.
 
     The class ensures that the split is valid by checking that the attributes are of the correct type and are ordered
     chronologically.
@@ -51,7 +52,6 @@ class SplitState(Generic[DateTimeLike]):
 
     def __post_init__(self: Self) -> None:
         """Post init used to validate the `SplitState` instance attributes."""
-
         # Validate types
         _slots = self.__slots__
         _values = tuple(getattr(self, _attr) for _attr in _slots)
@@ -65,7 +65,8 @@ class SplitState(Generic[DateTimeLike]):
             or (pd is not None and all(_type is pd.Timestamp for _type in _types))
         ):
             # cfr: https://stackoverflow.com/questions/16991948/detect-if-a-variable-is-a-datetime-object
-            raise TypeError("All attributes must be of type `datetime`, `date` or `pd.Timestamp`.")
+            msg = "All attributes must be of type `datetime`, `date` or `pd.Timestamp`."
+            raise TypeError(msg)
 
         # Validate order
         _ordered = tuple(pairwise_comparison(_values, less_or_equal))
@@ -76,8 +77,8 @@ class SplitState(Generic[DateTimeLike]):
                 for (s1, s2), (v1, v2), is_ordered in zip(pairwise(_slots), pairwise(_values), _ordered)
                 if not is_ordered
             )
-
-            raise ValueError(f"`{'`, `'.join(_slots)}` must be ordered. Found:\n" f"{_error_msg}")
+            msg = f"`{'`, `'.join(_slots)}` must be ordered. Found:\n{_error_msg}"
+            raise ValueError(msg)
 
     @property
     def train_length(self: Self) -> timedelta:
@@ -90,7 +91,7 @@ class SplitState(Generic[DateTimeLike]):
 
     @property
     def forecast_length(self: Self) -> timedelta:
-        """Returns the time between `forecast_start` and `forecast_end`
+        """Returns the time between `forecast_start` and `forecast_end`.
 
         Returns:
             A `timedelta` object representing the time between `forecast_start` and `forecast_end`.
@@ -99,7 +100,7 @@ class SplitState(Generic[DateTimeLike]):
 
     @property
     def gap_length(self: Self) -> timedelta:
-        """Returns the time between `train_end` and `forecast_start`
+        """Returns the time between `train_end` and `forecast_start`.
 
         Returns:
             A `timedelta` object representing the time between `train_end` and `forecast_start`.
@@ -108,7 +109,7 @@ class SplitState(Generic[DateTimeLike]):
 
     @property
     def total_length(self: Self) -> timedelta:
-        """Returns the time between `train_start` and `forecast_end`
+        """Returns the time between `train_start` and `forecast_end`.
 
         Returns:
             A `timedelta` object representing the time between `train_start` and `forecast_end`.

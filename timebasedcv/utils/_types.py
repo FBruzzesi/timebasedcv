@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 from datetime import date, datetime
 from typing import TYPE_CHECKING, Literal, Protocol, Tuple, TypeVar, Union
+from collections.abc import Sized
 
 if sys.version_info >= (3, 10):
     from typing import TypeAlias  # pragma: no cover
@@ -36,13 +37,9 @@ class SeriesLike(Protocol[T]):
     - `.shape` attribute
     """
 
-    def min(self: Self) -> T:
-        """Support for `.min()` method."""
-        ...
+    def min(self: Self) -> T: ...
 
-    def max(self: Self) -> T:
-        """Support for `.max()` method."""
-        ...
+    def max(self: Self) -> T: ...
 
     @property
     def shape(self: Self) -> Tuple[int]: ...
@@ -56,6 +53,8 @@ class SeriesLike(Protocol[T]):
     def __ge__(self: Self, other: Union[T, SeriesLike[T]]) -> SeriesLike[bool]: ...
 
     def __and__(self: SeriesLike[bool], other: SeriesLike[bool]) -> SeriesLike[bool]: ...
+
+    def __len__(self: Self) -> int: ... 
 
 
 T_co = TypeVar("T_co", covariant=True)
@@ -71,3 +70,7 @@ class TensorLike(Protocol[T_co]):
 
     @property
     def shape(self: Self) -> Tuple[int, ...]: ...
+
+    def __getitem__(self: Self, i: slice | SeriesLike) -> Self: ...
+
+    def __len__(self: Self) -> int: ...
