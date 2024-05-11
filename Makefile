@@ -17,8 +17,8 @@ clean-folders:
 
 lint:
 	ruff version
-	ruff check timebasedcv tests --fix
 	ruff format timebasedcv tests
+	ruff check timebasedcv tests --fix
 	ruff clean
 
 test:
@@ -37,7 +37,10 @@ interrogate:
 interrogate-badge:
 	interrogate --generate-badge docs/img/interrogate-shield.svg
 
-check: interrogate lint test clean-folders
+types:
+	mypy timebasedcv
+
+check: interrogate lint test types clean-folders
 
 docs-serve:
 	mkdocs serve

@@ -15,14 +15,14 @@ arr = np.arange(size)
 valid_mask = arr % 2 == 0
 expected = np.array([v for v in range(size) if v % 2 == 0])
 
-invalid_mask = np.random.randint(0, 1, size=size + 1).astype(bool)
+invalid_mask = np.zeros(shape=size + 1).astype(bool)
 
 
 @pytest.mark.parametrize(
     "arr, mask, expected, context",
     [
         (arr, valid_mask, expected, does_not_raise()),
-        (arr, invalid_mask, expected, pytest.raises(ValueError)),
+        (arr, invalid_mask, expected, pytest.raises(ValueError, match="Length of arr and mask must be equal.")),
     ],
 )
 def test_default_indexing_method(arr, mask, expected, context):

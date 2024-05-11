@@ -3,7 +3,6 @@ from __future__ import annotations
 import sys
 from datetime import date, datetime
 from typing import TYPE_CHECKING, Literal, Protocol, Tuple, TypeVar, Union
-from collections.abc import Sized
 
 if sys.version_info >= (3, 10):
     from typing import TypeAlias  # pragma: no cover
@@ -54,7 +53,7 @@ class SeriesLike(Protocol[T]):
 
     def __and__(self: SeriesLike[bool], other: SeriesLike[bool]) -> SeriesLike[bool]: ...
 
-    def __len__(self: Self) -> int: ... 
+    def __len__(self: Self) -> int: ...
 
 
 T_co = TypeVar("T_co", covariant=True)
