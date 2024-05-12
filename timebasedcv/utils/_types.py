@@ -19,6 +19,8 @@ if TYPE_CHECKING:
 
 
 DateTimeLike = TypeVar("DateTimeLike", datetime, date, "pd.Timestamp")
+NullableDatetime = Union[DateTimeLike, None]
+
 FrequencyUnit: TypeAlias = Literal["days", "seconds", "microseconds", "milliseconds", "minutes", "hours", "weeks"]
 WindowType: TypeAlias = Literal["rolling", "expanding"]
 
@@ -70,6 +72,6 @@ class TensorLike(Protocol[T_co]):
     @property
     def shape(self: Self) -> Tuple[int, ...]: ...
 
-    def __getitem__(self: Self, i: slice | SeriesLike) -> Self: ...
+    def __getitem__(self: Self, i: Union[slice, SeriesLike[bool], SeriesLike[int]]) -> Self: ...
 
     def __len__(self: Self) -> int: ...

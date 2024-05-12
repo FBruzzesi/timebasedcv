@@ -17,12 +17,16 @@ from timebasedcv.utils._backends import (
 from timebasedcv.utils._types import (
     DateTimeLike,
     FrequencyUnit,
+    NullableDatetime,
     SeriesLike,
     TensorLike,
     WindowType,
 )
 
 if TYPE_CHECKING:  # pragma: no cover
+    from datetime import date, datetime
+
+    import pandas as pd
     from numpy.typing import NDArray
 
 if sys.version_info >= (3, 11):  # pragma: no cover
@@ -216,8 +220,8 @@ class _CoreTimeBasedSplit:
         self: Self,
         *,
         time_series: Union[SeriesLike[DateTimeLike], None] = None,
-        start_dt: Union[DateTimeLike, None] = None,
-        end_dt: Union[DateTimeLike, None] = None,
+        start_dt: NullableDatetime = None,
+        end_dt: NullableDatetime = None,
     ) -> int:
         """Returns the number of splits that can be generated from `time_series`."""
         if start_dt is not None and end_dt is not None:
@@ -323,8 +327,8 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
         self: Self,
         *arrays: TL,
         time_series: SeriesLike[DateTimeLike],
-        start_dt: Union[DateTimeLike, None] = None,
-        end_dt: Union[DateTimeLike, None] = None,
+        start_dt: NullableDatetime = None,
+        end_dt: NullableDatetime = None,
         return_splitstate: Literal[False],
     ) -> Generator[Tuple[TL, ...], None, None]: ...  # pragma: no cover
 
@@ -333,8 +337,8 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
         self: Self,
         *arrays: TL,
         time_series: SeriesLike[DateTimeLike],
-        start_dt: Union[DateTimeLike, None] = None,
-        end_dt: Union[DateTimeLike, None] = None,
+        start_dt: NullableDatetime = None,
+        end_dt: NullableDatetime = None,
         return_splitstate: Literal[True],
     ) -> Generator[Tuple[Tuple[TL, ...], SplitState], None, None]: ...  # pragma: no cover
 
@@ -343,8 +347,8 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
         self: Self,
         *arrays: TL,
         time_series: SeriesLike[DateTimeLike],
-        start_dt: Union[DateTimeLike, None] = None,
-        end_dt: Union[DateTimeLike, None] = None,
+        start_dt: NullableDatetime = None,
+        end_dt: NullableDatetime = None,
         return_splitstate: bool = False,
     ) -> Generator[
         Union[Tuple[TL, ...], Tuple[Tuple[TL, ...], SplitState]],
@@ -356,8 +360,8 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
         self: Self,
         *arrays: TL,
         time_series: SeriesLike[DateTimeLike],
-        start_dt: Union[DateTimeLike, None] = None,
-        end_dt: Union[DateTimeLike, None] = None,
+        start_dt: NullableDatetime = None,
+        end_dt: NullableDatetime = None,
         return_splitstate: bool = False,
     ) -> Generator[Union[Tuple[TL, ...], Tuple[Tuple[TL, ...], SplitState]], None, None]:
         """Returns a generator of split arrays based on the `time_series`.
@@ -604,12 +608,12 @@ class TimeBasedCVSplitter(BaseCrossValidator):
         frequency: FrequencyUnit,
         train_size: int,
         forecast_horizon: int,
-        time_series: SeriesLike[DateTimeLike],
+        time_series: Union[SeriesLike[date], SeriesLike[datetime], SeriesLike[pd.Datetime]],
         gap: int = 0,
         stride: Union[int, None] = None,
         window: WindowType = "rolling",
-        start_dt: Union[DateTimeLike, None] = None,
-        end_dt: Union[DateTimeLike, None] = None,
+        start_dt: NullableDatetime = None,
+        end_dt: NullableDatetime = None,
     ) -> None:
         self.splitter = TimeBasedSplit(
             frequency=frequency,
@@ -620,18 +624,18 @@ class TimeBasedCVSplitter(BaseCrossValidator):
             window=window,
         )
 
-        self.time_series_: SeriesLike[DateTimeLike] = time_series
-        self.start_dt_: Union[DateTimeLike, None] = start_dt
-        self.end_dt_: Union[DateTimeLike, None] = end_dt
+        self.time_series_ = time_series
+        self.start_dt_ = start_dt
+        self.end_dt_ = end_dt
 
         self.n_splits = self._compute_n_splits()
         self.size_ = time_series.shape[0]
 
     def _iter_test_indices(
         self: Self,
-        X: Union[TL, None] = None,
-        y: Union[TL, None] = None,
-        groups: Union[TL, None] = None,
+        X: Union[NDArray, None] = None,
+        y: Union[NDArray, None] = None,
+        groups: Union[NDArray, None] = None,
     ) -> Generator[NDArray[np.int_], None, None]:
         """Generates integer indices corresponding to test sets.
 
@@ -641,7 +645,7 @@ class TimeBasedCVSplitter(BaseCrossValidator):
 
         _indexes = np.arange(self.size_)
 
-        for _, test_idx in self.splitter.split(
+        for _, test_idx in self.splitter.split(  # type: ignore[call-overload]
             _indexes,
             time_series=self.time_series_,
             start_dt=self.start_dt_,
@@ -652,9 +656,9 @@ class TimeBasedCVSplitter(BaseCrossValidator):
 
     def get_n_splits(
         self: Self,
-        X: Union[TensorLike, SeriesLike, None] = None,
-        y: Union[TensorLike, SeriesLike, None] = None,
-        groups: Union[TensorLike, SeriesLike, None] = None,
+        X: Union[NDArray, None] = None,
+        y: Union[NDArray, None] = None,
+        groups: Union[NDArray, None] = None,
     ) -> int:
         """Returns the number of splits that can be generated from the instance.
 
@@ -679,9 +683,9 @@ class TimeBasedCVSplitter(BaseCrossValidator):
     @staticmethod
     def _validate_split_args(
         size: int,
-        X: Union[TensorLike, SeriesLike, None] = None,
-        y: Union[TensorLike, SeriesLike, None] = None,
-        groups: Union[TensorLike, SeriesLike, None] = None,
+        X: Union[NDArray, None] = None,
+        y: Union[NDArray, None] = None,
+        groups: Union[NDArray, None] = None,
     ) -> None:
         """Validates the arguments passed to the `split` and `get_n_splits` methods."""
         if X is not None and X.shape[0] != size:
