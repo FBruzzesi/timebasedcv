@@ -54,13 +54,15 @@ class _CoreTimeBasedSplit:
 
     Arguments:
         frequency: The frequency of the time series. Must be one of "days", "seconds", "microseconds", "milliseconds",
-            "minutes", "hours", "weeks". These are the only valid values for the `unit` argument of the `timedelta`.
+            "minutes", "hours", "weeks". These are the only valid values for the `unit` argument of `timedelta` from
+            python `datetime` standard library.
         train_size: The size of the training set.
-        forecast_horizon: The size of the forecast horizon.
+        forecast_horizon: The size of the forecast horizon, i.e. the size of the test set.
         gap: The size of the gap between the training set and the forecast horizon.
         stride: The size of the stride between consecutive splits. Notice that if stride is not provided (or set to 0),
-            it is set to `forecast_horizon`.
-        window: The type of window to use. Must be one of "rolling" or "expanding".
+            it fallbacks to the `forecast_horizon` quantity.
+        window: The type of window to use, either "rolling" or "expanding".
+        mode: Determines in which orders the splits are generated, either "forward" or "backward".
 
     Raises:
         ValueError: If `frequency` is not one of "days", "seconds", "microseconds", "milliseconds", "minutes", "hours",
@@ -266,13 +268,15 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
 
     Arguments:
         frequency: The frequency of the time series. Must be one of "days", "seconds", "microseconds", "milliseconds",
-            "minutes", "hours", "weeks". These are the only valid values for the `unit` argument of the `timedelta`.
+            "minutes", "hours", "weeks". These are the only valid values for the `unit` argument of `timedelta` from
+            python `datetime` standard library.
         train_size: The size of the training set.
-        forecast_horizon: The size of the forecast horizon.
+        forecast_horizon: The size of the forecast horizon, i.e. the size of the test set.
         gap: The size of the gap between the training set and the forecast horizon.
         stride: The size of the stride between consecutive splits. Notice that if stride is not provided (or set to 0),
-            it is set to `forecast_horizon`.
-        window: The type of window to use. Must be one of "rolling" or "expanding".
+            it fallbacks to the `forecast_horizon` quantity.
+        window: The type of window to use, either "rolling" or "expanding".
+        mode: Determines in which orders the splits are generated, either "forward" or "backward".
 
     Raises:
         ValueError: If `frequency` is not one of "days", "seconds", "microseconds", "milliseconds", "minutes", "hours",
@@ -499,6 +503,7 @@ class ExpandingTimeSplit(TimeBasedSplit):  # pragma: no cover
         forecast_horizon: int,
         gap: int = 0,
         stride: Union[int, None] = None,
+        mode: ModeType,
     ) -> None:
         super().__init__(
             frequency=frequency,
@@ -507,6 +512,7 @@ class ExpandingTimeSplit(TimeBasedSplit):  # pragma: no cover
             gap=gap,
             stride=stride,
             window="expanding",
+            mode=mode,
         )
 
 
@@ -523,6 +529,7 @@ class RollingTimeSplit(TimeBasedSplit):  # pragma: no cover
         forecast_horizon: int,
         gap: int = 0,
         stride: Union[int, None] = None,
+        mode: ModeType,
     ) -> None:
         super().__init__(
             frequency=frequency,
@@ -531,6 +538,7 @@ class RollingTimeSplit(TimeBasedSplit):  # pragma: no cover
             gap=gap,
             stride=stride,
             window="rolling",
+            mode=mode,
         )
 
 
@@ -549,9 +557,10 @@ class TimeBasedCVSplitter(BaseCrossValidator):
 
     Arguments:
         frequency: The frequency of the time series. Must be one of "days", "seconds", "microseconds", "milliseconds",
-            "minutes", "hours", "weeks". These are the only valid values for the `unit` argument of the `timedelta`.
+            "minutes", "hours", "weeks". These are the only valid values for the `unit` argument of `timedelta` from
+            python `datetime` standard library.
         train_size: The size of the training set.
-        forecast_horizon: The size of the forecast horizon.
+        forecast_horizon: The size of the forecast horizon, i.e. the size of the test set.
         time_series: The time series used to create boolean mask for splits. It is not required to be sorted, but it
             must support:
 
@@ -561,8 +570,9 @@ class TimeBasedCVSplitter(BaseCrossValidator):
             - `.shape` attribute.
         gap: The size of the gap between the training set and the forecast horizon.
         stride: The size of the stride between consecutive splits. Notice that if stride is not provided (or set to 0),
-            it is set to `forecast_horizon`.
-        window: The type of window to use. Must be one of "rolling" or "expanding".
+            it fallbacks to the `forecast_horizon` quantity.
+        window: The type of window to use, either "rolling" or "expanding".
+        mode: Determines in which orders the splits are generated, either "forward" or "backward".
         start_dt: The start of the time period. If provided, it is used in place of the `time_series.min()`.
         end_dt: The end of the time period. If provided,it is used in place of the `time_series.max()`.
 
