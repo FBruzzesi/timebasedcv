@@ -22,6 +22,7 @@ NullableDatetime = Union[DateTimeLike, None]
 
 FrequencyUnit: TypeAlias = Literal["days", "seconds", "microseconds", "milliseconds", "minutes", "hours", "weeks"]
 WindowType: TypeAlias = Literal["rolling", "expanding"]
+ModeType: TypeAlias = Literal["forward", "backward"]
 
 T = TypeVar("T")
 
