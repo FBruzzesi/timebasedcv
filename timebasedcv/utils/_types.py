@@ -17,7 +17,6 @@ else:
 if TYPE_CHECKING:
     import pandas as pd
 
-
 DateTimeLike = TypeVar("DateTimeLike", datetime, date, "pd.Timestamp")
 NullableDatetime = Union[DateTimeLike, None]
 
