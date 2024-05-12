@@ -17,8 +17,9 @@ else:
 if TYPE_CHECKING:
     import pandas as pd
 
-
 DateTimeLike = TypeVar("DateTimeLike", datetime, date, "pd.Timestamp")
+NullableDatetime = Union[DateTimeLike, None]
+
 FrequencyUnit: TypeAlias = Literal["days", "seconds", "microseconds", "milliseconds", "minutes", "hours", "weeks"]
 WindowType: TypeAlias = Literal["rolling", "expanding"]
 
@@ -36,13 +37,9 @@ class SeriesLike(Protocol[T]):
     - `.shape` attribute
     """
 
-    def min(self: Self) -> T:
-        """Support for `.min()` method."""
-        ...
+    def min(self: Self) -> T: ...
 
-    def max(self: Self) -> T:
-        """Support for `.max()` method."""
-        ...
+    def max(self: Self) -> T: ...
 
     @property
     def shape(self: Self) -> Tuple[int]: ...
@@ -56,6 +53,8 @@ class SeriesLike(Protocol[T]):
     def __ge__(self: Self, other: Union[T, SeriesLike[T]]) -> SeriesLike[bool]: ...
 
     def __and__(self: SeriesLike[bool], other: SeriesLike[bool]) -> SeriesLike[bool]: ...
+
+    def __len__(self: Self) -> int: ...
 
 
 T_co = TypeVar("T_co", covariant=True)
@@ -71,3 +70,7 @@ class TensorLike(Protocol[T_co]):
 
     @property
     def shape(self: Self) -> Tuple[int, ...]: ...
+
+    def __getitem__(self: Self, i: Union[slice, SeriesLike[bool], SeriesLike[int]]) -> Self: ...
+
+    def __len__(self: Self) -> int: ...

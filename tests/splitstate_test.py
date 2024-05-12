@@ -64,21 +64,27 @@ def test_splitstate_valid(
 
 
 @pytest.mark.parametrize(
-    "train_start, exception_context",
+    "train_start, context",
     [
-        (date(2023, 1, 1), pytest.raises(TypeError)),
-        (pd.Timestamp(2023, 1, 1), pytest.raises(TypeError)),
-        ("2023-01-01", pytest.raises(TypeError)),
-        (datetime(2023, 2, 1), pytest.raises(ValueError)),
+        (date(2023, 1, 1), pytest.raises(TypeError, match="All attributes must be of type")),
+        (pd.Timestamp(2023, 1, 1), pytest.raises(TypeError, match="All attributes must be of type")),
+        ("2023-01-01", pytest.raises(TypeError, match="All attributes must be of type")),
+        (
+            datetime(2023, 2, 1),
+            pytest.raises(
+                ValueError,
+                match="`train_start`, `train_end`, `forecast_start`, `forecast_end` must be ordered",
+            ),
+        ),
     ],
 )
 def test_splitstate_invalid(
     train_start,
-    exception_context,
+    context,
 ):
     """Test the SplitState class with mixed input values types or unordered datetypes."""
 
-    with exception_context:
+    with context:
         SplitState(
             train_start=train_start,
             train_end=datetime(2023, 1, 31),

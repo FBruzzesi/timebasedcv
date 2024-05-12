@@ -3,8 +3,10 @@ from typing import Callable, Dict, TypeVar
 import narwhals as nw
 import numpy as np
 
+from timebasedcv.utils._types import SeriesLike, TensorLike
 
-def default_indexing_method(arr, mask):
+
+def default_indexing_method(arr: TensorLike, mask: SeriesLike) -> TensorLike:
     """Default indexing method for arrays.
 
     !!! warning
@@ -15,14 +17,15 @@ def default_indexing_method(arr, mask):
         mask: The boolean mask to use for indexing.
     """
     if len(arr) != len(mask):
-        raise ValueError("Length of arr and mask must be equal.")
+        msg = "Length of arr and mask must be equal."
+        raise ValueError(msg)
     return arr[mask]
 
 
 T_NW = TypeVar("T_NW", nw.DataFrame, nw.Series)
 
 
-def nw_indexing_method(_dfs: T_NW, mask) -> T_NW:
+def nw_indexing_method(_dfs: T_NW, mask: nw.Expr) -> T_NW:
     """Indexing method for Narwhals dataframes and series.
 
     Arguments:

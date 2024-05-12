@@ -10,30 +10,41 @@ from sklearn.model_selection import RandomizedSearchCV
 
 from timebasedcv import TimeBasedCVSplitter, TimeBasedSplit, _CoreTimeBasedSplit
 
+RNG = np.random.default_rng()
+
 # Define a fix set of valid arguments
 valid_kwargs = {
     "frequency": "days",
     "train_size": 7,
-    "forecast_horizon": 1,
+    "forecast_horizon": 3,
     "gap": 0,
-    "stride": 1,
+    "stride": 2,
     "window": "rolling",
 }
 
 
 start_dt = pd.Timestamp(2023, 1, 1)
-end_dt = pd.Timestamp(2023, 1, 31)
+end_dt = pd.Timestamp(2023, 3, 31)
 
 time_series = pd.Series(pd.date_range(start_dt, end_dt, freq="D"))
 size = len(time_series)
 
-df = pd.DataFrame(data=np.random.randn(size, 2), columns=["a", "b"]).assign(
+df = pd.DataFrame(data=RNG.normal(size=(size, 2)), columns=["a", "b"]).assign(  # noqa: PD901
     date=time_series,
     y=lambda t: t[["a", "b"]].sum(axis=1),
 )
 
 X, y = df[["a", "b"]], df["y"]
 
+err_msg_freq = (
+    r"`frequency` must be one of \('days', 'seconds', 'microseconds', 'milliseconds', 'minutes', 'hours', 'weeks'\)"
+)
+err_msg_int = r"\(`train_size_`, `forecast_horizon_`, `gap_`, `stride_`\) arguments must be of type `int`."
+err_msg_lower_bound = r"must be greater or equal than \(1, 1, 0, 1\)"
+err_msg_window = r"`window` must be one of \('rolling', 'expanding'\)"
+err_msg_time_order = r"(`time_start` must be before `time_end`)|(`start_dt` must be before `end_dt`)."
+err_msg_no_time = r"Either `time_series` or \(`start_dt`, `end_dt`\) pair must be provided."
+err_msg_shape = "Invalid shape: "
 # Tests for _CoreTimeBasedSplit
 
 
@@ -42,30 +53,30 @@ X, y = df[["a", "b"]], df["y"]
     [
         ("frequency", "days", does_not_raise()),
         ("frequency", "hours", does_not_raise()),
-        ("frequency", "test", pytest.raises(ValueError)),
-        ("frequency", 123, pytest.raises(ValueError)),
+        ("frequency", "test", pytest.raises(ValueError, match=err_msg_freq)),
+        ("frequency", 123, pytest.raises(ValueError, match=err_msg_freq)),
         ("train_size", 7, does_not_raise()),
-        ("train_size", 1.0, pytest.raises(TypeError)),
-        ("train_size", "test", pytest.raises(TypeError)),
-        ("train_size", -123, pytest.raises(ValueError)),
+        ("train_size", 1.0, pytest.raises(TypeError, match=err_msg_int)),
+        ("train_size", "test", pytest.raises(TypeError, match=err_msg_int)),
+        ("train_size", -123, pytest.raises(ValueError, match=err_msg_lower_bound)),
         ("forecast_horizon", 7, does_not_raise()),
-        ("forecast_horizon", 1.0, pytest.raises(TypeError)),
-        ("forecast_horizon", "test", pytest.raises(TypeError)),
-        ("forecast_horizon", -123, pytest.raises(ValueError)),
+        ("forecast_horizon", 1.0, pytest.raises(TypeError, match=err_msg_int)),
+        ("forecast_horizon", "test", pytest.raises(TypeError, match=err_msg_int)),
+        ("forecast_horizon", -123, pytest.raises(ValueError, match=err_msg_lower_bound)),
         ("gap", 0, does_not_raise()),
         ("gap", 7, does_not_raise()),
-        ("gap", 1.0, pytest.raises(TypeError)),
-        ("gap", "test", pytest.raises(TypeError)),
-        ("gap", -123, pytest.raises(ValueError)),
+        ("gap", 1.0, pytest.raises(TypeError, match=err_msg_int)),
+        ("gap", "test", pytest.raises(TypeError, match=err_msg_int)),
+        ("gap", -123, pytest.raises(ValueError, match=err_msg_lower_bound)),
         ("stride", None, does_not_raise()),
         ("stride", 7, does_not_raise()),
-        ("stride", 1.0, pytest.raises(TypeError)),
-        ("stride", "test", pytest.raises(TypeError)),
-        ("stride", -1, pytest.raises(ValueError)),
+        ("stride", 1.0, pytest.raises(TypeError, match=err_msg_int)),
+        ("stride", "test", pytest.raises(TypeError, match=err_msg_int)),
+        ("stride", -1, pytest.raises(ValueError, match=err_msg_lower_bound)),
         ("window", "rolling", does_not_raise()),
         ("window", "expanding", does_not_raise()),
-        ("window", "test", pytest.raises(ValueError)),
-        ("window", 123, pytest.raises(ValueError)),
+        ("window", "test", pytest.raises(ValueError, match=err_msg_window)),
+        ("window", 123, pytest.raises(ValueError, match=err_msg_window)),
     ],
 )
 def test_core_init(arg_name, arg_value, context):
@@ -107,7 +118,13 @@ def test_core_properties(frequency, train_size, forecast_horizon, gap, stride):
     """
     Tests the properties of _CoreTimeBasedSplit.
     """
-    cv = _CoreTimeBasedSplit(frequency, train_size, forecast_horizon, gap, stride)
+    cv = _CoreTimeBasedSplit(
+        frequency=frequency,
+        train_size=train_size,
+        forecast_horizon=forecast_horizon,
+        gap=gap,
+        stride=stride,
+    )
 
     assert cv.train_delta == timedelta(**{frequency: train_size})
     assert cv.forecast_delta == timedelta(**{frequency: forecast_horizon})
@@ -123,11 +140,11 @@ def test_core_properties(frequency, train_size, forecast_horizon, gap, stride):
     "time_start, time_end, context",
     [
         (datetime(2023, 1, 1), datetime(2023, 1, 31), does_not_raise()),
-        (datetime(2023, 1, 1), datetime(2023, 1, 1), pytest.raises(ValueError)),
+        (datetime(2023, 1, 1), datetime(2023, 1, 1), pytest.raises(ValueError, match=err_msg_time_order)),
         (date(2023, 1, 1), date(2023, 1, 31), does_not_raise()),
-        (date(2023, 1, 1), date(2023, 1, 1), pytest.raises(ValueError)),
+        (date(2023, 1, 1), date(2023, 1, 1), pytest.raises(ValueError, match=err_msg_time_order)),
         (pd.Timestamp(2023, 1, 1), pd.Timestamp(2023, 1, 31), does_not_raise()),
-        (pd.Timestamp(2023, 1, 1), pd.Timestamp(2023, 1, 1), pytest.raises(ValueError)),
+        (pd.Timestamp(2023, 1, 1), pd.Timestamp(2023, 1, 1), pytest.raises(ValueError, match=err_msg_time_order)),
     ],
 )
 def test_core_splits_from_period(window, time_start, time_end, context):
@@ -143,7 +160,7 @@ def test_core_splits_from_period(window, time_start, time_end, context):
     with context:
         n_splits = 0
         current_time = time_start
-        for split_state in cv._splits_from_period(time_start, time_end):
+        for split_state in cv._splits_from_period(time_start, time_end):  # noqa: SLF001
             train_start = current_time if cv.window_ == "rolling" else time_start
             train_end = current_time + cv.train_delta
             forecast_start = train_end + cv.gap_delta
@@ -165,11 +182,11 @@ def test_core_splits_from_period(window, time_start, time_end, context):
     [
         ({"time_series": time_series}, does_not_raise()),
         ({"start_dt": date(2023, 1, 1), "end_dt": date(2023, 1, 31)}, does_not_raise()),
-        ({"time_series": None, "start_dt": date(2023, 1, 1)}, pytest.raises(ValueError)),
-        ({"time_series": None, "end_dt": date(2023, 1, 31)}, pytest.raises(ValueError)),
+        ({"time_series": None, "start_dt": date(2023, 1, 1)}, pytest.raises(ValueError, match=err_msg_no_time)),
+        ({"time_series": None, "end_dt": date(2023, 1, 31)}, pytest.raises(ValueError, match=err_msg_no_time)),
         (
             {"start_dt": date(2023, 1, 31), "end_dt": date(2023, 1, 1)},
-            pytest.raises(ValueError),
+            pytest.raises(ValueError, match=err_msg_time_order),
         ),
     ],
 )
@@ -183,15 +200,6 @@ def test_core_n_splits_of(kwargs, context):
         cv.n_splits_of(**kwargs)
 
 
-def test_core_split():
-    """
-    Test the _CoreTimeBasedSplit.split method.
-    """
-
-    with pytest.raises(NotImplementedError):
-        _CoreTimeBasedSplit(**valid_kwargs).split()
-
-
 # Tests for TimeBasedSplit
 
 
@@ -203,7 +211,6 @@ def test_core_split():
         {"time_series": time_series[:-1]},
         # arrays shape different from time_series shape
         {"start_dt": pd.Timestamp(2023, 1, 1), "end_dt": pd.Timestamp(2023, 1, 1)},
-        # start_dt >= end_dt
     ],
 )
 def test_timebasedcv_split_invalid(kwargs):
@@ -216,10 +223,8 @@ def test_timebasedcv_split_invalid(kwargs):
     start_dt_ = kwargs.get("start_dt")
     end_dt_ = kwargs.get("end_dt")
 
-    with pytest.raises(ValueError):
-        next(
-            cv.split(*arrays_, time_series=time_series_, start_dt=start_dt_, end_dt=end_dt_),  # type: ignore
-        )
+    with pytest.raises(ValueError):  # noqa: PT011
+        next(cv.split(*arrays_, time_series=time_series_, start_dt=start_dt_, end_dt=end_dt_))
 
 
 @pytest.mark.parametrize(
@@ -250,7 +255,7 @@ def test_timebasedcv_split(kwargs):
             start_dt=start_dt_,
             end_dt=end_dt_,
             return_splitstate=return_splitstate_,
-        ),  # type: ignore
+        ),
     )
 
     if return_splitstate_:
@@ -270,7 +275,7 @@ def test_cv_splitter():
     compatibility with sklearn's _CV Splitter_s.
     """
     cv = TimeBasedCVSplitter(
-        time_series=time_series,  # type: ignore
+        time_series=time_series,
         start_dt=start_dt,
         end_dt=end_dt,
         **valid_kwargs,
@@ -291,7 +296,7 @@ def test_cv_splitter():
     random_search_cv = RandomizedSearchCV(
         estimator=Ridge(),
         param_distributions=param_grid,
-        cv=cv,  # type: ignore
+        cv=cv,
         n_jobs=-1,
     ).fit(X, y)
 
@@ -303,9 +308,9 @@ def test_cv_splitter():
     "X_shape, y_shape, g_shape, context",
     [
         ((size, 2), (size,), (size, 2), does_not_raise()),
-        ((size + 1, 2), (size,), (size, 2), pytest.raises(ValueError)),
-        ((size, 2), (size + 1,), (size, 2), pytest.raises(ValueError)),
-        ((size, 2), (size,), (size + 1, 2), pytest.raises(ValueError)),
+        ((size + 1, 2), (size,), (size, 2), pytest.raises(ValueError, match=err_msg_shape)),
+        ((size, 2), (size + 1,), (size, 2), pytest.raises(ValueError, match=err_msg_shape)),
+        ((size, 2), (size,), (size + 1, 2), pytest.raises(ValueError, match=err_msg_shape)),
     ],
 )
 def test_cv_splitter_validate_split(
@@ -318,9 +323,9 @@ def test_cv_splitter_validate_split(
     """Test the TimeBasedCVSplitter._validate_split_args static method."""
 
     with context:
-        TimeBasedCVSplitter._validate_split_args(
+        TimeBasedCVSplitter._validate_split_args(  # noqa: SLF001
             size=size,
-            X=np.random.randn(*X_shape),
-            y=np.random.randn(*y_shape),
-            groups=np.random.randn(*g_shape),
+            X=RNG.normal(size=X_shape),
+            y=RNG.normal(size=y_shape),
+            groups=RNG.normal(size=g_shape),
         )
