@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import sys
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from operator import le as less_or_equal
-from typing import Generic
+from typing import TYPE_CHECKING, Generic, Union
 
 from timebasedcv.utils._funcs import pairwise, pairwise_comparison
 from timebasedcv.utils._types import DateTimeLike
@@ -13,6 +15,9 @@ else:  # pragma: no cover
     from typing_extensions import Self
 
 from narwhals.dependencies import get_pandas
+
+if TYPE_CHECKING:  # pragma: no cover
+    import pandas as pd
 
 
 @dataclass(frozen=True)
@@ -115,3 +120,21 @@ class SplitState(Generic[DateTimeLike]):
             A `timedelta` object representing the time between `train_start` and `forecast_end`.
         """
         return self.forecast_end - self.train_start
+
+    def __add__(self: Self, other: Union[timedelta, pd.Timedelta]) -> SplitState:
+        """Adds `other` to each value of the state."""
+        return SplitState(
+            train_start=self.train_start + other,
+            train_end=self.train_end + other,
+            forecast_start=self.forecast_start + other,
+            forecast_end=self.forecast_end + other,
+        )
+
+    def __sub__(self: Self, other: Union[timedelta, pd.Timedelta]) -> SplitState:
+        """Subtracts other to each value of the state."""
+        return SplitState(
+            train_start=self.train_start - other,
+            train_end=self.train_end - other,
+            forecast_start=self.forecast_start - other,
+            forecast_end=self.forecast_end - other,
+        )

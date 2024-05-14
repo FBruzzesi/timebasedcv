@@ -17,6 +17,7 @@ from timebasedcv.utils._backends import (
 from timebasedcv.utils._types import (
     DateTimeLike,
     FrequencyUnit,
+    ModeType,
     NullableDatetime,
     SeriesLike,
     TensorLike,
@@ -37,6 +38,7 @@ else:  # pragma: no cover
 
 _frequency_values = get_args(FrequencyUnit)
 _window_values = get_args(WindowType)
+_mode_values = get_args(ModeType)
 
 TL = TypeVar("TL", bound=TensorLike)
 
@@ -52,13 +54,15 @@ class _CoreTimeBasedSplit:
 
     Arguments:
         frequency: The frequency of the time series. Must be one of "days", "seconds", "microseconds", "milliseconds",
-            "minutes", "hours", "weeks". These are the only valid values for the `unit` argument of the `timedelta`.
+            "minutes", "hours", "weeks". These are the only valid values for the `unit` argument of `timedelta` from
+            python `datetime` standard library.
         train_size: The size of the training set.
-        forecast_horizon: The size of the forecast horizon.
+        forecast_horizon: The size of the forecast horizon, i.e. the size of the test set.
         gap: The size of the gap between the training set and the forecast horizon.
         stride: The size of the stride between consecutive splits. Notice that if stride is not provided (or set to 0),
-            it is set to `forecast_horizon`.
-        window: The type of window to use. Must be one of "rolling" or "expanding".
+            it fallbacks to the `forecast_horizon` quantity.
+        window: The type of window to use, either "rolling" or "expanding".
+        mode: Determines in which orders the splits are generated, either "forward" or "backward".
 
     Raises:
         ValueError: If `frequency` is not one of "days", "seconds", "microseconds", "milliseconds", "minutes", "hours",
@@ -98,6 +102,7 @@ class _CoreTimeBasedSplit:
         gap: int = 0,
         stride: Union[int, None] = None,
         window: WindowType = "rolling",
+        mode: ModeType = "forward",
     ) -> None:
         self.frequency_ = frequency
         self.train_size_ = train_size
@@ -105,6 +110,7 @@ class _CoreTimeBasedSplit:
         self.gap_ = gap
         self.stride_ = stride or forecast_horizon
         self.window_ = window
+        self.mode_ = mode
 
         self._validate_arguments()
 
@@ -118,6 +124,11 @@ class _CoreTimeBasedSplit:
         # Validate window
         if self.window_ not in _window_values:
             msg = f"`window` must be one of {_window_values}. Found {self.window_}"
+            raise ValueError(msg)
+
+        # Validate mode
+        if self.mode_ not in _mode_values:
+            msg = f"`mode` must be one of {_mode_values}. Found {self.mode_}"
             raise ValueError(msg)
 
         # Validate positive integer arguments
@@ -198,23 +209,36 @@ class _CoreTimeBasedSplit:
             msg = "`time_start` must be before `time_end`."
             raise ValueError(msg)
 
-        train_start = current_time = time_start
-        train_delta = self.train_delta
-        forecast_delta = self.forecast_delta
-        gap_delta = self.gap_delta
-        stride_delta = self.stride_delta
+        if self.mode_ == "forward":
+            train_delta = self.train_delta
+            forecast_delta = self.forecast_delta
+            gap_delta = self.gap_delta
+            stride_delta = self.stride_delta
 
-        while current_time + train_delta + gap_delta < time_end:
-            train_end = current_time + train_delta
+            train_start = time_start
+            train_end = time_start + train_delta
             forecast_start = train_end + gap_delta
             forecast_end = forecast_start + forecast_delta
 
-            current_time = current_time + stride_delta
+        else:
+            train_delta = -self.train_delta
+            forecast_delta = -self.forecast_delta
+            gap_delta = -self.gap_delta
+            stride_delta = -self.stride_delta
 
+            forecast_end = time_end
+            forecast_start = forecast_end + forecast_delta
+            train_end = forecast_start + gap_delta
+            train_start = train_end + train_delta if self.window_ == "rolling" else time_start
+
+        while (forecast_start <= time_end) and (train_start >= time_start) and (train_start <= train_end + train_delta):
             yield SplitState(train_start, train_end, forecast_start, forecast_end)
 
-            if self.window_ == "rolling":
-                train_start = current_time
+            # Update state values
+            train_start = train_start + stride_delta if self.window_ == "rolling" else train_start
+            train_end = train_end + stride_delta
+            forecast_start = forecast_start + stride_delta
+            forecast_end = forecast_end + stride_delta
 
     def n_splits_of(
         self: Self,
@@ -244,13 +268,15 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
 
     Arguments:
         frequency: The frequency of the time series. Must be one of "days", "seconds", "microseconds", "milliseconds",
-            "minutes", "hours", "weeks". These are the only valid values for the `unit` argument of the `timedelta`.
+            "minutes", "hours", "weeks". These are the only valid values for the `unit` argument of `timedelta` from
+            python `datetime` standard library.
         train_size: The size of the training set.
-        forecast_horizon: The size of the forecast horizon.
+        forecast_horizon: The size of the forecast horizon, i.e. the size of the test set.
         gap: The size of the gap between the training set and the forecast horizon.
         stride: The size of the stride between consecutive splits. Notice that if stride is not provided (or set to 0),
-            it is set to `forecast_horizon`.
-        window: The type of window to use. Must be one of "rolling" or "expanding".
+            it fallbacks to the `forecast_horizon` quantity.
+        window: The type of window to use, either "rolling" or "expanding".
+        mode: Determines in which orders the splits are generated, either "forward" or "backward".
 
     Raises:
         ValueError: If `frequency` is not one of "days", "seconds", "microseconds", "milliseconds", "minutes", "hours",
@@ -477,6 +503,7 @@ class ExpandingTimeSplit(TimeBasedSplit):  # pragma: no cover
         forecast_horizon: int,
         gap: int = 0,
         stride: Union[int, None] = None,
+        mode: ModeType,
     ) -> None:
         super().__init__(
             frequency=frequency,
@@ -485,6 +512,7 @@ class ExpandingTimeSplit(TimeBasedSplit):  # pragma: no cover
             gap=gap,
             stride=stride,
             window="expanding",
+            mode=mode,
         )
 
 
@@ -501,6 +529,7 @@ class RollingTimeSplit(TimeBasedSplit):  # pragma: no cover
         forecast_horizon: int,
         gap: int = 0,
         stride: Union[int, None] = None,
+        mode: ModeType,
     ) -> None:
         super().__init__(
             frequency=frequency,
@@ -509,6 +538,7 @@ class RollingTimeSplit(TimeBasedSplit):  # pragma: no cover
             gap=gap,
             stride=stride,
             window="rolling",
+            mode=mode,
         )
 
 
@@ -527,9 +557,10 @@ class TimeBasedCVSplitter(BaseCrossValidator):
 
     Arguments:
         frequency: The frequency of the time series. Must be one of "days", "seconds", "microseconds", "milliseconds",
-            "minutes", "hours", "weeks". These are the only valid values for the `unit` argument of the `timedelta`.
+            "minutes", "hours", "weeks". These are the only valid values for the `unit` argument of `timedelta` from
+            python `datetime` standard library.
         train_size: The size of the training set.
-        forecast_horizon: The size of the forecast horizon.
+        forecast_horizon: The size of the forecast horizon, i.e. the size of the test set.
         time_series: The time series used to create boolean mask for splits. It is not required to be sorted, but it
             must support:
 
@@ -539,8 +570,9 @@ class TimeBasedCVSplitter(BaseCrossValidator):
             - `.shape` attribute.
         gap: The size of the gap between the training set and the forecast horizon.
         stride: The size of the stride between consecutive splits. Notice that if stride is not provided (or set to 0),
-            it is set to `forecast_horizon`.
-        window: The type of window to use. Must be one of "rolling" or "expanding".
+            it fallbacks to the `forecast_horizon` quantity.
+        window: The type of window to use, either "rolling" or "expanding".
+        mode: Determines in which orders the splits are generated, either "forward" or "backward".
         start_dt: The start of the time period. If provided, it is used in place of the `time_series.min()`.
         end_dt: The end of the time period. If provided,it is used in place of the `time_series.max()`.
 
@@ -612,6 +644,7 @@ class TimeBasedCVSplitter(BaseCrossValidator):
         gap: int = 0,
         stride: Union[int, None] = None,
         window: WindowType = "rolling",
+        mode: ModeType = "forward",
         start_dt: NullableDatetime = None,
         end_dt: NullableDatetime = None,
     ) -> None:
@@ -622,6 +655,7 @@ class TimeBasedCVSplitter(BaseCrossValidator):
             gap=gap,
             stride=stride,
             window=window,
+            mode=mode,
         )
 
         self.time_series_ = time_series

@@ -16,15 +16,15 @@ RNG = np.random.default_rng()
 valid_kwargs = {
     "frequency": "days",
     "train_size": 7,
-    "forecast_horizon": 3,
-    "gap": 0,
-    "stride": 2,
+    "forecast_horizon": 4,
+    "gap": 1,
+    "stride": 3,
     "window": "rolling",
 }
 
 
 start_dt = pd.Timestamp(2023, 1, 1)
-end_dt = pd.Timestamp(2023, 3, 31)
+end_dt = pd.Timestamp(2023, 1, 31)
 
 time_series = pd.Series(pd.date_range(start_dt, end_dt, freq="D"))
 size = len(time_series)
