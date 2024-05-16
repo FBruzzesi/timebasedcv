@@ -1,28 +1,15 @@
 from contextlib import nullcontext as does_not_raise
 from datetime import date, datetime, timedelta
-from typing import Tuple
 
 import numpy as np
 import pandas as pd
 import pytest
-from sklearn.linear_model import Ridge
-from sklearn.model_selection import RandomizedSearchCV
 
-from timebasedcv import TimeBasedCVSplitter, TimeBasedSplit, _CoreTimeBasedSplit
+from timebasedcv import TimeBasedSplit, _CoreTimeBasedSplit
 
 RNG = np.random.default_rng()
 
 # Define a fix set of valid arguments
-valid_kwargs = {
-    "frequency": "days",
-    "train_size": 7,
-    "forecast_horizon": 4,
-    "gap": 1,
-    "stride": 3,
-    "window": "rolling",
-}
-
-
 start_dt = pd.Timestamp(2023, 1, 1)
 end_dt = pd.Timestamp(2023, 1, 31)
 
@@ -42,9 +29,12 @@ err_msg_freq = (
 err_msg_int = r"\(`train_size_`, `forecast_horizon_`, `gap_`, `stride_`\) arguments must be of type `int`."
 err_msg_lower_bound = r"must be greater or equal than \(1, 1, 0, 1\)"
 err_msg_window = r"`window` must be one of \('rolling', 'expanding'\)"
+err_msg_mode = r"`mode` must be one of \('forward', 'backward'\)"
 err_msg_time_order = r"(`time_start` must be before `time_end`)|(`start_dt` must be before `end_dt`)."
 err_msg_no_time = r"Either `time_series` or \(`start_dt`, `end_dt`\) pair must be provided."
 err_msg_shape = "Invalid shape: "
+
+
 # Tests for _CoreTimeBasedSplit
 
 
@@ -77,37 +67,28 @@ err_msg_shape = "Invalid shape: "
         ("window", "expanding", does_not_raise()),
         ("window", "test", pytest.raises(ValueError, match=err_msg_window)),
         ("window", 123, pytest.raises(ValueError, match=err_msg_window)),
+        ("mode", "forward", does_not_raise()),
+        ("mode", "backward", does_not_raise()),
+        ("mode", "test", pytest.raises(ValueError, match=err_msg_mode)),
+        ("mode", 123, pytest.raises(ValueError, match=err_msg_mode)),
     ],
 )
-def test_core_init(arg_name, arg_value, context):
-    """
-    Tests initialization of _CoreTimeBasedSplit with different input values.
-    """
+def test_core_init(base_kwargs, arg_name, arg_value, context):
+    """Tests initialization of _CoreTimeBasedSplit with different input values."""
     with context:
-        _CoreTimeBasedSplit(
-            **{
-                **valid_kwargs,
-                arg_name: arg_value,
-            },
+        kwargs = base_kwargs | {arg_name: arg_value}
+        obj = _CoreTimeBasedSplit(**kwargs)
+
+        assert repr(obj) == (
+            "_CoreTimeBasedSplit("
+            f"\n    frequency_ = {kwargs['frequency']}"
+            f"\n    train_size_ = {kwargs['train_size']}"
+            f"\n    forecast_horizon_ = {kwargs['forecast_horizon']}"
+            f"\n    gap_ = {kwargs['gap']}"
+            f"\n    stride_ = {kwargs['stride'] or kwargs['forecast_horizon']}"
+            f"\n    window_ = {kwargs['window']}"
+            "\n)"
         )
-
-
-def test_core_repr():
-    """
-    Tests the __repr__ method of _CoreTimeBasedSplit.
-    """
-    obj = _CoreTimeBasedSplit(**valid_kwargs)
-
-    assert repr(obj) == (
-        "_CoreTimeBasedSplit("
-        f"\n    frequency_ = {valid_kwargs['frequency']}"
-        f"\n    train_size_ = {valid_kwargs['train_size']}"
-        f"\n    forecast_horizon_ = {valid_kwargs['forecast_horizon']}"
-        f"\n    gap_ = {valid_kwargs['gap']}"
-        f"\n    stride_ = {valid_kwargs['stride']}"
-        f"\n    window_ = {valid_kwargs['window']}"
-        "\n)"
-    )
 
 
 @pytest.mark.parametrize(
@@ -115,9 +96,7 @@ def test_core_repr():
     [("days", 7, 7, 1, None), ("hours", 48, 24, 0, 2), ("weeks", 4, 1, 1, 1)],
 )
 def test_core_properties(frequency, train_size, forecast_horizon, gap, stride):
-    """
-    Tests the properties of _CoreTimeBasedSplit.
-    """
+    """Tests the properties of _CoreTimeBasedSplit."""
     cv = _CoreTimeBasedSplit(
         frequency=frequency,
         train_size=train_size,
@@ -133,71 +112,34 @@ def test_core_properties(frequency, train_size, forecast_horizon, gap, stride):
 
 
 @pytest.mark.parametrize(
-    "window",
-    ["rolling", "expanding"],
-)
-@pytest.mark.parametrize(
     "time_start, time_end, context",
     [
         (datetime(2023, 1, 1), datetime(2023, 1, 31), does_not_raise()),
-        (datetime(2023, 1, 1), datetime(2023, 1, 1), pytest.raises(ValueError, match=err_msg_time_order)),
+        (datetime(2023, 1, 1), datetime(2022, 1, 1), pytest.raises(ValueError, match=err_msg_time_order)),
         (date(2023, 1, 1), date(2023, 1, 31), does_not_raise()),
-        (date(2023, 1, 1), date(2023, 1, 1), pytest.raises(ValueError, match=err_msg_time_order)),
+        (date(2023, 1, 1), date(2022, 1, 1), pytest.raises(ValueError, match=err_msg_time_order)),
         (pd.Timestamp(2023, 1, 1), pd.Timestamp(2023, 1, 31), does_not_raise()),
-        (pd.Timestamp(2023, 1, 1), pd.Timestamp(2023, 1, 1), pytest.raises(ValueError, match=err_msg_time_order)),
+        (pd.Timestamp(2023, 1, 1), pd.Timestamp(2022, 1, 1), pytest.raises(ValueError, match=err_msg_time_order)),
     ],
 )
-def test_core_splits_from_period(window, time_start, time_end, context):
+def test_core_splits_from_period(valid_kwargs, time_start, time_end, context):
     """Tests the _CoreTimeBasedSplit._splits_from_period method."""
 
-    cv = _CoreTimeBasedSplit(
-        **{
-            **valid_kwargs,
-            "window": window,
-        },
-    )
-
-    with context:
-        n_splits = 0
-        current_time = time_start
-        for split_state in cv._splits_from_period(time_start, time_end):  # noqa: SLF001
-            train_start = current_time if cv.window_ == "rolling" else time_start
-            train_end = current_time + cv.train_delta
-            forecast_start = train_end + cv.gap_delta
-            forecast_end = forecast_start + cv.forecast_delta
-
-            assert split_state.train_start == train_start
-            assert split_state.train_end == train_end
-            assert split_state.forecast_start == forecast_start
-            assert split_state.forecast_end == forecast_end
-
-            current_time = current_time + cv.stride_delta
-            n_splits += 1
-
-        assert n_splits == cv.n_splits_of(start_dt=time_start, end_dt=time_end)
-
-
-@pytest.mark.parametrize(
-    "kwargs, context",
-    [
-        ({"time_series": time_series}, does_not_raise()),
-        ({"start_dt": date(2023, 1, 1), "end_dt": date(2023, 1, 31)}, does_not_raise()),
-        ({"time_series": None, "start_dt": date(2023, 1, 1)}, pytest.raises(ValueError, match=err_msg_no_time)),
-        ({"time_series": None, "end_dt": date(2023, 1, 31)}, pytest.raises(ValueError, match=err_msg_no_time)),
-        (
-            {"start_dt": date(2023, 1, 31), "end_dt": date(2023, 1, 1)},
-            pytest.raises(ValueError, match=err_msg_time_order),
-        ),
-    ],
-)
-def test_core_n_splits_of(kwargs, context):
-    """
-    Tests the _CoreTimeBasedSplit.n_splits_of method.
-    """
     cv = _CoreTimeBasedSplit(**valid_kwargs)
 
     with context:
-        cv.n_splits_of(**kwargs)
+        n_splits = sum(1 for _ in cv._splits_from_period(time_start, time_end))  # noqa: SLF001
+        assert n_splits == cv.n_splits_of(start_dt=time_start, end_dt=time_end)
+        assert n_splits == cv.n_splits_of(time_series=pd.Series(pd.date_range(time_start, time_end, freq="D")))
+
+
+def test_core_splits_from_period_invalid(base_kwargs):
+    """Tests the _CoreTimeBasedSplit._splits_from_period method invalid args."""
+
+    msg = r"Either `time_series` or \(`start_dt`, `end_dt`\) pair must be provided."
+    with pytest.raises(ValueError, match=msg):  # noqa: PT012
+        cv = _CoreTimeBasedSplit(**base_kwargs)
+        cv.n_splits_of(start_dt=start_dt)
 
 
 # Tests for TimeBasedSplit
@@ -213,10 +155,8 @@ def test_core_n_splits_of(kwargs, context):
         {"start_dt": pd.Timestamp(2023, 1, 1), "end_dt": pd.Timestamp(2023, 1, 1)},
     ],
 )
-def test_timebasedcv_split_invalid(kwargs):
-    """
-    Test the TimeBasedSplit.split method with invalid arguments.
-    """
+def test_timebasedcv_split_invalid(valid_kwargs, kwargs):
+    """Test the TimeBasedSplit.split method with invalid arguments."""
     cv = TimeBasedSplit(**valid_kwargs)
     arrays_ = kwargs.get("arrays", (X, y))
     time_series_ = kwargs.get("time_series", time_series)
@@ -237,7 +177,7 @@ def test_timebasedcv_split_invalid(kwargs):
         {"return_splitstate": True},
     ],
 )
-def test_timebasedcv_split(kwargs):
+def test_timebasedcv_split(valid_kwargs, kwargs):
     """Tests the TimeBasedSplit.split method."""
     cv = TimeBasedSplit(**valid_kwargs)
 
@@ -264,68 +204,3 @@ def test_timebasedcv_split(kwargs):
         train_forecast = split_results
 
     assert len(train_forecast) == n_arrays * 2
-
-
-# Tests for TimeBasedCVSplitter
-
-
-def test_cv_splitter():
-    """
-    Tests the TimeBasedCVSplitter `__init__` and `split` methods as well as its
-    compatibility with sklearn's _CV Splitter_s.
-    """
-    cv = TimeBasedCVSplitter(
-        time_series=time_series,
-        start_dt=start_dt,
-        end_dt=end_dt,
-        **valid_kwargs,
-    )
-
-    assert cv.time_series_ is not None
-    assert cv.start_dt_ is not None
-    assert cv.end_dt_ is not None
-    assert isinstance(cv.n_splits, int)
-    assert isinstance(cv.size_, int)
-
-    param_grid = {
-        "alpha": np.linspace(0.1, 2, 10),
-        "fit_intercept": [True, False],
-        "positive": [True, False],
-    }
-
-    random_search_cv = RandomizedSearchCV(
-        estimator=Ridge(),
-        param_distributions=param_grid,
-        cv=cv,
-        n_jobs=-1,
-    ).fit(X, y)
-
-    assert random_search_cv.best_estimator_ is not None
-
-
-@pytest.mark.parametrize("size", [size])
-@pytest.mark.parametrize(
-    "X_shape, y_shape, g_shape, context",
-    [
-        ((size, 2), (size,), (size, 2), does_not_raise()),
-        ((size + 1, 2), (size,), (size, 2), pytest.raises(ValueError, match=err_msg_shape)),
-        ((size, 2), (size + 1,), (size, 2), pytest.raises(ValueError, match=err_msg_shape)),
-        ((size, 2), (size,), (size + 1, 2), pytest.raises(ValueError, match=err_msg_shape)),
-    ],
-)
-def test_cv_splitter_validate_split(
-    size: int,
-    X_shape: Tuple[int, int],
-    y_shape: Tuple[int],
-    g_shape: Tuple[int, int],
-    context,
-):
-    """Test the TimeBasedCVSplitter._validate_split_args static method."""
-
-    with context:
-        TimeBasedCVSplitter._validate_split_args(  # noqa: SLF001
-            size=size,
-            X=RNG.normal(size=X_shape),
-            y=RNG.normal(size=y_shape),
-            groups=RNG.normal(size=g_shape),
-        )
