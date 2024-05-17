@@ -16,7 +16,7 @@ end_dt = pd.Timestamp(2023, 1, 31)
 time_series = pd.Series(pd.date_range(start_dt, end_dt, freq="D"))
 size = len(time_series)
 
-df = pd.DataFrame(data=RNG.normal(size=(size, 2)), columns=["a", "b"]).assign(  # noqa: PD901
+df = pd.DataFrame(data=RNG.normal(size=(size, 2)), columns=["a", "b"]).assign(
     date=time_series,
     y=lambda t: t[["a", "b"]].sum(axis=1),
 )

@@ -1,8 +1,6 @@
 from contextlib import nullcontext as does_not_raise
-from typing import Tuple
 
 import numpy as np
-import pandas as pd
 import pytest
 from sklearn.linear_model import Ridge
 from sklearn.model_selection import RandomizedSearchCV
@@ -13,27 +11,16 @@ RNG = np.random.default_rng()
 
 # Define a fix set of valid arguments
 
-start_dt = pd.Timestamp(2023, 1, 1)
-end_dt = pd.Timestamp(2023, 1, 31)
-
-time_series = pd.Series(pd.date_range(start_dt, end_dt, freq="D"))
-size = len(time_series)
-
-df = pd.DataFrame(data=RNG.normal(size=(size, 2)), columns=["a", "b"]).assign(  # noqa: PD901
-    date=time_series,
-    y=lambda t: t[["a", "b"]].sum(axis=1),
-)
-
-X, y = df[["a", "b"]], df["y"]
 
 err_msg_shape = "Invalid shape: "
 
 
-def test_cv_splitter(valid_kwargs):
+def test_cv_splitter(valid_kwargs, generate_test_data):
     """
     Tests the TimeBasedCVSplitter `__init__` and `split` methods as well as its
     compatibility with sklearn's _CV Splitter_s.
     """
+    start_dt, end_dt, time_series, X, y = generate_test_data
     cv = TimeBasedCVSplitter(
         time_series=time_series,
         start_dt=start_dt,
@@ -63,29 +50,27 @@ def test_cv_splitter(valid_kwargs):
     assert random_search_cv.best_estimator_ is not None
 
 
-@pytest.mark.parametrize("size", [size])
 @pytest.mark.parametrize(
-    "X_shape, y_shape, g_shape, context",
+    "x_extra, y_extra, g_extra, context",
     [
-        ((size, 2), (size,), (size, 2), does_not_raise()),
-        ((size + 1, 2), (size,), (size, 2), pytest.raises(ValueError, match=err_msg_shape)),
-        ((size, 2), (size + 1,), (size, 2), pytest.raises(ValueError, match=err_msg_shape)),
-        ((size, 2), (size,), (size + 1, 2), pytest.raises(ValueError, match=err_msg_shape)),
+        (0, 0, 0, does_not_raise()),
+        (1, 0, 0, pytest.raises(ValueError, match=err_msg_shape)),
+        (0, 1, 0, pytest.raises(ValueError, match=err_msg_shape)),
+        (0, 0, 1, pytest.raises(ValueError, match=err_msg_shape)),
     ],
 )
 def test_cv_splitter_validate_split(
-    size: int,
-    X_shape: Tuple[int, int],
-    y_shape: Tuple[int],
-    g_shape: Tuple[int, int],
+    x_extra: int,
+    y_extra: int,
+    g_extra: int,
     context,
 ):
     """Test the TimeBasedCVSplitter._validate_split_args static method."""
-
+    SIZE = 10
     with context:
         TimeBasedCVSplitter._validate_split_args(  # noqa: SLF001
-            size=size,
-            X=RNG.normal(size=X_shape),
-            y=RNG.normal(size=y_shape),
-            groups=RNG.normal(size=g_shape),
+            size=SIZE,
+            X=RNG.normal(size=(SIZE + x_extra, 2)),
+            y=RNG.normal(size=(SIZE + y_extra,)),
+            groups=RNG.normal(size=(SIZE + g_extra, 2)),
         )

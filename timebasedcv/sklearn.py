@@ -15,13 +15,9 @@ else:  # pragma: no cover
 
 from importlib.metadata import version
 
-sklearn_version = version("scikit-learn")
-
-if sklearn_version and tuple(int(re.sub(r"\D", "", str(v))) for v in sklearn_version.split(".")) < (
-    0,
-    19,
-    0,
-):  # pragma: no cover
+if (sklearn_version := version("scikit-learn")) and tuple(
+    int(re.sub(r"\D", "", str(v))) for v in sklearn_version.split(".")
+) < (0, 19, 0):  # pragma: no cover
     msg = (
         f"scikit-learn>=0.19.0 is required for this module. Found version {sklearn_version}.\nInstall it with "
         "`python -m pip install scikit-learn>=0.19.0` or `python -m pip install timebasedcv[scikit-learn]`",
