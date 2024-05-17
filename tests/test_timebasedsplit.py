@@ -5,7 +5,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from timebasedcv import TimeBasedSplit, _CoreTimeBasedSplit
+from timebasedcv import TimeBasedSplit
+from timebasedcv.core import _CoreTimeBasedSplit
 
 RNG = np.random.default_rng()
 

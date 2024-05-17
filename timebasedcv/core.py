@@ -159,7 +159,7 @@ class _CoreTimeBasedSplit:
         _values = tuple(getattr(self, _attr) for _attr in _attrs)
         _new_line_tab = "\n    "
 
-        return f"{self.name_}" "(\n    " f"{_new_line_tab.join(f'{s} = {v}' for s, v in zip(_attrs, _values))}" "\n)"  # noqa: ISC001
+        return f"{self.name_}" "(\n    " f"{_new_line_tab.join(f'{s} = {v}' for s, v in zip(_attrs, _values))}" "\n)"
 
     @property
     def train_delta(self: Self) -> timedelta:
@@ -460,8 +460,7 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
             msg = "`time_start` must be before `time_end`."
             raise ValueError(msg)
 
-        _arr_types = tuple(str(type(a)) for a in arrays_)
-        _index_methods = tuple(BACKEND_TO_INDEXING_METHOD.get(_type, default_indexing_method) for _type in _arr_types)
+        _index_methods = tuple(BACKEND_TO_INDEXING_METHOD.get(str(type(a)), default_indexing_method) for a in arrays_)
         for split in self._splits_from_period(time_start, time_end):
             train_mask = (time_series_ >= split.train_start) & (time_series_ < split.train_end)
             forecast_mask = (time_series_ >= split.forecast_start) & (time_series_ < split.forecast_end)

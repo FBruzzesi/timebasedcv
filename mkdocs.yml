@@ -5,7 +5,7 @@ site_author: Francesco Bruzzesi
 site_description: Time based splits for cross validation
 
 # Repository information
-repo_name: FBruzzesi/timebased-cv
+repo_name: FBruzzesi/timebasedcv
 repo_url: https://github.com/fbruzzesi/timebasedcv
 edit_uri: edit/main/docs/
 
@@ -59,9 +59,15 @@ theme:
 
 # Plugins
 plugins:
-  - mkdocstrings
   - search:
       separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
+  - mkdocstrings:
+      handlers:
+        python:
+          import:
+          - https://installer.readthedocs.io/en/stable/objects.inv
+          rendering:
+            show_signature_annotations: true
 
 # Customization
 extra:
@@ -84,35 +90,46 @@ markdown_extensions:
   - md_in_html
   - toc:
       permalink: true
+
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tilde
   - pymdownx.arithmatex:
       generic: true
   - pymdownx.betterem:
       smart_enable: all
-  - pymdownx.caret
-  - pymdownx.details
   - pymdownx.highlight:
       anchor_linenums: true
-  - pymdownx.inlinehilite
-  - pymdownx.keys
   - pymdownx.magiclink:
       repo_url_shorthand: true
       user: squidfunk
       repo: mkdocs-material
-  - pymdownx.mark
-  - pymdownx.smartsymbols
-  - pymdownx.superfences
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.tasklist:
       custom_checkbox: true
-  - pymdownx.tilde
+  - pymdownx.snippets:
+      check_paths: true
+
 
 nav:
-  - Home: index.md
-  - Getting Started: getting-started.md
-  - API:
-    - Time based splits: api/timebasedsplit.md
-    - Scikit-learn Compatible CV: api/sklearn.md
-    - Split state: api/splitstate.md
-    - Types and protocols: api/types.md
-  - Contributing: contribute.md
+  - Home:
+    - Home: index.md
+    - Installation: installation.md
+    - Contributing: contribute.md
+  - User Guide:
+    - Home: user-guide/index.md
+    - Getting started: user-guide/getting-started.md
+    - Advanced features: user-guide/advanced.md
+    - Scikit-learn component: user-guide/scikit-learn.md
+  - API Reference:
+    - api/index.md
+    - api/timebasedcv.md
+    - api/core.md
+    - api/sklearn.md
+    - api/splitstate.md

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Generator, Union
 
 import numpy as np
 
-from timebasedcv.timebasedsplit import TimeBasedSplit
+from timebasedcv.core import TimeBasedSplit
 
 if sys.version_info >= (3, 11):  # pragma: no cover
     from typing import Self
@@ -24,7 +24,7 @@ if (sklearn_version := version("scikit-learn")) and tuple(
     )
     raise ImportError(msg)
 else:  # pragma: no cover
-    from sklearn.model_selection._split import BaseCrossValidator
+    from sklearn.model_selection._split import _BaseKFold
 
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -42,7 +42,7 @@ if TYPE_CHECKING:  # pragma: no cover
     )
 
 
-class TimeBasedCVSplitter(BaseCrossValidator):
+class TimeBasedCVSplitter(_BaseKFold):
     """The `TimeBasedCVSplitter` is a scikit-learn CV Splitters that generates splits based on time values.
 
     The number of sample in each split is independent of the number of splits but based purely on the timestamp of the
@@ -163,7 +163,7 @@ class TimeBasedCVSplitter(BaseCrossValidator):
         self.n_splits = self._compute_n_splits()
         self.size_ = time_series.shape[0]
 
-    def _iter_test_indices(
+    def split(
         self: Self,
         X: Union[NDArray, None] = None,
         y: Union[NDArray, None] = None,
@@ -177,14 +177,13 @@ class TimeBasedCVSplitter(BaseCrossValidator):
 
         _indexes = np.arange(self.size_)
 
-        for _, test_idx in self.splitter.split(  # type: ignore[call-overload]
+        yield from self.splitter.split(  # type: ignore[call-overload]
             _indexes,
             time_series=self.time_series_,
             start_dt=self.start_dt_,
             end_dt=self.end_dt_,
             return_splitstate=False,
-        ):
-            yield test_idx
+        )
 
     def get_n_splits(
         self: Self,

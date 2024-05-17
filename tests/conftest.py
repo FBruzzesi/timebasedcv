@@ -37,7 +37,7 @@ def train_size(request) -> int:
     return request.param
 
 
-@pytest.fixture(params=[2, 3])
+@pytest.fixture(params=[3, 4])
 def forecast_horizon(request) -> int:
     """Fixture for setting the forecast_horizon parameter."""
     return request.param
