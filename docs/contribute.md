@@ -4,20 +4,17 @@
 
 We welcome contributions to the library! If you have a bug fix or new feature that you would like to contribute, please follow the steps below:
 
-1. Fork the repository on GitHub.
-2. Clone the repository to your local machine.
+1. [Fork the repository](https://github.com/FBruzzesi/timebasedcv/fork) on GitHub.
+2. [Clone the repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) to your local machine.
 3. Create a new branch for your bug fix or feature.
 4. Make your changes and test them thoroughly, making sure that it passes all current tests.
 5. Commit your changes and push the branch to your fork.
-6. Open a pull request on the main repository.
-
-## Code of Conduct
-
-All contributors are expected to follow the project's code of conduct, which is based on the Contributor Covenant.
+6. [Open a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) on the main repository.
 
 ### Reporting Bugs
 
-If you find a bug in the library, please report it by opening an [issue on GitHub](https://github.com/FBruzzesi/timebasedcv/issues). Be sure to include the version of the library you're using, as well as any error messages or tracebacks and a reproducible example.
+
+If you find a bug in the library, please report it by opening an [issue on GitHub](https://github.com/FBruzzesi/timebasedcv/issues/new). Be sure to include the version of the library you're using, as well as any error messages or tracebacks and a reproducible example.
 
 ### Requesting Features
 
@@ -29,12 +26,24 @@ When submitting a pull request, please make sure that you've followed the steps 
 
 ### Code formatting
 
-Compclasses uses [black](https://black.readthedocs.io/en/stable/index.html) and [isort](https://pycqa.github.io/isort/) with the following  parameters for code formatting:
+**timebasedcv** uses [ruff](https://docs.astral.sh/ruff/) for both formatting and linting. Specific settings are declared in the [pyproject.toml file](https://github.com/FBruzzesi/timebasedcv/blob/3ddead232c2243c8129f6b599b28e486bdd87b3b/pyproject.toml#L75).
 
-```bash
-isort --profile black -l 90 timebasedcv tests
-black --target-version py38 --line-length 90 timebasedcv tests
-```
+To format the code, you can run the following commands:
+
+=== "with Make"
+
+    ```bash
+    make lint
+    ```
+
+=== "without Make"
+
+    ```bash
+    ruff version
+    ruff format timebasedcv tests
+    ruff check timebasedcv tests --fix
+    ruff clean
+    ```
 
 As part of the checks on pull requests, it is checked whether the code follows those standards. To ensure that the standard is met, it is recommended to install [pre-commit hooks](https://pre-commit.com/):
 
@@ -51,13 +60,13 @@ First move into the repo folder: `cd timebasedcv`.
 
 Then:
 
-=== "with make"
+=== "with Make"
 
     ```bash
     make init-dev
     ```
 
-=== "without make"
+=== "without Make"
 
     ```bash
     pip install -e ".[all]" --no-cache-dir
@@ -73,16 +82,16 @@ Once you are done with changes, you should:
 - add tests for the new features in the `/tests` folder
 - make sure that new features do not break existing codebase by running tests:
 
-    === "with make"
+    === "with Make"
 
         ```bash
         make test
         ```
 
-    === "without make"
+    === "without Make"
 
         ```bash
-        pytest tests -vv
+        pytest tests -n auto
         ```
 
 ## Docs

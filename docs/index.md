@@ -17,51 +17,49 @@
 
 ---
 
-## Alpha Notice
+## Disclaimer ⚠️
 
-This codebase is experimental and is working for my use cases. It is very probable that there are cases not covered and for which it breaks (badly). If you find them, please feel free to open an issue in the [issue page](https://github.com/FBruzzesi/timebasedcv/issues) of the repo.
+This codebase is experimental and is working for my use cases. It is very probable that there are cases not covered and for which it could break (badly). If you find them, please feel free to open an issue in the [issue page](https://github.com/FBruzzesi/timebasedcv/issues/new) of the repo.
 
 ## Description
 
-The current implementation of [scikit-learn TimeSeriesSplit](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.TimeSeriesSplit.html) lacks the flexibility of having multiple samples within the same time period/unit.
+The current implementation of [scikit-learn TimeSeriesSplit](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.TimeSeriesSplit.html) lacks the flexibility of having multiple samples within the same time period or time unit.
 
-This codebase addresses such problem by providing a cross validation strategy based on a **time period** rather than the number of samples. This is useful when the data is time dependent, and the model should be trained on past data and tested on future data, independently from the number of observations present within a given time period.
+**timebasedcv** addresses such problem by providing a cross validation strategy based on a **time unit** rather than the number of samples. This is useful when the data is time dependent, and the split should keep together samples within the same time window.
 
-Temporal data leakage is an issue and we want to prevent that from happening!
+Temporal data leakage is an issue and we want to prevent that from happening by providing splits to make sure that models can train on past data and tested on future data, independently from the number of observations present within a given time period.
+
+### Features
 
 We introduce two main classes:
 
-- [`TimeBasedSplit`](api/timebasedsplit.md#timebasedcv.timebasedsplit.TimeBasedSplit)allows to define a time based split with a given frequency, train size, test size, gap, stride and window type. Its core method `split` requires to pass a time series as input to create the boolean masks for train and test from the instance information defined above. Therefore it is not compatible with [scikit-learn CV Splitters](https://scikit-learn.org/stable/common_pitfalls.html#id3).
-- [`TimeBasedCVSplitter`](api/timebasedsplit.md#timebasedcv.timebasedsplit.TimeBasedCVSplitter) conforms with scikit-learn CV Splitters but requires to pass the time series as input to the instance. That is because a CV Splitter needs to know a priori the number of splits, and the `split` method shouldn't take any extra arguments as input other than the arrays to split.it.
+- [`TimeBasedSplit`](api/timebasedsplit.md#timebasedcv.timebasedsplit.TimeBasedSplit) allows to define a split based on time unit (frequency), train size, test size, gap, stride, window type and mode.
+
+    !!! warning
+        `TimeBasedSplit` is **not** compatible with [scikit-learn CV Splitters](https://scikit-learn.org/stable/common_pitfalls.html#id3).
+
+        In fact, we have made the (opinioned) choice to:
+
+        - Return the sliced arrays from `.split(...)`, while scikit-learn CV Splitters return train and test indices of the split.
+        - Require to pass the time series as input to `.split(...)` method, while scikit-learn CV Splitters require to provide only `X, y, groups` to `.split(...)`.
+        - Such time series is used to generate the boolean masks with which we slice the original arrays into train and test for each split.
+
+- Considering the above choices, we also provide a scikit-learn compatible splitter: [`TimeBasedCVSplitter`](api/sklearn.md#timebasedcv.sklearn.TimeBasedCVSplitter). Considering the signature that `.split(...)` requires and the fact that CV Splitters need to know a priori the number of splits, `TimeBasedCVSplitter` is initialized with the time series containing the time information used to generate the train and test indices of each split.
 
 ## Installation
 
-**timebasedcv** is a published Python package on [pypi](https://pypi.org/), therefore it can be installed directly via pip, as well as from source using pip and git, or with a local clone:
-
-=== "pip (suggested)"
+TL;DR:
 
     ```bash
     python -m pip install timebasedcv
     ```
 
-=== "pip + source/git"
-
-    ```bash
-    python -m pip install git+https://github.com/FBruzzesi/timebasedcv.git
-    ```
-
-=== "local clone"
-
-    ```bash
-    git clone https://github.com/FBruzzesi/timebasedcv.git
-    cd timebasedcv
-    python -m pip install .
-    ```
+For further information, please refer to the dedicated [Installation](installation.md) section.
 
 ## Getting Started
 
-Please refer to the dedicated page [Getting Started](getting-started.md).
+Please refer to the dedicated [Getting Started](user-guide/getting-started.md) section.
 
 ## License
 
-The project has a [MIT Licence](https://github.com/FBruzzesi/timebasedcv/blob/main/LICENSE)
+The project has a [MIT Licence](https://github.com/FBruzzesi/timebasedcv/blob/main/LICENSE).
