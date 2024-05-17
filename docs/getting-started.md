@@ -64,7 +64,7 @@ Another optional parameter that can be passed to the `split` method is `return_s
 
 ## TimeBasedCVSplitter
 
-The [`TimeBasedCVSplitter`](api/timebasedsplit.md#timebasedcv.timebasedsplit.TimeBasedCVSplitter) class conforms with scikit-learn CV Splitters. In order to achieve such behaviour we combine the arguments of [`TimeBasedSplit`](api/timebasedsplit.md#timebasedcv.timebasedsplit.TimeBasedSplit) `__init__` and `split` methods, so that it is possible to restrict the arguments of
+The [`TimeBasedCVSplitter`](api/sklearn.md#timebasedcv.sklearn.TimeBasedCVSplitter) class conforms with scikit-learn CV Splitters. In order to achieve such behaviour we combine the arguments of [`TimeBasedSplit`](api/timebasedsplit.md#timebasedcv.timebasedsplit.TimeBasedSplit) `__init__` and `split` methods, so that it is possible to restrict the arguments of
 `split` and `get_n_splits` to the arrays to split (i.e. `X`, `y` and `groups`), which are the only arguments required by scikit-learn CV Splitters.
 
 That is because a CV Splitter needs to know a priori the number of splits and the `split` method shouldn't take any extra arguments as input other than the arrays to split.

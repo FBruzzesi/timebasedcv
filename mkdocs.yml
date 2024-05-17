@@ -15,9 +15,7 @@ watch:
 use_directory_urls: true
 theme:
   name: material
-  font:
-    text: Ubuntu
-    code: Ubuntu Mono
+  font: false
   palette:
   - media: '(prefers-color-scheme: light)'
     scheme: default
@@ -49,11 +47,11 @@ theme:
     - content.code.copy
     - content.tooltips
     - content.tabs.link
-    
+
     - search.suggest
     - search.highlight
     - search.share
-  
+
     - toc.follow
 
   logo: img/timebasedcv-logo.png
@@ -114,6 +112,7 @@ nav:
   - Getting Started: getting-started.md
   - API:
     - Time based splits: api/timebasedsplit.md
+    - Scikit-learn Compatible CV: api/sklearn.md
     - Split state: api/splitstate.md
     - Types and protocols: api/types.md
   - Contributing: contribute.md

@@ -91,3 +91,53 @@ def test_splitstate_invalid(
             forecast_start=datetime(2023, 2, 1),
             forecast_end=datetime(2023, 2, 28),
         )
+
+
+def test_splitstate_add():
+    """Tests SplitState.__add__."""
+    split_state = SplitState(
+        train_start=datetime(2023, 1, 1, 0),
+        train_end=datetime(2023, 1, 31, 0),
+        forecast_start=datetime(2023, 2, 1, 0),
+        forecast_end=datetime(2023, 2, 28, 0),
+    )
+
+    delta = timedelta(days=1)
+    expected_split_state = SplitState(
+        train_start=datetime(2023, 1, 2, 0),
+        train_end=datetime(2023, 2, 1, 0),
+        forecast_start=datetime(2023, 2, 2, 0),
+        forecast_end=datetime(2023, 3, 1, 0),
+    )
+
+    result = split_state + delta
+
+    assert result.train_start == expected_split_state.train_start
+    assert result.train_end == expected_split_state.train_end
+    assert result.forecast_start == expected_split_state.forecast_start
+    assert result.forecast_end == expected_split_state.forecast_end
+
+
+def test_splitstate_sub():
+    """Tests SplitState.__sub__."""
+    split_state = SplitState(
+        train_start=datetime(2023, 1, 2, 0),
+        train_end=datetime(2023, 2, 1, 0),
+        forecast_start=datetime(2023, 2, 2, 0),
+        forecast_end=datetime(2023, 3, 1, 0),
+    )
+
+    delta = timedelta(days=1)
+    expected_split_state = SplitState(
+        train_start=datetime(2023, 1, 1, 0),
+        train_end=datetime(2023, 1, 31, 0),
+        forecast_start=datetime(2023, 2, 1, 0),
+        forecast_end=datetime(2023, 2, 28, 0),
+    )
+
+    result = split_state - delta
+
+    assert result.train_start == expected_split_state.train_start
+    assert result.train_end == expected_split_state.train_end
+    assert result.forecast_start == expected_split_state.forecast_start
+    assert result.forecast_end == expected_split_state.forecast_end
