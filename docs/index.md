@@ -13,17 +13,17 @@
 
 ---
 
-[Documentation](https://fbruzzesi.github.io/timebasedcv) | [Repository](https://github.com/fbruzzesi/timebasedcv) | [Issue Tracker](https://github.com/fbruzzesi/timebasedcv/issues)
+[Documentation](https://fbruzzesi.github.io/timebasedcv) | [Repository](https://github.com/fbruzzesi/timebasedcv){:target="_blank"} | [Issue Tracker](https://github.com/fbruzzesi/timebasedcv/issues){:target="_blank"}
 
 ---
 
 ## Disclaimer ⚠️
 
-This codebase is experimental and is working for my use cases. It is very probable that there are cases not covered and for which it could break (badly). If you find them, please feel free to open an issue in the [issue page](https://github.com/FBruzzesi/timebasedcv/issues/new) of the repo.
+This codebase is experimental and is working for my use cases. It is very probable that there are cases not covered and for which it could break (badly). If you find them, please feel free to open an issue in the [issue page](https://github.com/FBruzzesi/timebasedcv/issues/new){:target="_blank"} of the repo.
 
 ## Description
 
-The current implementation of [scikit-learn TimeSeriesSplit](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.TimeSeriesSplit.html) lacks the flexibility of having multiple samples within the same time period or time unit.
+The current implementation of [scikit-learn TimeSeriesSplit](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.TimeSeriesSplit.html){:target="_blank"} lacks the flexibility of having multiple samples within the same time period or time unit.
 
 **timebasedcv** addresses such problem by providing a cross validation strategy based on a **time unit** rather than the number of samples. This is useful when the data is time dependent, and the split should keep together samples within the same time window.
 
@@ -33,10 +33,10 @@ Temporal data leakage is an issue and we want to prevent that from happening by 
 
 We introduce two main classes:
 
-- [`TimeBasedSplit`](api/timebasedsplit.md#timebasedcv.timebasedsplit.TimeBasedSplit) allows to define a split based on time unit (frequency), train size, test size, gap, stride, window type and mode.
+- [`TimeBasedSplit`](api/timebasedsplit.md#timebasedcv.core.TimeBasedSplit){:target="_blank"} allows to define a split based on time unit (frequency), train size, test size, gap, stride, window type and mode.
 
     !!! warning
-        `TimeBasedSplit` is **not** compatible with [scikit-learn CV Splitters](https://scikit-learn.org/stable/common_pitfalls.html#id3).
+        `TimeBasedSplit` is **not** compatible with [scikit-learn CV Splitters](https://scikit-learn.org/stable/common_pitfalls.html#id3){:target="_blank"}.
 
         In fact, we have made the (opinioned) choice to:
 
@@ -44,21 +44,25 @@ We introduce two main classes:
         - Require to pass the time series as input to `.split(...)` method, while scikit-learn CV Splitters require to provide only `X, y, groups` to `.split(...)`.
         - Such time series is used to generate the boolean masks with which we slice the original arrays into train and test for each split.
 
-- Considering the above choices, we also provide a scikit-learn compatible splitter: [`TimeBasedCVSplitter`](api/sklearn.md#timebasedcv.sklearn.TimeBasedCVSplitter). Considering the signature that `.split(...)` requires and the fact that CV Splitters need to know a priori the number of splits, `TimeBasedCVSplitter` is initialized with the time series containing the time information used to generate the train and test indices of each split.
+- Considering the above choices, we also provide a scikit-learn compatible splitter: [`TimeBasedCVSplitter`](api/sklearn.md#timebasedcv.sklearn.TimeBasedCVSplitter){:target="_blank"}. Considering the signature that `.split(...)` requires and the fact that CV Splitters need to know a priori the number of splits, `TimeBasedCVSplitter` is initialized with the time series containing the time information used to generate the train and test indices of each split.
 
 ## Installation
 
 TL;DR:
 
-    ```bash
-    python -m pip install timebasedcv
-    ```
+```bash
+python -m pip install timebasedcv
+```
 
-For further information, please refer to the dedicated [Installation](installation.md) section.
+For further information, please refer to the dedicated [installation](installation.md) section.
 
 ## Getting Started
 
-Please refer to the dedicated [Getting Started](user-guide/getting-started.md) section.
+Please refer to the dedicated [getting started](user-guide/getting-started.md) section.
+
+## Contributing
+
+Please refer to the dedicated [contributing guidelines](contribute.md) section.
 
 ## License
 

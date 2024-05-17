@@ -4,7 +4,7 @@ The following sections will guide you through the basic usage of the library.
 
 ## TimeBasedSplit
 
-The [`TimeBasedSplit`](api/timebasedsplit.md#timebasedcv.timebasedsplit.TimeBasedSplit) class allows to define a time based split with a given frequency, train size, test size, gap, stride and window type.
+The [`TimeBasedSplit`](../api/timebasedcv.md#timebasedcv.core.TimeBasedSplit) class allows to define a time based split with a given frequency, train size, test size, gap, stride and window type.
 
 ```python
 from timebasedcv import TimeBasedSplit
@@ -21,12 +21,12 @@ tbs = TimeBasedSplit(
 
 The available values for the parameters are:
 
-- `frequency`: "days", "seconds", "microseconds", "milliseconds", "minutes", "hours", "weeks".
-- `train_size`: any strictly positive integer.
-- `forecast_horizon`: any strictly positive integer.
-- `gap`: any non-negative integer.
-- `stride`: any strictly positive integer or `None`.
-- `window`: "rolling" or "expanding".
+- `frequency`: "days", "seconds", "microseconds", "milliseconds", "minutes", "hours", "weeks"
+- `train_size`: any strictly positive integer
+- `forecast_horizon`: any strictly positive integer
+- `gap`: any non-negative integer
+- `stride`: any strictly positive integer or `None`
+- `window`: "rolling" or "expanding"
 
 Once the instance is created, it is possible to split the data using the `split` method. This method requires to pass a `time_series` as input to create the boolean masks for train and test.
 
@@ -60,11 +60,11 @@ Train: (30, 2), Forecast: (7, 2)
 Train: (30, 2), Forecast: (7, 2)
 ```
 
-Another optional parameter that can be passed to the `split` method is `return_splitstate`. If `True`, the method will return a [`SplitState`](api/splitstate.md) dataclass which contains the "split" points for training and test, namely `train_start`, `train_end`, `forecast_start` and `forecast_end`. These can be useful if a particular logic needs to be applied to the data before training and/or forecasting.
+Another optional parameter that can be passed to the `split` method is `return_splitstate`. If `True`, the method will return a [`SplitState`](../api/splitstate.md) dataclass which contains the "split" points for training and test, namely `train_start`, `train_end`, `forecast_start` and `forecast_end`. These can be useful if a particular logic needs to be applied to the data before training and/or forecasting.
 
 ## TimeBasedCVSplitter
 
-The [`TimeBasedCVSplitter`](api/sklearn.md#timebasedcv.sklearn.TimeBasedCVSplitter) class conforms with scikit-learn CV Splitters. In order to achieve such behaviour we combine the arguments of [`TimeBasedSplit`](api/timebasedsplit.md#timebasedcv.timebasedsplit.TimeBasedSplit) `__init__` and `split` methods, so that it is possible to restrict the arguments of
+The [`TimeBasedCVSplitter`](../api/sklearn.md#timebasedcv.sklearn.TimeBasedCVSplitter) class conforms with scikit-learn CV Splitters. In order to achieve such behaviour we combine the arguments of [`TimeBasedSplit`](../api/timebasedcv.md#timebasedcv.core.TimeBasedSplit) `__init__` and `split` methods, so that it is possible to restrict the arguments of
 `split` and `get_n_splits` to the arrays to split (i.e. `X`, `y` and `groups`), which are the only arguments required by scikit-learn CV Splitters.
 
 That is because a CV Splitter needs to know a priori the number of splits and the `split` method shouldn't take any extra arguments as input other than the arrays to split.
@@ -154,7 +154,7 @@ Now let's plot train and forecasting splits with different split strategies (or 
 
 The blue dots represent the train points, while the red dots represent the forecastng points.
 
-![cross-validation](img/cross-validation.png)
+![cross-validation](../img/cross-validation.png)
 
 ??? example "Code to generate the plot"
 

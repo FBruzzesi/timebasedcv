@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Generator, Union
 
 import numpy as np
 
-from timebasedcv.timebasedsplit import TimeBasedSplit
+from timebasedcv.core import TimeBasedSplit
 
 if sys.version_info >= (3, 11):  # pragma: no cover
     from typing import Self

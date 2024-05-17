@@ -121,8 +121,11 @@ nav:
     - Contributing: contribute.md
   - User Guide:
     - Getting Started: user-guide/getting-started.md
+    - Advanced Features: user-guide/advanced.md
+    - Scikit-learn Compatibility: user-guide/scikit-learn.md
   - API Reference:
-    - TimeBasedCV based splits: api/timebasedsplit.md
-    - Scikit-learn Compatible CV: api/sklearn.md
-    - Split state: api/splitstate.md
-    - Types and protocols: api/types.md
+    - api/index.md
+    - api/timebasedcv.md
+    - api/core.md
+    - api/sklearn.md
+    - api/splitstate.md

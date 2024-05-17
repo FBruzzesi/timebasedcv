@@ -32,7 +32,7 @@ Temporal data leakage is an issue and we want to prevent that from happening by 
 
 We introduce two main classes:
 
-- [`TimeBasedSplit`](https://fbruzzesi.github.io/timebasedcv/api/timebasedsplit/#timebasedcv.timebasedsplit.TimeBasedSplit) allows to define a split based on time unit (frequency), train size, test size, gap, stride, window type and mode. Remark that `TimeBasedSplit` is **not** compatible with [scikit-learn CV Splitters](https://scikit-learn.org/stable/common_pitfalls.html#id3). In fact, we have made the (opinioned) choice to:
+- [`TimeBasedSplit`](https://fbruzzesi.github.io/timebasedcv/api/timebasedsplit/#timebasedcv.core.TimeBasedSplit) allows to define a split based on time unit (frequency), train size, test size, gap, stride, window type and mode. Remark that `TimeBasedSplit` is **not** compatible with [scikit-learn CV Splitters](https://scikit-learn.org/stable/common_pitfalls.html#id3). In fact, we have made the (opinioned) choice to:
 
   - Return the sliced arrays from `.split(...)`, while scikit-learn CV Splitters return train and test indices of the split.
   - Require to pass the time series as input to `.split(...)` method, while scikit-learn CV Splitters require to provide only `X, y, groups` to `.split(...)`.
@@ -44,15 +44,15 @@ We introduce two main classes:
 
 TL;DR:
 
-    ```bash
-    python -m pip install timebasedcv
-    ```
+```bash
+python -m pip install timebasedcv
+```
 
-For further information, please refer to the dedicated [Installation](https://fbruzzesi.github.io/timebasedcv/installation) section.
+For further information, please refer to the dedicated [installation](https://fbruzzesi.github.io/timebasedcv/installation) section.
 
 ## Quickstart
 
-The following code snippet is all you need to get started, yet consider checking out the [Getting Started](https://fbruzzesi.github.io/timebasedcv/getting-started/) section of the documentation for a detailed guide on how to use the library.
+The following code snippet is all you need to get started, yet consider checking out the [Getting Started](https://fbruzzesi.github.io/timebasedcv/user-guide/getting-started/) section of the documentation for a detailed guide on how to use the library.
 
 First let's generate some data with different number of points per day:
 
