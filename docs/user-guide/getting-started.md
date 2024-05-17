@@ -95,7 +95,7 @@ As we can see, each split does not necessarely have the same number of points, t
 
 Let's visualize the splits (blue dots represent the train points, while the red dots represent the forecastng points).
 
-![cross-validation](../img/fig1.png)
+![basic-cv-split](../img/basic-cv-split.png)
 
 ??? example "Code to generate the plot"
 
@@ -150,3 +150,118 @@ Let's visualize the splits (blue dots represent the train points, while the red 
 
     fig.show()
     ```
+
+Here is an example of a few different configuration values for the splitter:
+
+![multi-cv-split](../img/cv-multi-config.png)
+
+??? example "Code to generate the plot"
+
+    ```python
+    import plotly.graph_objects as go
+    from plotly.subplots import make_subplots
+
+    configs = [
+        {
+            "frequency": "days",
+            "train_size": 14,
+            "forecast_horizon": 7,
+            "gap": 2,
+            "stride": 5,
+            "window": "expanding"
+        },
+        {
+            "frequency": "days",
+            "train_size": 14,
+            "forecast_horizon": 7,
+            "gap": 2,
+            "stride": 5,
+            "window": "rolling"
+        },
+        {
+            "frequency": "days",
+            "train_size": 14,
+            "forecast_horizon": 7,
+            "gap": 0,
+            "stride": None,
+            "window": "rolling"
+        }
+    ]
+
+    fig = make_subplots(
+        rows=len(configs),
+        cols=1,
+        subplot_titles=[str(config) for config in configs],
+        shared_xaxes=True,
+        vertical_spacing=0.1,
+        x_title="Time",
+    )
+
+    for _row, config in enumerate(configs, start=1):
+
+        tbs = TimeBasedSplit(**config)
+
+        for _fold, (train_forecast, split_state) in enumerate(tbs.split(y/25, time_series=time_series, return_splitstate=True), start=1):
+
+            train, forecast = train_forecast
+
+            ts = split_state.train_start
+            te = split_state.train_end
+            fs = split_state.forecast_start
+            fe = split_state.forecast_end
+
+            fig.add_trace(
+                go.Scatter(
+                    x=time_series[time_series.between(ts, te, inclusive="left")],
+                    y=train + _fold,
+                    name=f"Train Fold {_fold}",
+                    mode="markers",
+                    marker={"color": "rgb(57, 105, 172)"}
+                ),
+                row=_row,
+                col=1,
+            )
+
+            fig.add_trace(
+                go.Scatter(
+                    x=time_series[time_series.between(fs, fe, inclusive="left")],
+                    y=forecast + _fold,
+                    name=f"Forecast Fold {_fold}",
+                    mode="markers",
+                    marker={"color": "indianred"}
+                ),
+                row=_row,
+                col=1,
+            )
+
+    fig.update_layout(
+        title={
+            "text": "Time Based Cross Validation",
+            "y":0.95, "x":0.5,
+            "xanchor": "center",
+            "yanchor": "top"
+        },
+        showlegend=False,
+        height=750,
+        **{
+            f"yaxis{i}": {"autorange": "reversed", "title": "Fold"}
+            for i in range(1, len(configs)+1)
+        }
+    )
+
+    fig.show()
+
+    ```
+
+### Multiple arrays
+
+It is possible to split multiple any arbitrary number of arrays at the same time, similarly to how [train_test_split](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html){:target="_blank"} behaves.
+
+```python title="Generate the splits"
+time_series, a, b, y  = df.to_numpy().T
+
+for a_train, a_test, b_train, b_test, y_train, y_test in tbs.split(a, b, y, time_series=time_series):
+    # Do some magic!
+```
+
+For now the requirement is still that they all have the same length, but we are working on relaxing this constraint.

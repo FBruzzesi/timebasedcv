@@ -110,6 +110,9 @@ score=-0.004
 score=-0.403
 ```
 
+## Multiple arrays of different types
+
+
 ## Window types
 
 In time series forecasting we can use two different type of windows to split the data into training and testing while backtesting/cross-validating a model: _rolling_ or _expanding_.

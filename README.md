@@ -129,7 +129,7 @@ As we can see, each split does not necessarely have the same number of points, t
 
 A picture is worth a thousand words, let's visualize the splits (blue dots represent the train points, while the red dots represent the forecastng points):
 
-![cross-validation](docs/img/fig1.png)
+![cross-validation](docs/img/basic-cv-split.png)
 
 ## Contributing
 

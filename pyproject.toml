@@ -14,7 +14,7 @@ authors = [{name = "Francesco Bruzzesi"}]
 
 dependencies = [
     "numpy",
-    "narwhals>=0.7.15",
+    "narwhals>=0.8.13",
     "typing-extensions>=4.4.0; python_version < '3.11'",
 ]
 
