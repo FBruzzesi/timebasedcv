@@ -25,11 +25,9 @@ from timebasedcv import TimeBasedSplit
 tbs = TimeBasedSplit(
     frequency="days",
     train_size=10,
-    forecast_horizon=3,
-    gap=0,
-    stride=2,
-    window="rolling",
-    mode="forward",
+    forecast_horizon=5,
+    gap=1,
+    stride=3
 )
 ```
 
@@ -97,16 +95,19 @@ As we can see, each split does not necessarely have the same number of points, t
 
 Let's visualize the splits (blue dots represent the train points, while the red dots represent the forecastng points).
 
---8<-- "docs/img/fig1.png"
+![cross-validation](../img/fig1.png)
 
 ??? example "Code to generate the plot"
 
-    ```py
+    ```python
     import plotly.graph_objects as go
 
     fig = go.Figure()
 
-    for _fold, (train_forecast, split_state) in enumerate(tbs.split(y/25, time_series=time_series, return_splitstate=True), start=1):
+    for _fold, (train_forecast, split_state) in enumerate(
+        tbs.split(y/25, time_series=time_series, return_splitstate=True),
+        start=1,
+        ):
 
         train, forecast = train_forecast
 
