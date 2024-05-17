@@ -76,7 +76,7 @@ err_msg_shape = "Invalid shape: "
 def test_core_init(base_kwargs, arg_name, arg_value, context):
     """Tests initialization of _CoreTimeBasedSplit with different input values."""
     with context:
-        kwargs = base_kwargs | {arg_name: arg_value}
+        kwargs = {**base_kwargs, arg_name: arg_value}
         obj = _CoreTimeBasedSplit(**kwargs)
 
         assert repr(obj) == (
