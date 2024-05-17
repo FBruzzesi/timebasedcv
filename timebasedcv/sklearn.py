@@ -91,7 +91,7 @@ class TimeBasedCVSplitter(BaseCrossValidator):
     from sklearn.linear_model import Ridge
     from sklearn.model_selection import RandomizedSearchCV
 
-    from timebasedcv import TimeBasedCVSplitter
+    from timebasedcv.sklearn import TimeBasedCVSplitter
 
     start_dt = pd.Timestamp(2023, 1, 1)
     end_dt = pd.Timestamp(2023, 1, 31)
@@ -99,9 +99,7 @@ class TimeBasedCVSplitter(BaseCrossValidator):
     time_series = pd.Series(pd.date_range(start_dt, end_dt, freq="D"))
     size = len(time_series)
 
-    df = (
-        pd.DataFrame(data=np.random.randn(size, 2), columns=["a", "b"]).assign(y=lambda t: t[["a", "b"]].sum(axis=1)),
-    )
+    df = pd.DataFrame(data=np.random.randn(size, 2), columns=["a", "b"]).assign(y=lambda t: t[["a", "b"]].sum(axis=1))
 
     X, y = df[["a", "b"]], df["y"]
 
