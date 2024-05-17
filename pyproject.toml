@@ -63,8 +63,8 @@ test = [
     "coverage==7.2.1",
 ]
 
-all = ["timebasedcv[pandas,polars]"]
-all-dev = ["timebasedcv[dev,docs,lint,pandas,polars,test]"]
+all = ["timebasedcv[pandas,polars,scikit-learn]"]
+all-dev = ["timebasedcv[all,dev,docs,lint,test]"]
 
 [tool.hatch.build.targets.sdist]
 only-include = ["timebasedcv"]
