@@ -90,6 +90,7 @@ markdown_extensions:
   - md_in_html
   - toc:
       permalink: true
+
   - pymdownx.inlinehilite
   - pymdownx.keys
   - pymdownx.caret
@@ -112,6 +113,8 @@ markdown_extensions:
       alternate_style: true
   - pymdownx.tasklist:
       custom_checkbox: true
+  - pymdownx.snippets:
+      check_paths: true
 
 
 nav:
@@ -120,9 +123,10 @@ nav:
     - Installation: installation.md
     - Contributing: contribute.md
   - User Guide:
-    - Getting Started: user-guide/getting-started.md
-    - Advanced Features: user-guide/advanced.md
-    - Scikit-learn Compatibility: user-guide/scikit-learn.md
+    - Home: user-guide/index.md
+    - Getting started: user-guide/getting-started.md
+    - Advanced features: user-guide/advanced.md
+    - Scikit-learn component: user-guide/scikit-learn.md
   - API Reference:
     - api/index.md
     - api/timebasedcv.md

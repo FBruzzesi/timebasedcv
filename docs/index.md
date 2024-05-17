@@ -33,7 +33,7 @@ Temporal data leakage is an issue and we want to prevent that from happening by 
 
 We introduce two main classes:
 
-- [`TimeBasedSplit`](api/timebasedsplit.md#timebasedcv.core.TimeBasedSplit){:target="_blank"} allows to define a split based on time unit (frequency), train size, test size, gap, stride, window type and mode.
+- [`TimeBasedSplit`](api/timebasedcv.md#timebasedcv.core.TimeBasedSplit){:target="_blank"} allows to define a split based on time unit (frequency), train size, test size, gap, stride, window type and mode.
 
     !!! warning
         `TimeBasedSplit` is **not** compatible with [scikit-learn CV Splitters](https://scikit-learn.org/stable/common_pitfalls.html#id3){:target="_blank"}.

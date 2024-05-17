@@ -32,7 +32,7 @@ Temporal data leakage is an issue and we want to prevent that from happening by 
 
 We introduce two main classes:
 
-- [`TimeBasedSplit`](https://fbruzzesi.github.io/timebasedcv/api/timebasedsplit/#timebasedcv.core.TimeBasedSplit) allows to define a split based on time unit (frequency), train size, test size, gap, stride, window type and mode. Remark that `TimeBasedSplit` is **not** compatible with [scikit-learn CV Splitters](https://scikit-learn.org/stable/common_pitfalls.html#id3). In fact, we have made the (opinioned) choice to:
+- [`TimeBasedSplit`](https://fbruzzesi.github.io/timebasedcv/api/timebasedcv/#timebasedcv.core.TimeBasedSplit) allows to define a split based on time unit (frequency), train size, test size, gap, stride, window type and mode. Remark that `TimeBasedSplit` is **not** compatible with [scikit-learn CV Splitters](https://scikit-learn.org/stable/common_pitfalls.html#id3). In fact, we have made the (opinioned) choice to:
 
   - Return the sliced arrays from `.split(...)`, while scikit-learn CV Splitters return train and test indices of the split.
   - Require to pass the time series as input to `.split(...)` method, while scikit-learn CV Splitters require to provide only `X, y, groups` to `.split(...)`.
@@ -52,70 +52,84 @@ For further information, please refer to the dedicated [installation](https://fb
 
 ## Quickstart
 
-The following code snippet is all you need to get started, yet consider checking out the [Getting Started](https://fbruzzesi.github.io/timebasedcv/user-guide/getting-started/) section of the documentation for a detailed guide on how to use the library.
+The following code snippet is all you need to get started, yet consider checking out the [getting started](https://fbruzzesi.github.io/timebasedcv/user-guide/getting-started/) section of the documentation for a detailed guide on how to use the library.
+
+The main takeaway should be that `TimeBasedSplit` allows for a lot of flexibility at the cost of having to specify a long list of parameters. This is what makes the library so powerful and flexible to cover the large majority of use cases.
 
 First let's generate some data with different number of points per day:
 
 ```python
-import pandas as pd
 import numpy as np
-np.random.seed(42)
+import pandas as pd
+
+RNG = np.random.default_rng(seed=42)
 
 dates = pd.Series(pd.date_range("2023-01-01", "2023-01-31", freq="D"))
 size = len(dates)
 
-df = pd.concat([
-    pd.DataFrame({
-        "time": pd.date_range(start, end, periods=_size, inclusive="left"),
-        "value": np.random.randn(_size-1)/25,
-    })
-    for start, end, _size in zip(dates[:size], dates[1:], np.random.randint(2, 24, size-1))
-]).reset_index(drop=True)
+df = (pd.concat([
+        pd.DataFrame({
+            "time": pd.date_range(start, end, periods=_size, inclusive="left"),
+            "a": RNG.normal(size=_size-1),
+            "b": RNG.normal(size=_size-1),
+        })
+        for start, end, _size in zip(dates[:-1], dates[1:], RNG.integers(2, 24, size-1))
+    ])
+    .reset_index(drop=True)
+    .assign(y=lambda t: t[["a", "b"]].sum(axis=1) + RNG.normal(size=t.shape[0])/25)
+)
 
-time_series, X = df["time"], df["value"]
-df.set_index("time").resample("D").count().head(5)
+df.set_index("time").resample("D").agg(count=("y", np.size)).head(5)
 ```
 
 ```terminal
-time	        value
-2023-01-01	14
-2023-01-02	2
-2023-01-03	22
-2023-01-04	11
-2023-01-05	1
+            count
+time
+2023-01-01      2
+2023-01-02     18
+2023-01-03     15
+2023-01-04     10
+2023-01-05     10
 ```
 
-Now let's run the split with a given frequency, train size, test size, gap, stride and window type:
+Then lets instantiate the `TimeBasedSplit` class:
 
 ```python
 from timebasedcv import TimeBasedSplit
 
-configs = [
-    {
-        "frequency": "days",
-        "train_size": 14,
-        "forecast_horizon": 7,
-        "gap": 2,
-        "stride": 5,
-        "window": "expanding"
-    },
-    ...
-]
-
-tbs = TimeBasedSplit(**config)
-
-
-fmt = "%Y-%m-%d"
-for train_set, forecast_set in tbs.split(X, time_series=time_series):
-
-    # Do some magic here
+tbs = TimeBasedSplit(
+    frequency="days",
+    train_size=10,
+    forecast_horizon=3,
+    gap=0,
+    stride=2,
+    window="rolling",
+    mode="forward",
+)
 ```
 
-Let's see how `train_set` and `forecasting_set` splits would look likes for different split strategies (or configurations).
+Now let's run split the data with the provided `TimeBasedSplit` instance:
 
-The blue dots represent the train points, while the red dots represent the forecastng points.
+```py title="Generate the splits"
+X, y, time_series = df.loc[:, ["a", "b"]], df["y"], df["time"]
 
-![cross-validation](docs/img/cross-validation.png)
+for X_train, X_forecast, y_train, y_forecast in tbs.split(X, y, time_series=time_series):
+    print(f"Train: {X_train.shape}, Forecast: {X_forecast.shape}")
+```
+
+```terminal
+Train: (100, 2), Forecast: (51, 2)
+Train: (114, 2), Forecast: (50, 2)
+...
+Train: (124, 2), Forecast: (40, 2)
+Train: (137, 2), Forecast: (22, 2)
+```
+
+As we can see, each split does not necessarely have the same number of points, this is because the time series has a different number of points per day.
+
+A picture is worth a thousand words, let's visualize the splits (blue dots represent the train points, while the red dots represent the forecastng points):
+
+![cross-validation](docs/img/fig1.png)
 
 ## Contributing
 

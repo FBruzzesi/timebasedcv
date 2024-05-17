@@ -1,258 +1,151 @@
-# Getting Started
+# Getting started
 
 The following sections will guide you through the basic usage of the library.
 
-## TimeBasedSplit
+## `TimeBasedSplit`
 
-The [`TimeBasedSplit`](../api/timebasedcv.md#timebasedcv.core.TimeBasedSplit) class allows to define a time based split with a given frequency, train size, test size, gap, stride and window type.
+The [`TimeBasedSplit`](../api/timebasedcv.md#timebasedcv.core.TimeBasedSplit) class allows to define a way to split your data based on time. There is a (long) list of parameters that can be set to define how to generate the splits. These allow for a lot of flexibility in how the data is split. Here is an overview of them:
 
-```python
+- `frequency`: we do not try to infer the frequency from the data, this information has to be specified beforehand. Available values are "days", "seconds", "microseconds", "milliseconds", "minutes", "hours", "weeks".
+- `train_size`: defines the minimum number of time units required to be in the train set, e.g. if `frequency="days"` and `train_size=30`, the train set will have at least 30 days.
+- `forecast_horizon`: specifies the number of time units to forecast, e.g. if `frequency="days"` and `forecast_horizon=7`, the forecast set will have 7 days. Notice that at the end of the time series, the forecast set might be smaller than the specified `forecast_horizon`.
+- `gap`: the number of time units to skip between the end of the train set and the start of the forecast set.
+- `stride`: how many time unit to move forward after each split. If `None`, the stride is equal to the `forecast_horizon`.
+- `window`: it can be either "rolling" or "expanding"
+- `mode`: it can be either "forward" or "backward" (generating splits either starting from the beginning or the end of the time series).
+
+Well that is a lot of parameters! But in our opinion it is what makes the library so flexible and powerful to be able to cover the large majority of use cases!
+
+!!! info
+    As the list of so long, and it could be easy to provide values in the wrong order and/or be very hard to understand what each number means, we require to pass them as keyword only arguments!
+
+```python title="Create a TimeBasedSplit instance"
 from timebasedcv import TimeBasedSplit
 
 tbs = TimeBasedSplit(
     frequency="days",
-    train_size=30,
-    forecast_horizon=7,
+    train_size=10,
+    forecast_horizon=3,
     gap=0,
-    stride=3,
+    stride=2,
     window="rolling",
+    mode="forward",
 )
 ```
 
-The available values for the parameters are:
-
-- `frequency`: "days", "seconds", "microseconds", "milliseconds", "minutes", "hours", "weeks"
-- `train_size`: any strictly positive integer
-- `forecast_horizon`: any strictly positive integer
-- `gap`: any non-negative integer
-- `stride`: any strictly positive integer or `None`
-- `window`: "rolling" or "expanding"
-
-Once the instance is created, it is possible to split the data using the `split` method. This method requires to pass a `time_series` as input to create the boolean masks for train and test.
+Once an instance is created, it is possible to split a list of arrays using the `.split(...)` method, such method requires to pass a `time_series` as input to know how to split each array.
 
 Optionally it is possible to pass a `start_dt` and `end_dt` arguments as well. If provided, they are used in place of the `time_series.min()` and `time_series.max()` respectively to determine the period.
 
-This is useful because the series does not necessarely starts from the first date and/or terminates in the last date of the time period of interest.
+This is useful because the series does not necessarely starts from the first date and/or terminates in the last date of the time period of interest, and it could lead to skewed splits.
 
-```python
-import pandas as pd
+!!! info
+    We made the opinionated choice of returning the sliced arrays from `.split(...)`, while scikit-learn CV Splitters return train and test indices of the split.
+
+```python title="Generate the data"
 import numpy as np
-
-time_series = pd.Series(pd.date_range("2023-01-01", "2023-12-31", freq="D"))
-size = len(time_series)
-
-df = (pd.DataFrame(data=np.random.randn(size, 2), columns=["a", "b"])
-    .assign(y=lambda t : t[["a", "b"]].sum(axis=1))
-)
-
-X, y = df[["a", "b"]], df["y"]
-
-print(f"Number of splits: {tbs.n_splits_of(time_series=time_series)}")
-#  Number of splits: 112
-
-for X_train, X_forecast, y_train, y_forecast in tbs.split(X, y, time_series=time_series):
-    print(f"Train: {X_train.shape}, Forecast: {X_forecast.shape}")
-```
-```terminal
-Train: (30, 2), Forecast: (7, 2)
-Train: (30, 2), Forecast: (7, 2)
-...
-Train: (30, 2), Forecast: (7, 2)
-```
-
-Another optional parameter that can be passed to the `split` method is `return_splitstate`. If `True`, the method will return a [`SplitState`](../api/splitstate.md) dataclass which contains the "split" points for training and test, namely `train_start`, `train_end`, `forecast_start` and `forecast_end`. These can be useful if a particular logic needs to be applied to the data before training and/or forecasting.
-
-## TimeBasedCVSplitter
-
-The [`TimeBasedCVSplitter`](../api/sklearn.md#timebasedcv.sklearn.TimeBasedCVSplitter) class conforms with scikit-learn CV Splitters. In order to achieve such behaviour we combine the arguments of [`TimeBasedSplit`](../api/timebasedcv.md#timebasedcv.core.TimeBasedSplit) `__init__` and `split` methods, so that it is possible to restrict the arguments of
-`split` and `get_n_splits` to the arrays to split (i.e. `X`, `y` and `groups`), which are the only arguments required by scikit-learn CV Splitters.
-
-That is because a CV Splitter needs to know a priori the number of splits and the `split` method shouldn't take any extra arguments as input other than the arrays to split.
-
-```python
 import pandas as pd
-import numpy as np
 
-from sklearn.linear_model import Ridge
-from sklearn.model_selection import RandomizedSearchCV
-
-from timebasedcv import TimeBasedCVSplitter
-
-start_dt = pd.Timestamp(2023, 1, 1)
-end_dt = pd.Timestamp(2023, 12, 31)
-
-cv = TimeBasedCVSplitter(
-    frequency="days",
-    train_size=30,
-    forecast_horizon=7,
-    time_series=time_series,
-    gap=0,
-    stride=3,
-    window="rolling",
-    start_dt=start_dt,
-    end_dt=end_dt,
-)
-
-param_grid = {
-    "alpha": np.linspace(0.1, 2, 10),
-    "fit_intercept": [True, False],
-    "positive": [True, False],
-}
-
-random_search_cv = RandomizedSearchCV(
-    estimator=Ridge(),
-    param_distributions=param_grid,
-    cv=cv,
-    n_jobs=-1,
-).fit(X, y)
-
-random_search_cv.best_params_
-```
-
-```terminal
-{'positive': True, 'fit_intercept': False, 'alpha': 0.1}
-```
-
-## Examples of Cross Validation
-
-The following examples show how the CV works with different parameters.
-
-First and foremost let's generate some random data. The following code generates a time series with randomly spaced points between 2023-01-01 and 2023-01-31.
-
-```python
-import pandas as pd
-import numpy as np
-np.random.seed(42)
+RNG = np.random.default_rng(seed=42)
 
 dates = pd.Series(pd.date_range("2023-01-01", "2023-01-31", freq="D"))
 size = len(dates)
 
-df = pd.concat([
-    pd.DataFrame({
-        "time": pd.date_range(start, end, periods=_size, inclusive="left"),
-        "value": np.random.randn(_size-1)/25,
-    })
-    for start, end, _size in zip(dates[:size], dates[1:], np.random.randint(2, 24, size-1))
-]).reset_index(drop=True)
+df = (pd.concat([
+        pd.DataFrame({
+            "time": pd.date_range(start, end, periods=_size, inclusive="left"),
+            "a": RNG.normal(size=_size-1),
+            "b": RNG.normal(size=_size-1),
+        })
+        for start, end, _size in zip(dates[:-1], dates[1:], RNG.integers(2, 24, size-1))
+    ])
+    .reset_index(drop=True)
+    .assign(y=lambda t: t[["a", "b"]].sum(axis=1) + RNG.normal(size=t.shape[0])/25)
+)
 
-time_series, X = df["time"], df["value"]
-df.set_index("time").resample("D").count().head(5)
+df.set_index("time").resample("D").agg(count=("y", np.size)).head(5)
 ```
 
 ```terminal
-time	        value
-2023-01-01	14
-2023-01-02	2
-2023-01-03	22
-2023-01-04	11
-2023-01-05	1
+            count
+time
+2023-01-01      2
+2023-01-02     18
+2023-01-03     15
+2023-01-04     10
+2023-01-05     10
 ```
 
-As we can see every day has a different number of points.
+Now let's run split the data with the provided `TimeBasedSplit` instance:
 
-Now let's plot train and forecasting splits with different split strategies (or configurations).
+```py title="Generate the splits"
+X, y, time_series = df.loc[:, ["a", "b"]], df["y"], df["time"]
 
-The blue dots represent the train points, while the red dots represent the forecastng points.
+for X_train, X_forecast, y_train, y_forecast in tbs.split(X, y, time_series=time_series):
+    print(f"Train: {X_train.shape}, Forecast: {X_forecast.shape}")
+```
 
-![cross-validation](../img/cross-validation.png)
+```terminal
+Train: (100, 2), Forecast: (51, 2)
+Train: (114, 2), Forecast: (50, 2)
+...
+Train: (124, 2), Forecast: (40, 2)
+Train: (137, 2), Forecast: (22, 2)
+```
+
+As we can see, each split does not necessarely have the same number of points, this is because the time series has a different number of points per day.
+
+Let's visualize the splits (blue dots represent the train points, while the red dots represent the forecastng points).
+
+--8<-- "docs/img/fig1.png"
 
 ??? example "Code to generate the plot"
 
-    ```python
-    configs = [
-        {
-            "frequency": "days",
-            "train_size": 14,
-            "forecast_horizon": 7,
-            "gap": 2,
-            "stride": 5,
-            "window": "expanding"
-        },
-        {
-            "frequency": "days",
-            "train_size": 14,
-            "forecast_horizon": 7,
-            "gap": 2,
-            "stride": 5,
-            "window": "rolling"
-        },
-        {
-            "frequency": "days",
-            "train_size": 14,
-            "forecast_horizon": 7,
-            "gap": 0,
-            "stride": None,
-            "window": "rolling"
-        }
-    ]
-
+    ```py
     import plotly.graph_objects as go
-    from plotly.subplots import make_subplots
 
-    from timebasedcv import TimeBasedSplit
+    fig = go.Figure()
 
-    fig = make_subplots(
-        rows=len(configs),
-        cols=1,
-        subplot_titles=[str(config) for config in configs],
-        shared_xaxes=True,
-        vertical_spacing=0.1,
-        x_title="Time",
-    )
+    for _fold, (train_forecast, split_state) in enumerate(tbs.split(y/25, time_series=time_series, return_splitstate=True), start=1):
 
-    for _row, config in enumerate(configs, start=1):
+        train, forecast = train_forecast
 
-        tbs = TimeBasedSplit(**config)
-        fmt = "%Y-%m-%d"
+        ts = split_state.train_start
+        te = split_state.train_end
+        fs = split_state.forecast_start
+        fe = split_state.forecast_end
 
-        for _fold, (train_forecast, split_state) in enumerate(tbs.split(X, time_series=time_series, return_splitstate=True), start=1):
-
-            train, forecast = train_forecast
-
-            ts = split_state.train_start.strftime(fmt)
-            te = split_state.train_end.strftime(fmt)
-            fs = split_state.forecast_start.strftime(fmt)
-            fe = split_state.forecast_end.strftime(fmt)
-
-            print(ts, te, fs, fe)
-            fig.add_trace(
-                go.Scatter(
-                    x=time_series[time_series.between(ts, te, inclusive="left")],
-                    y=train + _fold,
-                    name=f"Train Fold {_fold}",
-                    mode="markers",
-                    marker={"color": "rgb(57, 105, 172)"}
-                ),
-                row=_row,
-                col=1,
+        fig.add_trace(
+            go.Scatter(
+                x=time_series[time_series.between(ts, te, inclusive="left")],
+                y=train + _fold,
+                name=f"Train Fold {_fold}",
+                mode="markers",
+                marker={"color": "rgb(57, 105, 172)"}
             )
+        )
 
-            fig.add_trace(
-                go.Scatter(
-                    x=time_series[time_series.between(fs, fe, inclusive="left")],
-                    y=forecast + _fold,
-                    name=f"Forecast Fold {_fold}",
-                    mode="markers",
-                    marker={"color": "indianred"}
-                ),
-                row=_row,
-                col=1,
+        fig.add_trace(
+            go.Scatter(
+                x=time_series[time_series.between(fs, fe, inclusive="left")],
+                y=forecast + _fold,
+                name=f"Forecast Fold {_fold}",
+                mode="markers",
+                marker={"color": "indianred"}
             )
+        )
 
-    fig.update_layout(
-        title={
-            "text": "Time Based Cross Validation",
-            "y":0.95, "x":0.5,
-            "xanchor": "center",
-            "yanchor": "top"
-        },
-        showlegend=False,
-        height=1000,
-        **{
-            f"yaxis{i}": {"autorange": "reversed", "title": "Fold"}
-            for i in range(1, len(configs)+1)
-        }
-    )
+        fig.update_layout(
+            title={
+                "text": "Time Based Cross Validation",
+                "y":0.95, "x":0.5,
+                "xanchor": "center",
+                "yanchor": "top"
+            },
+            showlegend=True,
+            height=500,
+            yaxis = {"autorange": "reversed", "title": "Fold"}
+        )
 
     fig.show()
     ```

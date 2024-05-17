@@ -6,3 +6,4 @@
         show_root_heading: true
         members:
             - split
+            - get_n_splits
