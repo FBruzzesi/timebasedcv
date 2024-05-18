@@ -22,9 +22,9 @@ if TYPE_CHECKING:  # pragma: no cover
 
 @dataclass(frozen=True)
 class SplitState(Generic[DateTimeLike]):
-    """The `SplitState` class represents the state of a split.
+    """A `SplitState` represents the state of a split in terms of its 4 cut/split points.
 
-    This is a set of split points where to partition a time series into training set and forecast set.
+    Namely these are start and end of training set, start and end of forecasting/test set.
 
     The class ensures that the split is valid by checking that the attributes are of the correct type and are ordered
     chronologically.

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 import sys
-from typing import TYPE_CHECKING, Generator, Union
+from typing import TYPE_CHECKING, Generator, Tuple, Union
 
 import numpy as np
 
@@ -43,24 +43,25 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 class TimeBasedCVSplitter(_BaseKFold):
-    """The `TimeBasedCVSplitter` is a scikit-learn CV Splitters that generates splits based on time values.
+    """The `TimeBasedCVSplitter` is a scikit-learn compatible CV Splitter that generates splits based on time values.
 
     The number of sample in each split is independent of the number of splits but based purely on the timestamp of the
     sample.
 
-    In order to achieve such behaviour we include the arguments of `TimeBasedSplit.split()` method (namely
-    `time_series`, `start_dt` and `end_dt`) in the constructor (a.k.a. `__init__` method) and store the for future use
-    in its `split` and `get_n_splits` methods.
+    In order to achieve such behaviour we include the arguments of
+    [`TimeBasedSplit.split()`][timebasedcv.core.TimeBasedSplit.split] method (namely `time_series`, `start_dt` and
+    `end_dt`) in the constructor (a.k.a. `__init__` method) and store the for future use in its `split` and
+    `get_n_splits` methods.
 
     In this way we can restrict the arguments of `split` and `get_n_splits` to the arrays to split (i.e. `X`, `y` and
     `groups`), which are the only arguments required by scikit-learn CV Splitters.
 
     Arguments:
-        frequency: The frequency of the time series. Must be one of "days", "seconds", "microseconds", "milliseconds",
-            "minutes", "hours", "weeks". These are the only valid values for the `unit` argument of `timedelta` from
-            python `datetime` standard library.
-        train_size: The size of the training set.
-        forecast_horizon: The size of the forecast horizon, i.e. the size of the test set.
+        frequency: The frequency (or time unit) of the time series. Must be one of "days", "seconds", "microseconds",
+            "milliseconds", "minutes", "hours", "weeks". These are the only valid values for the `unit` argument of
+            `timedelta` from python `datetime` standard library.
+        train_size: Defines the minimum number of time units required to be in the train set.
+        forecast_horizon: Specifies the number of time units to forecast.
         time_series: The time series used to create boolean mask for splits. It is not required to be sorted, but it
             must support:
 
@@ -68,69 +69,70 @@ class TimeBasedCVSplitter(_BaseKFold):
             - bitwise operators (with other boolean arrays).
             - `.min()` and `.max()` methods.
             - `.shape` attribute.
-        gap: The size of the gap between the training set and the forecast horizon.
-        stride: The size of the stride between consecutive splits. Notice that if stride is not provided (or set to 0),
-            it fallbacks to the `forecast_horizon` quantity.
+        gap: Sets the number of time units to skip between the end of the train set and the start of the forecast set.
+        stride: How many time unit to move forward after each split. If `None` (or set to 0), the stride is equal to the
+            `forecast_horizon` quantity.
         window: The type of window to use, either "rolling" or "expanding".
-        mode: Determines in which orders the splits are generated, either "forward" or "backward".
+        mode: Determines in which orders the splits are generated, either "forward" (start to end) or "backward"
+            (end to start).
         start_dt: The start of the time period. If provided, it is used in place of the `time_series.min()`.
         end_dt: The end of the time period. If provided,it is used in place of the `time_series.max()`.
 
     Raises:
-        ValueError: If `frequency` is not one of "days", "seconds", "microseconds", "milliseconds", "minutes", "hours",
+        ValueError:
+            - If `frequency` is not one of "days", "seconds", "microseconds", "milliseconds", "minutes", "hours",
             "weeks".
-        ValueError: If `window` is not one of "rolling" or "expanding".
+            - If `window` is not one of "rolling" or "expanding".
+            - If `mode` is not one of "forward" or "backward"
+            - If `train_size`, `forecast_horizon`, `gap` or `stride` are not strictly positive.
         TypeError: If `train_size`, `forecast_horizon`, `gap` or `stride` are not of type `int`.
-        ValueError: If `train_size`, `forecast_horizon`, `gap` or `stride` are not strictly positive.
 
-    Usage:
-    ```python
-    import pandas as pd
-    import numpy as np
+    Examples:
+        ```python
+        import pandas as pd
+        import numpy as np
 
-    from sklearn.linear_model import Ridge
-    from sklearn.model_selection import RandomizedSearchCV
+        from sklearn.linear_model import Ridge
+        from sklearn.model_selection import RandomizedSearchCV
 
-    from timebasedcv.sklearn import TimeBasedCVSplitter
+        from timebasedcv.sklearn import TimeBasedCVSplitter
 
-    start_dt = pd.Timestamp(2023, 1, 1)
-    end_dt = pd.Timestamp(2023, 1, 31)
+        start_dt = pd.Timestamp(2023, 1, 1)
+        end_dt = pd.Timestamp(2023, 1, 31)
 
-    time_series = pd.Series(pd.date_range(start_dt, end_dt, freq="D"))
-    size = len(time_series)
+        time_series = pd.Series(pd.date_range(start_dt, end_dt, freq="D"))
+        size = len(time_series)
 
-    df = pd.DataFrame(data=np.random.randn(size, 2), columns=["a", "b"]).assign(y=lambda t: t[["a", "b"]].sum(axis=1))
+        df = pd.DataFrame(data=np.random.randn(size, 2), columns=["a", "b"])
 
-    X, y = df[["a", "b"]], df["y"]
+        X, y = df[["a", "b"]], df[["a", "b"]].sum(axis=1)
 
-    cv = TimeBasedCVSplitter(
-        frequency="days",
-        train_size=7,
-        forecast_horizon=11,
-        gap=0,
-        stride=1,
-        window="rolling",
-        time_series=time_series,
-        start_dt=start_dt,
-        end_dt=end_dt,
-    )
+        cv = TimeBasedCVSplitter(
+            frequency="days",
+            train_size=7,
+            forecast_horizon=11,
+            gap=0,
+            stride=1,
+            window="rolling",
+            time_series=time_series,
+            start_dt=start_dt,
+            end_dt=end_dt,
+        )
 
-    param_grid = {
-        "alpha": np.linspace(0.1, 2, 10),
-        "fit_intercept": [True, False],
-        "positive": [True, False],
-    }
+        param_grid = {
+            "alpha": np.linspace(0.1, 2, 10),
+            "fit_intercept": [True, False],
+            "positive": [True, False],
+        }
 
-    random_search_cv = RandomizedSearchCV(
-        estimator=Ridge(),
-        param_distributions=param_grid,
-        cv=cv,
-        n_jobs=-1,
-    ).fit(X, y)
-    ```
+        random_search_cv = RandomizedSearchCV(
+            estimator=Ridge(),
+            param_distributions=param_grid,
+            cv=cv,
+            n_jobs=-1,
+        ).fit(X, y)
+        ```
     """
-
-    name_ = "TimeBasedCVSplitter"
 
     def __init__(  # noqa: PLR0913
         self: Self,
@@ -168,10 +170,23 @@ class TimeBasedCVSplitter(_BaseKFold):
         X: Union[NDArray, None] = None,
         y: Union[NDArray, None] = None,
         groups: Union[NDArray, None] = None,
-    ) -> Generator[NDArray[np.int_], None, None]:
-        """Generates integer indices corresponding to test sets.
+    ) -> Generator[Tuple[NDArray[np.int_], NDArray[np.int_]], None, None]:
+        """Generates integer indices corresponding to train and test sets.
 
-        Required method to conform with scikit-learn `BaseCrossValidator`
+        Arguments:
+            X: Optional input features array.
+            y: Optional target variable array.
+            groups: Optional array containing group labels for the samples.
+
+        Returns:
+            A generator that yields tuples of train and test indices.
+
+        Raises:
+            ValueError:
+                - If the input arrays have incompatible shapes.
+                - If the input arrays have incompatible types.
+                - If the input arrays have incompatible lengths.
+
         """
         self._validate_split_args(self.size_, X, y, groups)
 
