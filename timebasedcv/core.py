@@ -47,44 +47,47 @@ class _CoreTimeBasedSplit:
     window type).
 
     Arguments:
-        frequency: The frequency of the time series. Must be one of "days", "seconds", "microseconds", "milliseconds",
-            "minutes", "hours", "weeks". These are the only valid values for the `unit` argument of `timedelta` from
-            python `datetime` standard library.
-        train_size: The size of the training set.
-        forecast_horizon: The size of the forecast horizon, i.e. the size of the test set.
-        gap: The size of the gap between the training set and the forecast horizon.
-        stride: The size of the stride between consecutive splits. Notice that if stride is not provided (or set to 0),
-            it fallbacks to the `forecast_horizon` quantity.
+        frequency: The frequency (or time unit) of the time series. Must be one of "days", "seconds", "microseconds",
+            "milliseconds", "minutes", "hours", "weeks". These are the only valid values for the `unit` argument of
+            `timedelta` from python `datetime` standard library.
+        train_size: Defines the minimum number of time units required to be in the train set.
+        forecast_horizon: Specifies the number of time units to forecast.
+        gap: Sets the number of time units to skip between the end of the train set and the start of the forecast set.
+        stride: How many time unit to move forward after each split. If `None` (or set to 0), the stride is equal to the
+            `forecast_horizon` quantity.
         window: The type of window to use, either "rolling" or "expanding".
-        mode: Determines in which orders the splits are generated, either "forward" or "backward".
+        mode: Determines in which orders the splits are generated, either "forward" (start to end) or "backward"
+            (end to start).
 
     Raises:
-        ValueError: If `frequency` is not one of "days", "seconds", "microseconds", "milliseconds", "minutes", "hours",
+        ValueError:
+            - If `frequency` is not one of "days", "seconds", "microseconds", "milliseconds", "minutes", "hours",
             "weeks".
-        ValueError: If `window` is not one of "rolling" or "expanding".
+            - If `window` is not one of "rolling" or "expanding".
+            - If `mode` is not one of "forward" or "backward"
+            - If `train_size`, `forecast_horizon`, `gap` or `stride` are not strictly positive.
         TypeError: If `train_size`, `forecast_horizon`, `gap` or `stride` are not of type `int`.
-        ValueError: If `train_size`, `forecast_horizon`, `gap` or `stride` are not strictly positive.
 
     Although `_CoreTimeBasedSplit` is not meant to be used directly, it can be used as a template to create new time
     based splits classes.
 
-    Usage:
-    ```python
-    from timebasedcv import _CoreTimeBasedSplit
+    Examples:
+        ```python
+        from timebasedcv.core import _CoreTimeBasedSplit
 
 
-    class MyTimeBasedSplit(_CoreTimeBasedSplit):
-        def split(self, X, timeseries):
-            # Implement the split method to return a generator
+        class MyTimeBasedSplit(_CoreTimeBasedSplit):
+            ...
 
-            for split in self._splits_from_period(timeseries.min(), timeseries.max()):
-                # Do something with the split to compute the train and forecast sets
-                ...
-                yield X_train, y_test
-    ```
+            def split(self, X, timeseries):
+                '''Implement the split method to return a generator'''
+
+                for split in self._splits_from_period(timeseries.min(), timeseries.max()):
+                    # Do something with the split to compute the train and forecast sets
+                    ...
+                    yield X_train, y_test
+        ```
     """
-
-    name_ = "_CoreTimeBasedSplit"
 
     def __init__(  # noqa: PLR0913
         self: Self,
@@ -145,6 +148,10 @@ class _CoreTimeBasedSplit:
                 f"Found ({', '.join(str(v) for v in _values)})"
             )
             raise ValueError(msg)
+
+    @property
+    def name_(self: Self) -> str:
+        return self.__class__.__name__
 
     def __repr__(self: Self) -> str:
         """Custom repr method."""
@@ -240,7 +247,23 @@ class _CoreTimeBasedSplit:
         start_dt: NullableDatetime = None,
         end_dt: NullableDatetime = None,
     ) -> int:
-        """Returns the number of splits that can be generated from `time_series`."""
+        """Returns the number of splits that can be generated from `time_series`.
+
+        Arguments:
+            time_series: A time series data. If provided it should support `.min()` and `.max().
+            start_dt: The start date and time of the time series. If not provided, it will be inferred from
+                `time_series`.
+            end_dt: The end date and time of the time series. If not provided, it will be inferred from
+                `time_series`.
+
+        Returns:
+            The number of splits that can be generated from the given time series.
+
+        Raises:
+            ValueError:
+                - If both `start_dt` and `end_dt` are provided and `start_dt` is greater than or equal to `end_dt`.
+                - If neither `time_series` nor (`start_dt`, `end_dt`) pair is provided.
+        """
         if (start_dt is not None) and (end_dt is not None):
             if start_dt >= end_dt:
                 msg = "`start_dt` must be before `end_dt`."
@@ -257,55 +280,27 @@ class _CoreTimeBasedSplit:
 
 
 class TimeBasedSplit(_CoreTimeBasedSplit):
-    """Class that generates splits based on time values, independently from the number of samples in each split.
+    """`TimeBasedSplit` generates splits based on time periods, independently from the number of samples in each split.
 
-    Arguments:
-        frequency: The frequency of the time series. Must be one of "days", "seconds", "microseconds", "milliseconds",
-            "minutes", "hours", "weeks". These are the only valid values for the `unit` argument of `timedelta` from
-            python `datetime` standard library.
-        train_size: The size of the training set.
-        forecast_horizon: The size of the forecast horizon, i.e. the size of the test set.
-        gap: The size of the gap between the training set and the forecast horizon.
-        stride: The size of the stride between consecutive splits. Notice that if stride is not provided (or set to 0),
-            it fallbacks to the `forecast_horizon` quantity.
-        window: The type of window to use, either "rolling" or "expanding".
-        mode: Determines in which orders the splits are generated, either "forward" or "backward".
+    It inherits from [`_CoreTimeBasedSplit`][timebasedcv.core._CoreTimeBasedSplit] and it only implements the `.split()`
+    method and logic.
 
-    Raises:
-        ValueError: If `frequency` is not one of "days", "seconds", "microseconds", "milliseconds", "minutes", "hours",
-            "weeks".
-        ValueError: If `window` is not one of "rolling" or "expanding".
-        TypeError: If `train_size`, `forecast_horizon`, `gap` or `stride` are not of type `int`.
-        ValueError: If `train_size`, `forecast_horizon`, `gap` or `stride` are not strictly positive.
+    !!! warning "Differences with scikit-learn"
 
-    Usage:
-    ```python
-    import pandas as pd
-    import numpy as np
+        `TimeBasedSplit` is **not** compatible with
+        [scikit-learn CV Splitters](https://scikit-learn.org/stable/common_pitfalls.html#id3){:target="_blank"}.
 
-    from timebasedcv import TimeBasedSplit
+        In fact, we have made the (opinioned) choice to:
 
-    tbs = TimeBasedSplit(
-        frequency="days",
-        train_size=30,
-        forecast_horizon=7,
-        gap=0,
-        stride=3,
-        window="rolling",
-    )
+        - Return the sliced arrays from `.split(...)`, while scikit-learn CV Splitters return train and test indices of
+            the split.
+        - Require to pass the time series as input to `.split(...)` method, while scikit-learn CV Splitters require to
+            provide only `X, y, groups` to `.split(...)`.
+        - Such time series is used to generate the boolean masks with which we slice the original arrays into train and
+            test for each split.
 
-    dates = pd.Series(pd.date_range("2023-01-01", "2023-12-31", freq="D"))
-    size = len(dates)
-
-    df = pd.DataFrame(data=np.random.randn(size, 2), columns=["a", "b"]).assign(y=lambda t: t[["a", "b"]].sum(axis=1))
-
-    X, y = df[["a", "b"]], df["y"]
-
-    print(f"Number of splits: {tbs.n_splits_of(time_series=dates)}")
-
-    for X_train, X_forecast, y_train, y_forecast in tbs.split(X, y, time_series=dates):
-        print(f"Train: {X_train.shape}, Forecast: {X_forecast.shape}")
-    ```
+        If you are looking for a class compatible with scikit-learn, check out our
+        [`TimeBasedCVSplitter`][timebasedcv.sklearn.TimeBasedCVSplitter] in the `timebasedcv.sklearn` module.
 
     A few examples on how splits are generated given the parameters. Let:
 
@@ -335,9 +330,98 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
     | =============== /// *****   |
     | =================== /// *** |
     ```
-    """
 
-    name_ = "TimeBasedSplit"
+    Arguments:
+        frequency: The frequency (or time unit) of the time series. Must be one of "days", "seconds", "microseconds",
+            "milliseconds", "minutes", "hours", "weeks". These are the only valid values for the `unit` argument of
+            `timedelta` from python `datetime` standard library.
+        train_size: Defines the minimum number of time units required to be in the train set.
+        forecast_horizon: Specifies the number of time units to forecast.
+        gap: Sets the number of time units to skip between the end of the train set and the start of the forecast set.
+        stride: How many time unit to move forward after each split. If `None` (or set to 0), the stride is equal to the
+            `forecast_horizon` quantity.
+        window: The type of window to use, either "rolling" or "expanding".
+        mode: Determines in which orders the splits are generated, either "forward" (start to end) or "backward"
+            (end to start).
+
+    Raises:
+        ValueError:
+            - If `frequency` is not one of "days", "seconds", "microseconds", "milliseconds", "minutes", "hours",
+            "weeks".
+            - If `window` is not one of "rolling" or "expanding".
+            - If `mode` is not one of "forward" or "backward"
+            - If `train_size`, `forecast_horizon`, `gap` or `stride` are not strictly positive.
+        TypeError: If `train_size`, `forecast_horizon`, `gap` or `stride` are not of type `int`.
+
+
+    Examples:
+        ```python
+        # Let's first generate some data
+        import pandas as pd
+        import numpy as np
+
+        RNG = np.random.default_rng(seed=42)
+
+        dates = pd.Series(pd.date_range("2023-01-01", "2023-01-31", freq="D"))
+        size = len(dates)
+
+        df = (
+            pd.concat(
+                [
+                    pd.DataFrame(
+                        {
+                            "time": pd.date_range(start, end, periods=_size, inclusive="left"),
+                            "a": RNG.normal(size=_size - 1),
+                            "b": RNG.normal(size=_size - 1),
+                        }
+                    )
+                    for start, end, _size in zip(dates[:-1], dates[1:], RNG.integers(2, 24, size - 1))
+                ]
+            )
+            .reset_index(drop=True)
+            .assign(y=lambda t: t[["a", "b"]].sum(axis=1) + RNG.normal(size=t.shape[0]) / 25)
+        )
+
+        df.set_index("time").resample("D").agg(count=("y", np.size)).head(5)
+        ```
+
+        ```terminal
+                    count
+        time
+        2023-01-01      2
+        2023-01-02     18
+        2023-01-03     15
+        2023-01-04     10
+        2023-01-05     10
+        ```
+
+        Now let's run split the data with the provided `TimeBasedSplit` instance:
+
+        ```py
+        from timebasedcv import TimeBasedSplit
+
+
+        tbs = TimeBasedSplit(
+            frequency="days",
+            train_size=10,
+            forecast_horizon=5,
+            gap=1,
+            stride=3
+        )
+        X, y, time_series = df.loc[:, ["a", "b"]], df["y"], df["time"]
+
+        for X_train, X_forecast, y_train, y_forecast in tbs.split(X, y, time_series=time_series):
+            print(f"Train: {X_train.shape}, Forecast: {X_forecast.shape}")
+        ```
+
+        ```terminal
+        Train: (100, 2), Forecast: (51, 2)
+        Train: (114, 2), Forecast: (50, 2)
+        ...
+        Train: (124, 2), Forecast: (40, 2)
+        Train: (137, 2), Forecast: (22, 2)
+        ```
+    """
 
     @overload
     def split(
@@ -424,9 +508,10 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
                 `train_forecast_arrays`.
 
         Raises:
-            ValueError: If no arrays are provided as input.
-            ValueError: If the arrays provided have different lengths.
-            ValueError: If the length of the time series does not match the length of the arrays.
+            ValueError:
+                - If no arrays are provided as input.
+                - If the arrays provided have different lengths.
+                - If the length of the time series does not match the length of the arrays.
         """
         n_arrays = len(arrays)
         if n_arrays == 0:
@@ -484,8 +569,6 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
 class ExpandingTimeSplit(TimeBasedSplit):  # pragma: no cover
     """Alias for `TimeBasedSplit(..., window="expanding")`."""
 
-    name_ = "ExpandingTimeSplit"
-
     def __init__(  # noqa: PLR0913
         self: Self,
         *,
@@ -509,8 +592,6 @@ class ExpandingTimeSplit(TimeBasedSplit):  # pragma: no cover
 
 class RollingTimeSplit(TimeBasedSplit):  # pragma: no cover
     """Alias for `TimeBasedSplit(..., window="rolling")`."""
-
-    name_ = "RollingTimeSplit"
 
     def __init__(  # noqa: PLR0913
         self: Self,

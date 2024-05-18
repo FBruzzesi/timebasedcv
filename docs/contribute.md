@@ -1,6 +1,6 @@
-# Contributing
+# Contributing 👏
 
-## Guidelines
+## Guidelines 💡
 
 We welcome contributions to the library! If you have a bug fix or new feature that you would like to contribute, please follow the steps below:
 
@@ -12,11 +12,11 @@ We welcome contributions to the library! If you have a bug fix or new feature th
 6. Commit your changes and push the branch to your fork.
 7. [Open a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request){:target="_blank"} on the main repository.
 
-## Submitting Pull Requests
+## Submitting Pull Requests 🎯
 
 When submitting a pull request, please make sure that you've followed the steps above and that your code has been thoroughly tested. Also, be sure to include a brief summary of the changes you've made and a reference to any issues that your pull request resolves.
 
-## Code formatting
+## Code formatting 🚀
 
 **timebasedcv** uses [ruff](https://docs.astral.sh/ruff/){:target="_blank"} for both formatting and linting. Specific settings are declared in the [pyproject.toml file](https://github.com/FBruzzesi/timebasedcv/blob/3ddead232c2243c8129f6b599b28e486bdd87b3b/pyproject.toml#L75){:target="_blank"}.
 
@@ -44,7 +44,7 @@ python -m pip install pre-commit
 pre-commit install
 ```
 
-## Developing
+## Developing 🐍
 
 Let's suppose that you already did steps 1-4 from the above list, now you should install the library and its developing dependencies  in editable way.
 
@@ -67,7 +67,7 @@ Then:
 
 Now you are ready to proceed with all the changes you want to!
 
-## Testing
+## Testing 🧪
 
 Once you are done with changes, you should:
 
@@ -86,7 +86,7 @@ Once you are done with changes, you should:
         pytest tests -n auto
         ```
 
-## Docs
+## Docs 📑
 
 The documentation is generated using [mkdocs-material](https://squidfunk.github.io/mkdocs-material/){:target="_blank"}, the API part uses [mkdocstrings](https://mkdocstrings.github.io/){:target="_blank"}.
 
