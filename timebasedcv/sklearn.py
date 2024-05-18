@@ -182,10 +182,7 @@ class TimeBasedCVSplitter(_BaseKFold):
             A generator that yields tuples of train and test indices.
 
         Raises:
-            ValueError:
-                - If the input arrays have incompatible shapes.
-                - If the input arrays have incompatible types.
-                - If the input arrays have incompatible lengths.
+            ValueError: If the input arrays have incompatible lengths with reference `time_series`.
 
         """
         self._validate_split_args(self.size_, X, y, groups)
