@@ -1,5 +1,5 @@
 
-# Scikit-learn component
+# Scikit-learn component 🚀
 
 [scikit-learn CV Splitters](https://scikit-learn.org/stable/common_pitfalls.html#id3){:target="_blank"} require a splitter to behave in a certain way:
 

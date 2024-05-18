@@ -1,4 +1,4 @@
-# Installation
+# Installation 💻
 
 **timebasedcv** is a published Python package on [pypi](https://pypi.org/project/timebasedcv){:target="_blank"}, therefore it can be installed directly via pip, as well as from source using pip and git, or with a local clone:
 
@@ -22,7 +22,7 @@
     python -m pip install .
     ```
 
-## Dependencies
+## Dependencies 👏
 
 !!! info
     The minimum Python version supported is 3.8.

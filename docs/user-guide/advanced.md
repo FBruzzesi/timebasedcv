@@ -1,4 +1,4 @@
-# Advanced features
+# Advanced features 🐍🐍
 
 There are some a few more advanced features that can be used with the `TimeBasedSplit` class.
 
