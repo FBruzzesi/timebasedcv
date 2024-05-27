@@ -18,11 +18,11 @@
 
 ## Disclaimer ⚠️
 
-This codebase is experimental and is working for my use cases. It is very probable that there are cases not entirely covered and for which it could break (badly). If you find them, please feel free to open an issue in the [issue page](https://github.com/FBruzzesi/timebasedcv/issues/new){:target="_blank"} of the repo.
+This codebase is experimental and is working for my use cases. It is very probable that there are cases not entirely covered and for which it could break (badly). If you find them, please feel free to open an issue in the [issue page](https://github.com/FBruzzesi/timebasedcv/issues/new) of the repo.
 
 ## Description ✨
 
-The current implementation of [scikit-learn TimeSeriesSplit](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.TimeSeriesSplit.html){:target="_blank"} lacks the flexibility of having multiple samples within the same time period (or time unit).
+The current implementation of [scikit-learn TimeSeriesSplit](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.TimeSeriesSplit.html) lacks the flexibility of having multiple samples within the same time period (or time unit).
 
 **timebasedcv** addresses such problem by providing a cross validation strategy based on a **time period** rather than the number of samples. This is useful when the data is time dependent, and the split should keep together samples within the same time window.
 
