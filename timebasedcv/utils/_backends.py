@@ -1,6 +1,6 @@
 from typing import Callable, Dict, TypeVar
 
-import narwhals as nw
+import narwhals.stable.v1 as nw
 import numpy as np
 
 from timebasedcv.utils._types import SeriesLike, TensorLike

@@ -5,7 +5,7 @@ from datetime import timedelta
 from itertools import chain
 from typing import TYPE_CHECKING, Generator, Literal, Tuple, TypeVar, Union, get_args, overload
 
-import narwhals as nw
+import narwhals.stable.v1 as nw
 
 from timebasedcv.splitstate import SplitState
 from timebasedcv.utils._backends import (
