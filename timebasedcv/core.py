@@ -12,7 +12,7 @@ from typing import Union
 from typing import get_args
 from typing import overload
 
-import narwhals as nw
+import narwhals.stable.v1 as nw
 
 from timebasedcv.splitstate import SplitState
 from timebasedcv.utils._backends import BACKEND_TO_INDEXING_METHOD

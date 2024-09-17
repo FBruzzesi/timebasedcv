@@ -2,7 +2,7 @@ from typing import Callable
 from typing import Dict
 from typing import TypeVar
 
-import narwhals as nw
+import narwhals.stable.v1 as nw
 import numpy as np
 
 from timebasedcv.utils._types import SeriesLike
