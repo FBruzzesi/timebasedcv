@@ -2,11 +2,16 @@ from __future__ import annotations
 
 import sys
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta
+from datetime import date
+from datetime import datetime
+from datetime import timedelta
 from operator import le as less_or_equal
-from typing import TYPE_CHECKING, Generic, Union
+from typing import TYPE_CHECKING
+from typing import Generic
+from typing import Union
 
-from timebasedcv.utils._funcs import pairwise, pairwise_comparison
+from timebasedcv.utils._funcs import pairwise
+from timebasedcv.utils._funcs import pairwise_comparison
 from timebasedcv.utils._types import DateTimeLike
 
 if sys.version_info >= (3, 11):  # pragma: no cover

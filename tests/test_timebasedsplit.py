@@ -1,5 +1,7 @@
 from contextlib import nullcontext as does_not_raise
-from datetime import date, datetime, timedelta
+from datetime import date
+from datetime import datetime
+from datetime import timedelta
 
 import numpy as np
 import pandas as pd

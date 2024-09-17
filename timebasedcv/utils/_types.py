@@ -1,8 +1,14 @@
 from __future__ import annotations
 
 import sys
-from datetime import date, datetime
-from typing import TYPE_CHECKING, Literal, Protocol, Tuple, TypeVar, Union
+from datetime import date
+from datetime import datetime
+from typing import TYPE_CHECKING
+from typing import Literal
+from typing import Protocol
+from typing import Tuple
+from typing import TypeVar
+from typing import Union
 
 if sys.version_info >= (3, 10):
     from typing import TypeAlias  # pragma: no cover

@@ -1,5 +1,8 @@
 from itertools import tee
-from typing import Callable, Iterable, Tuple, TypeVar
+from typing import Callable
+from typing import Iterable
+from typing import Tuple
+from typing import TypeVar
 
 T = TypeVar("T")
 

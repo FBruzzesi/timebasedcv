@@ -1,9 +1,12 @@
-from typing import Callable, Dict, TypeVar
+from typing import Callable
+from typing import Dict
+from typing import TypeVar
 
 import narwhals as nw
 import numpy as np
 
-from timebasedcv.utils._types import SeriesLike, TensorLike
+from timebasedcv.utils._types import SeriesLike
+from timebasedcv.utils._types import TensorLike
 
 
 def default_indexing_method(arr: TensorLike, mask: SeriesLike) -> TensorLike:

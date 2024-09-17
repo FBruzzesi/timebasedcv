@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import re
 import sys
-from typing import TYPE_CHECKING, Generator, Tuple, Union
+from typing import TYPE_CHECKING
+from typing import Generator
+from typing import Tuple
+from typing import Union
 
 import numpy as np
 
@@ -24,25 +27,24 @@ if (sklearn_version := version("scikit-learn")) and tuple(
     )
     raise ImportError(msg)
 else:  # pragma: no cover
-    from sklearn.model_selection._split import _BaseKFold
+    from sklearn.model_selection._split import _BaseKFold  # type: ignore[import-untyped]
 
 
 if TYPE_CHECKING:  # pragma: no cover
-    from datetime import date, datetime
+    from datetime import date
+    from datetime import datetime
 
     import pandas as pd
     from numpy.typing import NDArray
 
-    from timebasedcv.utils._types import (
-        FrequencyUnit,
-        ModeType,
-        NullableDatetime,
-        SeriesLike,
-        WindowType,
-    )
+    from timebasedcv.utils._types import FrequencyUnit
+    from timebasedcv.utils._types import ModeType
+    from timebasedcv.utils._types import NullableDatetime
+    from timebasedcv.utils._types import SeriesLike
+    from timebasedcv.utils._types import WindowType
 
 
-class TimeBasedCVSplitter(_BaseKFold):
+class TimeBasedCVSplitter(_BaseKFold):  # type: ignore[no-any-unimported]
     """The `TimeBasedCVSplitter` is a scikit-learn compatible CV Splitter that generates splits based on time values.
 
     The number of sample in each split is independent of the number of splits but based purely on the timestamp of the
@@ -140,7 +142,7 @@ class TimeBasedCVSplitter(_BaseKFold):
         frequency: FrequencyUnit,
         train_size: int,
         forecast_horizon: int,
-        time_series: Union[SeriesLike[date], SeriesLike[datetime], SeriesLike[pd.Datetime]],
+        time_series: Union[SeriesLike[date], SeriesLike[datetime], SeriesLike[pd.Timestamp]],
         gap: int = 0,
         stride: Union[int, None] = None,
         window: WindowType = "rolling",

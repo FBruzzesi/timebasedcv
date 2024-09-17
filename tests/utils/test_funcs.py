@@ -1,9 +1,12 @@
 import operator
-from typing import Callable, List, Tuple
+from typing import Callable
+from typing import List
+from typing import Tuple
 
 import pytest
 
-from timebasedcv.utils._funcs import pairwise, pairwise_comparison
+from timebasedcv.utils._funcs import pairwise
+from timebasedcv.utils._funcs import pairwise_comparison
 
 
 def test_pairwise(sample_list: List[int], sample_pairs: List[Tuple[int, int]]):

@@ -3,24 +3,27 @@ from __future__ import annotations
 import sys
 from datetime import timedelta
 from itertools import chain
-from typing import TYPE_CHECKING, Generator, Literal, Tuple, TypeVar, Union, get_args, overload
+from typing import TYPE_CHECKING
+from typing import Generator
+from typing import Literal
+from typing import Tuple
+from typing import TypeVar
+from typing import Union
+from typing import get_args
+from typing import overload
 
 import narwhals as nw
 
 from timebasedcv.splitstate import SplitState
-from timebasedcv.utils._backends import (
-    BACKEND_TO_INDEXING_METHOD,
-    default_indexing_method,
-)
-from timebasedcv.utils._types import (
-    DateTimeLike,
-    FrequencyUnit,
-    ModeType,
-    NullableDatetime,
-    SeriesLike,
-    TensorLike,
-    WindowType,
-)
+from timebasedcv.utils._backends import BACKEND_TO_INDEXING_METHOD
+from timebasedcv.utils._backends import default_indexing_method
+from timebasedcv.utils._types import DateTimeLike
+from timebasedcv.utils._types import FrequencyUnit
+from timebasedcv.utils._types import ModeType
+from timebasedcv.utils._types import NullableDatetime
+from timebasedcv.utils._types import SeriesLike
+from timebasedcv.utils._types import TensorLike
+from timebasedcv.utils._types import WindowType
 
 if sys.version_info >= (3, 11):  # pragma: no cover
     from typing import Self

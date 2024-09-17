@@ -5,10 +5,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from timebasedcv.utils._backends import (
-    BACKEND_TO_INDEXING_METHOD,
-    default_indexing_method,
-)
+from timebasedcv.utils._backends import BACKEND_TO_INDEXING_METHOD
+from timebasedcv.utils._backends import default_indexing_method
 
 size = 10
 arr = np.arange(size)

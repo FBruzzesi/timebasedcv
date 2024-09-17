@@ -75,6 +75,7 @@ packages = ["timebasedcv"]
 [tool.ruff]
 line-length = 120
 target-version = "py38"
+fix = true
 
 [tool.ruff.lint]
 select = ["ALL"]
@@ -106,6 +107,9 @@ keep-runtime-typing = true
 [tool.ruff.format]
 docstring-code-format = true
 
+[tool.ruff.lint.isort]
+force-single-line = true
+
 [tool.interrogate]
 ignore-nested-functions = true
 ignore-module = true
@@ -119,7 +123,14 @@ exclude = ["timebasedcv/utils/_types.py"]
 verbose = 2 # 0 (minimal output), 1 (-v), 2 (-vv)
 
 [tool.mypy]
-ignore_missing_imports = true
+# ignore_missing_imports = true
+disallow_untyped_defs = true
+disallow_any_unimported = true
+no_implicit_optional = true
+check_untyped_defs = true
+warn_return_any = true
+show_error_codes = true
+warn_unused_ignores = true
 
 [tool.coverage.run]
 source = ["timebasedcv/"]
