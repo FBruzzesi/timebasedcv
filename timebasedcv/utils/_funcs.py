@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from itertools import tee
 from typing import Callable
 from typing import Iterable

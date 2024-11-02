@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 from typing import Callable
 from typing import Dict
 from typing import TypeVar
@@ -5,8 +8,9 @@ from typing import TypeVar
 import narwhals.stable.v1 as nw
 import numpy as np
 
-from timebasedcv.utils._types import SeriesLike
-from timebasedcv.utils._types import TensorLike
+if TYPE_CHECKING:
+    from timebasedcv.utils._types import SeriesLike
+    from timebasedcv.utils._types import TensorLike
 
 
 def default_indexing_method(arr: TensorLike, mask: SeriesLike) -> TensorLike:
