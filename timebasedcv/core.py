@@ -212,6 +212,8 @@ class _CoreTimeBasedSplit:
             msg = "`time_start` must be before `time_end`."
             raise ValueError(msg)
 
+        is_rolling_window = self.window_ == "rolling"
+
         if self.mode_ == "forward":
             train_delta = self.train_delta
             forecast_delta = self.forecast_delta
@@ -232,13 +234,13 @@ class _CoreTimeBasedSplit:
             forecast_end = time_end
             forecast_start = forecast_end + forecast_delta
             train_end = forecast_start + gap_delta
-            train_start = train_end + train_delta if self.window_ == "rolling" else time_start
+            train_start = train_end + train_delta if is_rolling_window else time_start
 
         while (forecast_start <= time_end) and (train_start >= time_start) and (train_start <= train_end + train_delta):
             yield SplitState(train_start, train_end, forecast_start, forecast_end)
 
             # Update state values
-            train_start = train_start + stride_delta if self.window_ == "rolling" else train_start
+            train_start = train_start + stride_delta if is_rolling_window else train_start
             train_end = train_end + stride_delta
             forecast_start = forecast_start + stride_delta
             forecast_end = forecast_end + stride_delta

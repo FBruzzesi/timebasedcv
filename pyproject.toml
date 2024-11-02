@@ -109,6 +109,7 @@ docstring-code-format = true
 
 [tool.ruff.lint.isort]
 force-single-line = true
+required-imports = ["from __future__ import annotations"]
 
 [tool.interrogate]
 ignore-nested-functions = true
