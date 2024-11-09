@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from datetime import date
 from datetime import datetime
-from datetime import timedelta
 
 import pandas as pd
 import pytest
+from dateutil.relativedelta import relativedelta
 
 from timebasedcv.splitstate import SplitState
 
@@ -41,7 +41,7 @@ from timebasedcv.splitstate import SplitState
 )
 @pytest.mark.parametrize(
     "expected_train_len, expected_forecast_len, expected_gap_len, expected_total_len",
-    [(timedelta(days=30), timedelta(days=27), timedelta(days=1), timedelta(days=58))],
+    [(relativedelta(days=30), relativedelta(days=27), relativedelta(days=1), relativedelta(months=1, days=27))],
 )
 def test_splitstate_valid(
     train_start,
@@ -106,7 +106,7 @@ def test_splitstate_add():
         forecast_end=datetime(2023, 2, 28, 0),
     )
 
-    delta = timedelta(days=1)
+    delta = relativedelta(days=1)
     expected_split_state = SplitState(
         train_start=datetime(2023, 1, 2, 0),
         train_end=datetime(2023, 2, 1, 0),
@@ -131,7 +131,7 @@ def test_splitstate_sub():
         forecast_end=datetime(2023, 3, 1, 0),
     )
 
-    delta = timedelta(days=1)
+    delta = relativedelta(days=1)
     expected_split_state = SplitState(
         train_start=datetime(2023, 1, 1, 0),
         train_end=datetime(2023, 1, 31, 0),

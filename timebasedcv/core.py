@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import sys
-from datetime import timedelta
 from itertools import chain
 from typing import TYPE_CHECKING
 from typing import Generator
@@ -13,6 +12,7 @@ from typing import get_args
 from typing import overload
 
 import narwhals.stable.v1 as nw
+from dateutil.relativedelta import relativedelta
 
 from timebasedcv.splitstate import SplitState
 from timebasedcv.utils._backends import BACKEND_TO_INDEXING_METHOD
@@ -52,7 +52,7 @@ class _CoreTimeBasedSplit:
     Arguments:
         frequency: The frequency (or time unit) of the time series. Must be one of "days", "seconds", "microseconds",
             "milliseconds", "minutes", "hours", "weeks". These are the only valid values for the `unit` argument of
-            `timedelta` from python `datetime` standard library.
+            `relativedelta` from python `datetime` standard library.
         train_size: Defines the minimum number of time units required to be in the train set.
         forecast_horizon: Specifies the number of time units to forecast.
         gap: Sets the number of time units to skip between the end of the train set and the start of the forecast set.
@@ -172,24 +172,24 @@ class _CoreTimeBasedSplit:
         return f"{self.name_}" "(\n    " f"{_new_line_tab.join(f'{s} = {v}' for s, v in zip(_attrs, _values))}" "\n)"
 
     @property
-    def train_delta(self: Self) -> timedelta:
-        """Returns the `timedelta` object corresponding to the `train_size`."""
-        return timedelta(**{str(self.frequency_): self.train_size_})
+    def train_delta(self: Self) -> relativedelta:
+        """Returns the `relativedelta` object corresponding to the `train_size`."""
+        return relativedelta(**{str(self.frequency_): self.train_size_})  # type: ignore[arg-type]
 
     @property
-    def forecast_delta(self: Self) -> timedelta:
-        """Returns the `timedelta` object corresponding to the `forecast_horizon`."""
-        return timedelta(**{str(self.frequency_): self.forecast_horizon_})
+    def forecast_delta(self: Self) -> relativedelta:
+        """Returns the `relativedelta` object corresponding to the `forecast_horizon`."""
+        return relativedelta(**{str(self.frequency_): self.forecast_horizon_})  # type: ignore[arg-type]
 
     @property
-    def gap_delta(self: Self) -> timedelta:
-        """Returns the `timedelta` object corresponding to the `gap` and `frequency`."""
-        return timedelta(**{str(self.frequency_): self.gap_})
+    def gap_delta(self: Self) -> relativedelta:
+        """Returns the `relativedelta` object corresponding to the `gap` and `frequency`."""
+        return relativedelta(**{str(self.frequency_): self.gap_})  # type: ignore[arg-type]
 
     @property
-    def stride_delta(self: Self) -> timedelta:
-        """Returns the `timedelta` object corresponding to `stride`."""
-        return timedelta(**{str(self.frequency_): self.stride_})
+    def stride_delta(self: Self) -> relativedelta:
+        """Returns the `relativedelta` object corresponding to `stride`."""
+        return relativedelta(**{str(self.frequency_): self.stride_})  # type: ignore[arg-type]
 
     def _splits_from_period(
         self: Self,
@@ -339,7 +339,7 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
     Arguments:
         frequency: The frequency (or time unit) of the time series. Must be one of "days", "seconds", "microseconds",
             "milliseconds", "minutes", "hours", "weeks". These are the only valid values for the `unit` argument of
-            `timedelta` from python `datetime` standard library.
+            `relativedelta` from python `datetime` standard library.
         train_size: Defines the minimum number of time units required to be in the train set.
         forecast_horizon: Specifies the number of time units to forecast.
         gap: Sets the number of time units to skip between the end of the train set and the start of the forecast set.

@@ -10,6 +10,8 @@ from typing import TYPE_CHECKING
 from typing import Generic
 from typing import Union
 
+from dateutil.relativedelta import relativedelta
+
 from timebasedcv.utils._funcs import pairwise
 from timebasedcv.utils._funcs import pairwise_comparison
 from timebasedcv.utils._types import DateTimeLike
@@ -91,42 +93,42 @@ class SplitState(Generic[DateTimeLike]):
             raise ValueError(msg)
 
     @property
-    def train_length(self: Self) -> timedelta:
+    def train_length(self: Self) -> relativedelta:
         """Returns the time between `train_start` and `train_end`.
 
         Returns:
-            A `timedelta` object representing the time between `train_start` and `train_end`.
+            A `relativedelta` object representing the time between `train_start` and `train_end`.
         """
-        return self.train_end - self.train_start
+        return relativedelta(self.train_end, self.train_start)
 
     @property
-    def forecast_length(self: Self) -> timedelta:
+    def forecast_length(self: Self) -> relativedelta:
         """Returns the time between `forecast_start` and `forecast_end`.
 
         Returns:
-            A `timedelta` object representing the time between `forecast_start` and `forecast_end`.
+            A `relativedelta` object representing the time between `forecast_start` and `forecast_end`.
         """
-        return self.forecast_end - self.forecast_start
+        return relativedelta(self.forecast_end, self.forecast_start)
 
     @property
-    def gap_length(self: Self) -> timedelta:
+    def gap_length(self: Self) -> relativedelta:
         """Returns the time between `train_end` and `forecast_start`.
 
         Returns:
-            A `timedelta` object representing the time between `train_end` and `forecast_start`.
+            A `relativedelta` object representing the time between `train_end` and `forecast_start`.
         """
-        return self.forecast_start - self.train_end
+        return relativedelta(self.forecast_start, self.train_end)
 
     @property
-    def total_length(self: Self) -> timedelta:
+    def total_length(self: Self) -> relativedelta:
         """Returns the time between `train_start` and `forecast_end`.
 
         Returns:
-            A `timedelta` object representing the time between `train_start` and `forecast_end`.
+            A `relativedelta` object representing the time between `train_start` and `forecast_end`.
         """
-        return self.forecast_end - self.train_start
+        return relativedelta(self.forecast_end, self.train_start)
 
-    def __add__(self: Self, other: Union[timedelta, pd.Timedelta]) -> SplitState:
+    def __add__(self: Self, other: Union[timedelta, relativedelta, pd.Timedelta]) -> SplitState:
         """Adds `other` to each value of the state."""
         return SplitState(
             train_start=self.train_start + other,
@@ -135,7 +137,7 @@ class SplitState(Generic[DateTimeLike]):
             forecast_end=self.forecast_end + other,
         )
 
-    def __sub__(self: Self, other: Union[timedelta, pd.Timedelta]) -> SplitState:
+    def __sub__(self: Self, other: Union[timedelta, relativedelta, pd.Timedelta]) -> SplitState:
         """Subtracts other to each value of the state."""
         return SplitState(
             train_start=self.train_start - other,

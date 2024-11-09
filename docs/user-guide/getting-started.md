@@ -269,5 +269,3 @@ for a_train, a_test, b_train, b_test, y_train, y_test in tbs.split(a, b, y, time
 
 !!! warning
     Ideally each array can be a different type (numpy, pandas, polars, and so on...), in practice there are a few limitations that might arise from the different types, so please be aware of that.
-
-    We are working to make the library more flexible and to support more types of arrays and more interactions between them.

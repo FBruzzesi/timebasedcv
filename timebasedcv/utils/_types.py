@@ -26,7 +26,9 @@ if TYPE_CHECKING:
 DateTimeLike = TypeVar("DateTimeLike", datetime, date, "pd.Timestamp")
 NullableDatetime = Union[DateTimeLike, None]
 
-FrequencyUnit: TypeAlias = Literal["days", "seconds", "microseconds", "milliseconds", "minutes", "hours", "weeks"]
+FrequencyUnit: TypeAlias = Literal[
+    "days", "seconds", "microseconds", "milliseconds", "minutes", "hours", "weeks", "months", "years"
+]
 WindowType: TypeAlias = Literal["rolling", "expanding"]
 ModeType: TypeAlias = Literal["forward", "backward"]
 
