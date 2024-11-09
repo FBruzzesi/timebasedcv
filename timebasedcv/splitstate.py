@@ -29,7 +29,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
 @dataclass(frozen=True)
 class SplitState(Generic[DateTimeLike]):
-    """A `SplitState` represents the state of a split in terms of its 4 cut/split points.
+    """A `SplitState` represents the state of a split in terms of its four cut/split points.
 
     Namely these are start and end of training set, start and end of forecasting/test set.
 
