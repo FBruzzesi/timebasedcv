@@ -523,15 +523,15 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
             msg = "At least one array required as input"
             raise ValueError(msg)
 
-        ts_shape = time_series.shape
-        if len(ts_shape) != 1:
-            msg = f"Time series must be 1-dimensional. Got {len(ts_shape)} dimensions."
-            raise ValueError(msg)
-
         arrays_: Tuple[Union[nw.DataFrame, nw.Series, np.ndarray], ...] = tuple(
             nw.from_native(array, eager_only=True, allow_series=True, strict=False) for array in arrays
         )
         time_series_: Union[nw.Series, np.ndarray] = nw.from_native(time_series, series_only=True, strict=False)
+
+        ts_shape = time_series_.shape
+        if len(ts_shape) != 1:
+            msg = f"Time series must be 1-dimensional. Got {len(ts_shape)} dimensions."
+            raise ValueError(msg)
 
         a0 = arrays[0]
         arr_len = a0.shape[0]

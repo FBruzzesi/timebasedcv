@@ -37,8 +37,6 @@ repository = "https://github.com/fbruzzesi/timebasedcv"
 issue-tracker = "https://github.com/fbruzzesi/timebasedcv/issues"
 
 [project.optional-dependencies]
-polars = ["polars>=0.20.3"]
-pandas = ["pandas>=1.2.0"]
 scikit-learn = ["scikit-learn>=0.19"]
 
 dev = [
@@ -62,6 +60,10 @@ test = [
     "pytest==7.2.0",
     "pytest-xdist==3.2.1",
     "coverage==7.2.1",
+    "pandas>=1.2.0",
+    "polars>=0.20.3",
+    "pyarrow>=11.0.0",
+    "dask>=2023.1.0"
 ]
 
 all = ["timebasedcv[pandas,polars,scikit-learn]"]
