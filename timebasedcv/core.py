@@ -37,7 +37,7 @@ _frequency_values = get_args(FrequencyUnit)
 _window_values = get_args(WindowType)
 _mode_values = get_args(ModeType)
 
-TL = TypeVar("TL", bound=TensorLike)
+TensorLikeT = TypeVar("TensorLikeT", bound=TensorLike)
 
 
 class _CoreTimeBasedSplit:
@@ -431,45 +431,45 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
     @overload
     def split(
         self: Self,
-        *arrays: TL,
+        *arrays: TensorLikeT,
         time_series: SeriesLike[DateTimeLike],
         start_dt: NullableDatetime = None,
         end_dt: NullableDatetime = None,
         return_splitstate: Literal[False],
-    ) -> Generator[Tuple[TL, ...], None, None]: ...  # pragma: no cover
+    ) -> Generator[Tuple[TensorLikeT, ...], None, None]: ...  # pragma: no cover
 
     @overload
     def split(
         self: Self,
-        *arrays: TL,
+        *arrays: TensorLikeT,
         time_series: SeriesLike[DateTimeLike],
         start_dt: NullableDatetime = None,
         end_dt: NullableDatetime = None,
         return_splitstate: Literal[True],
-    ) -> Generator[Tuple[Tuple[TL, ...], SplitState], None, None]: ...  # pragma: no cover
+    ) -> Generator[Tuple[Tuple[TensorLikeT, ...], SplitState], None, None]: ...  # pragma: no cover
 
     @overload
     def split(
         self: Self,
-        *arrays: TL,
+        *arrays: TensorLikeT,
         time_series: SeriesLike[DateTimeLike],
         start_dt: NullableDatetime = None,
         end_dt: NullableDatetime = None,
         return_splitstate: bool = False,
     ) -> Generator[
-        Union[Tuple[TL, ...], Tuple[Tuple[TL, ...], SplitState]],
+        Union[Tuple[TensorLikeT, ...], Tuple[Tuple[TensorLikeT, ...], SplitState]],
         None,
         None,
     ]: ...  # pragma: no cover
 
     def split(
         self: Self,
-        *arrays: TL,
+        *arrays: TensorLikeT,
         time_series: SeriesLike[DateTimeLike],
         start_dt: NullableDatetime = None,
         end_dt: NullableDatetime = None,
         return_splitstate: bool = False,
-    ) -> Generator[Union[Tuple[TL, ...], Tuple[Tuple[TL, ...], SplitState]], None, None]:
+    ) -> Generator[Union[Tuple[TensorLikeT, ...], Tuple[Tuple[TensorLikeT, ...], SplitState]], None, None]:
         """Returns a generator of split arrays based on the `time_series`.
 
         The `time_series` argument is split on split state values to create boolean masks for training - from train_
