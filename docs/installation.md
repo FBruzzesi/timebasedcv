@@ -27,7 +27,7 @@
 !!! info
     The minimum Python version supported is 3.8.
 
-- Since **v0.1.0**, the only two dependencies are [`numpy`](https://numpy.org/doc/stable/index.html){:target="_blank"} and [`narwhals>=0.7.15`](https://narwhals-dev.github.io/narwhals/){:target="_blank"}.
+- Since **v0.1.0**, the only two dependencies are [`numpy`](https://numpy.org/doc/stable/index.html){:target="_blank"} and [`narwhals>=1.0.0`](https://narwhals-dev.github.io/narwhals/){:target="_blank"}.
 
     **Narwhals** allows to have a compatibility layer between polars, pandas and other dataframe libraries. Therefore, as long as narwhals supports such dataframe object, we will as well.
 
