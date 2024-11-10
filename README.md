@@ -44,7 +44,7 @@ We introduce two main classes:
 
 ### Dataframe and array agnostic
 
-- Thanks to [Narwhals](https://narwhals-dev.github.io/narwhals/){:target="_blank"}, `TimeBasedSplit` works out of the box with `pandas`, `polars`, `pyarrow` and any other dataframe library supported by Narwhals.
+- Thanks to [Narwhals](https://narwhals-dev.github.io/narwhals/), `TimeBasedSplit` works out of the box with `pandas`, `polars`, `pyarrow` and any other dataframe library supported by Narwhals.
 - Thanks to the array API, `TimeBasedSplit` works out of the box with `numpy`, `cupy`, `dask.array` and any other array library that support slicing à la numpy.
 
 ## Installation 💻
