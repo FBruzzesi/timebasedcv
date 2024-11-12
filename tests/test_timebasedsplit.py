@@ -4,6 +4,7 @@ from contextlib import nullcontext as does_not_raise
 from datetime import date
 from datetime import datetime
 
+import narwhals as nw
 import numpy as np
 import pandas as pd
 import pytest
@@ -173,38 +174,66 @@ def test_timebasedcv_split_invalid(valid_kwargs, kwargs):
         next(cv.split(*arrays_, time_series=time_series_, start_dt=start_dt_, end_dt=end_dt_))
 
 
-@pytest.mark.parametrize(
-    "kwargs",
-    [
-        {"arrays": (X,)},
-        {"arrays": (X, y, X.to_numpy())},  # multi-type arrays
-        # arrays shape different from time_series shape
-        {"start_dt": pd.Timestamp(2023, 1, 1), "end_dt": pd.Timestamp(2023, 1, 31)},
-        {"return_splitstate": True},
-    ],
-)
-def test_timebasedcv_split(valid_kwargs, kwargs):
-    """Tests the TimeBasedSplit.split method."""
+@pytest.mark.parametrize("return_splitstate", [True, False])
+def test_timebasedcv_split_dataframes(valid_kwargs, frame_constructor, generate_test_data, return_splitstate):
+    """Tests the TimeBasedSplit.split method on different dataframe constructors."""
     cv = TimeBasedSplit(**valid_kwargs)
 
-    arrays_ = kwargs.get("arrays", (X, y))
-    time_series_ = kwargs.get("time_series", time_series)
-    start_dt_ = kwargs.get("start_dt")
-    end_dt_ = kwargs.get("end_dt")
-    return_splitstate_ = kwargs.get("return_splitstate", False)
+    start_dt, end_dt, time_series, X, y = generate_test_data
+
+    data = {
+        "x0": X[:, 0],
+        "x1": X[:, 1],
+        "y": y,
+        "ts": time_series,
+    }
+
+    df = nw.from_native(frame_constructor(data), eager_only=True)
+
+    arrays_ = (df.select("x0", "x1").to_native(), df["y"].to_native())
+    time_series_ = df["ts"].to_native()
 
     n_arrays = len(arrays_)
     split_results = next(
         cv.split(
             *arrays_,
             time_series=time_series_,
-            start_dt=start_dt_,
-            end_dt=end_dt_,
-            return_splitstate=return_splitstate_,
+            start_dt=start_dt,
+            end_dt=end_dt,
+            return_splitstate=return_splitstate,
         ),
     )
 
-    if return_splitstate_:
+    if return_splitstate:
+        train_forecast, _ = split_results
+    else:
+        train_forecast = split_results
+
+    assert len(train_forecast) == n_arrays * 2
+
+
+@pytest.mark.parametrize("return_splitstate", [True, False])
+def test_timebasedcv_split_arrays(valid_kwargs, array_constructor, generate_test_data, return_splitstate):
+    """Tests the TimeBasedSplit.split method on different dataframe constructors."""
+    cv = TimeBasedSplit(**valid_kwargs)
+
+    start_dt, end_dt, time_series, X, y = generate_test_data
+
+    arrays_ = (array_constructor(X), array_constructor(y))
+    time_series_ = array_constructor(time_series)
+
+    n_arrays = len(arrays_)
+    split_results = next(
+        cv.split(
+            *arrays_,
+            time_series=time_series_,
+            start_dt=start_dt,
+            end_dt=end_dt,
+            return_splitstate=return_splitstate,
+        ),
+    )
+
+    if return_splitstate:
         train_forecast, _ = split_results
     else:
         train_forecast = split_results

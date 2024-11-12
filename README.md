@@ -42,6 +42,11 @@ We introduce two main classes:
 
 - Considering the above choices, we also provide a scikit-learn compatible splitter: [`TimeBasedCVSplitter`](https://fbruzzesi.github.io/timebasedcv/api/sklearn/#timebasedcv.sklearn.TimeBasedCVSplitter). Considering the signature that `.split(...)` requires and the fact that CV Splitters need to know a priori the number of splits, `TimeBasedCVSplitter` is initialized with the time series containing the time information used to generate the train and test indices of each split.
 
+### Dataframe and array agnostic
+
+- Thanks to [Narwhals](https://narwhals-dev.github.io/narwhals/), `TimeBasedSplit` works out of the box with `pandas`, `polars`, `pyarrow` and any other dataframe library supported by Narwhals.
+- Thanks to the array API, `TimeBasedSplit` works out of the box with `numpy`, `cupy`, `dask.array` and any other array library that support slicing à la numpy.
+
 ## Installation 💻
 
 TL;DR:
