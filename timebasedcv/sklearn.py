@@ -60,8 +60,8 @@ class TimeBasedCVSplitter(_BaseKFold):  # type: ignore[no-any-unimported]
 
     Arguments:
         frequency: The frequency (or time unit) of the time series. Must be one of "days", "seconds", "microseconds",
-            "milliseconds", "minutes", "hours", "weeks". These are the only valid values for the `unit` argument of
-            `timedelta` from python `datetime` standard library.
+            "milliseconds", "minutes", "hours", "weeks", "months" or "years". These are the valid values for the
+            `unit` argument of `relativedelta` from python `dateutil` library.
         train_size: Defines the minimum number of time units required to be in the train set.
         forecast_horizon: Specifies the number of time units to forecast.
         time_series: The time series used to create boolean mask for splits. It is not required to be sorted, but it
