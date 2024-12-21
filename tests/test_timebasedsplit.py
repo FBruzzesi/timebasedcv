@@ -3,12 +3,12 @@ from __future__ import annotations
 from contextlib import nullcontext as does_not_raise
 from datetime import date
 from datetime import datetime
-from datetime import timedelta
 
 import narwhals as nw
 import numpy as np
 import pandas as pd
 import pytest
+from dateutil.relativedelta import relativedelta
 
 from timebasedcv import TimeBasedSplit
 from timebasedcv.core import _CoreTimeBasedSplit
@@ -30,7 +30,8 @@ df = pd.DataFrame(data=RNG.normal(size=(size, 2)), columns=["a", "b"]).assign(
 X, y = df[["a", "b"]], df["y"]
 
 err_msg_freq = (
-    r"`frequency` must be one of \('days', 'seconds', 'microseconds', 'milliseconds', 'minutes', 'hours', 'weeks'\)"
+    "`frequency` must be one of "
+    r"\('days', 'seconds', 'microseconds', 'milliseconds', 'minutes', 'hours', 'weeks', 'months', 'years'\)"
 )
 err_msg_int = r"\(`train_size_`, `forecast_horizon_`, `gap_`, `stride_`\) arguments must be of type `int`."
 err_msg_lower_bound = r"must be greater or equal than \(1, 1, 0, 1\)"
@@ -111,10 +112,10 @@ def test_core_properties(frequency, train_size, forecast_horizon, gap, stride):
         stride=stride,
     )
 
-    assert cv.train_delta == timedelta(**{frequency: train_size})
-    assert cv.forecast_delta == timedelta(**{frequency: forecast_horizon})
-    assert cv.gap_delta == timedelta(**{frequency: gap})
-    assert cv.stride_delta == timedelta(**{frequency: stride or forecast_horizon})
+    assert cv.train_delta == relativedelta(**{frequency: train_size})
+    assert cv.forecast_delta == relativedelta(**{frequency: forecast_horizon})
+    assert cv.gap_delta == relativedelta(**{frequency: gap})
+    assert cv.stride_delta == relativedelta(**{frequency: stride or forecast_horizon})
 
 
 @pytest.mark.parametrize(
