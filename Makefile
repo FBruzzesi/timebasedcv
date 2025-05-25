@@ -37,7 +37,7 @@ interrogate:
 interrogate-badge:
 	interrogate --generate-badge docs/img/interrogate-shield.svg
 
-types:
+typing:
 	mypy timebasedcv
 
 check: interrogate lint test types clean-folders

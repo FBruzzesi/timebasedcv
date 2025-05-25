@@ -1,17 +1,18 @@
 from __future__ import annotations
 
 import operator
-from typing import Callable
-from typing import List
-from typing import Tuple
+from typing import TYPE_CHECKING
 
 import pytest
 
 from timebasedcv.utils._funcs import pairwise
 from timebasedcv.utils._funcs import pairwise_comparison
 
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
-def test_pairwise(sample_list: List[int], sample_pairs: List[Tuple[int, int]]):
+
+def test_pairwise(sample_list: list[int], sample_pairs: list[tuple[int, int]]):
     """Tests pairwise function."""
     assert list(pairwise(sample_list)) == sample_pairs
 
@@ -24,6 +25,6 @@ def test_pairwise(sample_list: List[int], sample_pairs: List[Tuple[int, int]]):
         (operator.eq, [False, False, False, False]),
     ],
 )
-def test_pairwise_comparison(sample_list: List[int], op: Callable[[int, int], bool], expected: List[bool]):
+def test_pairwise_comparison(sample_list: list[int], op: Callable[[int, int], bool], expected: list[bool]):
     """Tests pairwise_comparison function."""
     assert list(pairwise_comparison(sample_list, op)) == expected

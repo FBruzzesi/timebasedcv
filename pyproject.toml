@@ -16,7 +16,6 @@ dependencies = [
     "python-dateutil",
     "numpy",
     "narwhals>=1.0.0",
-    "typing-extensions>=4.4.0; python_version < '3.11'",
 ]
 
 classifiers = [
@@ -42,7 +41,10 @@ scikit-learn = ["scikit-learn>=0.19"]
 
 dev = [
     "pre-commit==2.21.0",
-    "hatch"
+    "hatch",
+    "types-python-dateutil",
+    "pandas-stubs",
+    "typing-extensions",
 ]
 
 lint = [

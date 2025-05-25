@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import sys
 from dataclasses import dataclass
 from datetime import date
 from datetime import datetime
@@ -8,23 +7,17 @@ from datetime import timedelta
 from operator import le as less_or_equal
 from typing import TYPE_CHECKING
 from typing import Generic
-from typing import Union
 
 from dateutil.relativedelta import relativedelta
+from narwhals.dependencies import get_pandas
 
 from timebasedcv.utils._funcs import pairwise
 from timebasedcv.utils._funcs import pairwise_comparison
 from timebasedcv.utils._types import DateTimeLike
 
-if sys.version_info >= (3, 11):  # pragma: no cover
-    from typing import Self
-else:  # pragma: no cover
-    from typing_extensions import Self
-
-from narwhals.dependencies import get_pandas
-
 if TYPE_CHECKING:  # pragma: no cover
     import pandas as pd
+    from typing_extensions import Self
 
 
 @dataclass(frozen=True)
@@ -50,7 +43,7 @@ class SplitState(Generic[DateTimeLike]):
         ValueError: If the attributes are not ordered chronologically.
     """
 
-    __slots__ = (
+    __slots__ = (  # noqa: RUF023
         "train_start",
         "train_end",
         "forecast_start",
@@ -86,7 +79,7 @@ class SplitState(Generic[DateTimeLike]):
         if not all(_ordered):
             _error_msg = "\n".join(
                 f"{s1}({v1}) is greater or equal to {s2}({v2})"
-                for (s1, s2), (v1, v2), is_ordered in zip(pairwise(_slots), pairwise(_values), _ordered)
+                for (s1, s2), (v1, v2), is_ordered in zip(pairwise(_slots), pairwise(_values), _ordered, strict=False)
                 if not is_ordered
             )
             msg = f"`{'`, `'.join(_slots)}` must be ordered. Found:\n{_error_msg}"
@@ -128,7 +121,7 @@ class SplitState(Generic[DateTimeLike]):
         """
         return relativedelta(self.forecast_end, self.train_start)
 
-    def __add__(self: Self, other: Union[timedelta, relativedelta, pd.Timedelta]) -> SplitState:
+    def __add__(self: Self, other: timedelta | relativedelta | pd.Timedelta) -> SplitState:
         """Adds `other` to each value of the state."""
         return SplitState(
             train_start=self.train_start + other,
@@ -137,7 +130,7 @@ class SplitState(Generic[DateTimeLike]):
             forecast_end=self.forecast_end + other,
         )
 
-    def __sub__(self: Self, other: Union[timedelta, relativedelta, pd.Timedelta]) -> SplitState:
+    def __sub__(self: Self, other: timedelta | relativedelta | pd.Timedelta) -> SplitState:
         """Subtracts other to each value of the state."""
         return SplitState(
             train_start=self.train_start - other,
