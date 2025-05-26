@@ -138,7 +138,7 @@ class _CoreTimeBasedSplit:
             )
             raise TypeError(msg)
 
-        if not all(v >= lb for v, lb in zip(_values, _lower_bounds, strict=False)):
+        if not all(v >= lb for v, lb in zip(_values, _lower_bounds)):
             msg = (
                 f"(`{'`, `'.join(_slot_names)}`) must be greater or equal than "
                 f"({', '.join(map(str, _lower_bounds))}).\n"
@@ -163,9 +163,7 @@ class _CoreTimeBasedSplit:
         _values = tuple(getattr(self, _attr) for _attr in _attrs)
         _new_line_tab = "\n    "
 
-        return (
-            f"{self.name_}(\n    {_new_line_tab.join(f'{s} = {v}' for s, v in zip(_attrs, _values, strict=False))}\n)"
-        )
+        return f"{self.name_}(\n    {_new_line_tab.join(f'{s} = {v}' for s, v in zip(_attrs, _values))}\n)"
 
     @property
     def train_delta(self: Self) -> relativedelta:
@@ -557,7 +555,7 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
                         nw.to_native(_idx_method(_arr, train_mask), strict=False),
                         nw.to_native(_idx_method(_arr, forecast_mask), strict=False),
                     )
-                    for _arr, _idx_method in zip(arrays_, _index_methods, strict=False)
+                    for _arr, _idx_method in zip(arrays_, _index_methods)
                 ),
             )
 

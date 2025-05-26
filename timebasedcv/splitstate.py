@@ -79,7 +79,7 @@ class SplitState(Generic[DateTimeLike]):
         if not all(_ordered):
             _error_msg = "\n".join(
                 f"{s1}({v1}) is greater or equal to {s2}({v2})"
-                for (s1, s2), (v1, v2), is_ordered in zip(pairwise(_slots), pairwise(_values), _ordered, strict=False)
+                for (s1, s2), (v1, v2), is_ordered in zip(pairwise(_slots), pairwise(_values), _ordered)
                 if not is_ordered
             )
             msg = f"`{'`, `'.join(_slots)}` must be ordered. Found:\n{_error_msg}"

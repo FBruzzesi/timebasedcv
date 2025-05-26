@@ -19,7 +19,7 @@ def pairwise(iterable: Iterable[T]) -> Iterable[tuple[T, T]]:
     """
     a, b = tee(iterable)
     next(b, None)
-    return zip(a, b, strict=False)
+    return zip(a, b)
 
 
 def pairwise_comparison(iterable: Iterable[T], comparison_op: Callable[[T, T], bool]) -> Iterable[bool]:
