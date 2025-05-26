@@ -41,7 +41,7 @@ scikit-learn = ["scikit-learn>=0.19"]
 
 [dependency-groups]
 lint = ["ruff>=0.11.0"]
-test = [
+tests = [
     "pytest==7.2.0",
     "pytest-xdist==3.2.1",
     "coverage==7.2.1",
@@ -67,7 +67,7 @@ typing = [
 dev = [
     "pre-commit",
     {include-group = "lint"},
-    {include-group = "test"},
+    {include-group = "tests"},
     {include-group = "docs"},
     {include-group = "typing"},
 ]
