@@ -1,27 +1,17 @@
 from __future__ import annotations
 
-import sys
 from datetime import date
 from datetime import datetime
 from typing import TYPE_CHECKING
 from typing import Literal
 from typing import Protocol
-from typing import Tuple
 from typing import TypeVar
 from typing import Union
 
-if sys.version_info >= (3, 10):
-    from typing import TypeAlias  # pragma: no cover
-else:
-    from typing_extensions import TypeAlias  # pragma: no cover
-
-if sys.version_info >= (3, 11):
-    from typing import Self  # pragma: no cover
-else:
-    from typing_extensions import Self  # pragma: no cover
-
 if TYPE_CHECKING:
     import pandas as pd
+    from typing_extensions import Self  # pragma: no cover
+    from typing_extensions import TypeAlias  # pragma: no cover
 
 DateTimeLike = TypeVar("DateTimeLike", datetime, date, "pd.Timestamp")
 NullableDatetime = Union[DateTimeLike, None]
@@ -51,15 +41,15 @@ class SeriesLike(Protocol[T]):
     def max(self: Self) -> T: ...
 
     @property
-    def shape(self: Self) -> Tuple[int]: ...
+    def shape(self: Self) -> tuple[int]: ...
 
-    def __lt__(self: Self, other: Union[T, SeriesLike[T]]) -> SeriesLike[bool]: ...
+    def __lt__(self: Self, other: T | SeriesLike[T]) -> SeriesLike[bool]: ...
 
-    def __gt__(self: Self, other: Union[T, SeriesLike[T]]) -> SeriesLike[bool]: ...
+    def __gt__(self: Self, other: T | SeriesLike[T]) -> SeriesLike[bool]: ...
 
-    def __le__(self: Self, other: Union[T, SeriesLike[T]]) -> SeriesLike[bool]: ...
+    def __le__(self: Self, other: T | SeriesLike[T]) -> SeriesLike[bool]: ...
 
-    def __ge__(self: Self, other: Union[T, SeriesLike[T]]) -> SeriesLike[bool]: ...
+    def __ge__(self: Self, other: T | SeriesLike[T]) -> SeriesLike[bool]: ...
 
     def __and__(self: SeriesLike[bool], other: SeriesLike[bool]) -> SeriesLike[bool]: ...
 
@@ -78,8 +68,8 @@ class TensorLike(Protocol[T_co]):
     """
 
     @property
-    def shape(self: Self) -> Tuple[int, ...]: ...
+    def shape(self: Self) -> tuple[int, ...]: ...
 
-    def __getitem__(self: Self, i: Union[slice, SeriesLike[bool], SeriesLike[int]]) -> Self: ...
+    def __getitem__(self: Self, i: slice | SeriesLike[bool] | SeriesLike[int]) -> Self: ...
 
     def __len__(self: Self) -> int: ...

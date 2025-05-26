@@ -1,25 +1,15 @@
 from __future__ import annotations
 
 import re
-import sys
+from importlib.metadata import version
 from typing import TYPE_CHECKING
-from typing import Generator
-from typing import Tuple
-from typing import Union
 
 import numpy as np
 
 from timebasedcv.core import TimeBasedSplit
 
-if sys.version_info >= (3, 11):  # pragma: no cover
-    from typing import Self
-else:  # pragma: no cover
-    from typing_extensions import Self
-
-from importlib.metadata import version
-
 if (sklearn_version := version("scikit-learn")) and tuple(
-    int(re.sub(r"\D", "", str(v))) for v in sklearn_version.split(".")
+    int(re.sub(r"\D", "", v)) for v in sklearn_version.split(".")
 ) < (0, 19, 0):  # pragma: no cover
     msg = (
         f"scikit-learn>=0.19.0 is required for this module. Found version {sklearn_version}.\nInstall it with "
@@ -31,17 +21,22 @@ else:  # pragma: no cover
 
 
 if TYPE_CHECKING:  # pragma: no cover
+    from collections.abc import Generator
     from datetime import date
     from datetime import datetime
 
     import pandas as pd
     from numpy.typing import NDArray
+    from typing_extensions import Self
 
     from timebasedcv.utils._types import FrequencyUnit
     from timebasedcv.utils._types import ModeType
     from timebasedcv.utils._types import NullableDatetime
     from timebasedcv.utils._types import SeriesLike
     from timebasedcv.utils._types import WindowType
+
+
+__all__ = ("TimeBasedCVSplitter",)
 
 
 class TimeBasedCVSplitter(_BaseKFold):  # type: ignore[no-any-unimported]
@@ -142,9 +137,9 @@ class TimeBasedCVSplitter(_BaseKFold):  # type: ignore[no-any-unimported]
         frequency: FrequencyUnit,
         train_size: int,
         forecast_horizon: int,
-        time_series: Union[SeriesLike[date], SeriesLike[datetime], SeriesLike[pd.Timestamp]],
+        time_series: SeriesLike[date] | SeriesLike[datetime] | SeriesLike[pd.Timestamp],
         gap: int = 0,
-        stride: Union[int, None] = None,
+        stride: int | None = None,
         window: WindowType = "rolling",
         mode: ModeType = "forward",
         start_dt: NullableDatetime = None,
@@ -169,10 +164,10 @@ class TimeBasedCVSplitter(_BaseKFold):  # type: ignore[no-any-unimported]
 
     def split(
         self: Self,
-        X: Union[NDArray, None] = None,
-        y: Union[NDArray, None] = None,
-        groups: Union[NDArray, None] = None,
-    ) -> Generator[Tuple[NDArray[np.int_], NDArray[np.int_]], None, None]:
+        X: NDArray | None = None,
+        y: NDArray | None = None,
+        groups: NDArray | None = None,
+    ) -> Generator[tuple[NDArray[np.int_], NDArray[np.int_]], None, None]:
         """Generates integer indices corresponding to train and test sets.
 
         Arguments:
@@ -201,9 +196,9 @@ class TimeBasedCVSplitter(_BaseKFold):  # type: ignore[no-any-unimported]
 
     def get_n_splits(
         self: Self,
-        X: Union[NDArray, None] = None,
-        y: Union[NDArray, None] = None,
-        groups: Union[NDArray, None] = None,
+        X: NDArray | None = None,
+        y: NDArray | None = None,
+        groups: NDArray | None = None,
     ) -> int:
         """Returns the number of splits that can be generated from the instance.
 
@@ -228,9 +223,9 @@ class TimeBasedCVSplitter(_BaseKFold):  # type: ignore[no-any-unimported]
     @staticmethod
     def _validate_split_args(
         size: int,
-        X: Union[NDArray, None] = None,
-        y: Union[NDArray, None] = None,
-        groups: Union[NDArray, None] = None,
+        X: NDArray | None = None,
+        y: NDArray | None = None,
+        groups: NDArray | None = None,
     ) -> None:
         """Validates the arguments passed to the `split` and `get_n_splits` methods."""
         if X is not None and X.shape[0] != size:

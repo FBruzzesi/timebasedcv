@@ -4,12 +4,7 @@ from datetime import datetime
 from datetime import timedelta
 from typing import TYPE_CHECKING
 from typing import Any
-from typing import Callable
-from typing import Dict
-from typing import List
 from typing import Literal
-from typing import Tuple
-from typing import Union
 
 import dask.array as da
 import numpy as np
@@ -19,25 +14,27 @@ import pyarrow as pa
 import pytest
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from narwhals.typing import IntoDataFrame
 
     from timebasedcv.utils._types import TensorLike
 
 
-@pytest.fixture()
-def sample_list() -> List[int]:
+@pytest.fixture
+def sample_list() -> list[int]:
     """Returns a sample list."""
     return [1, 2, 3, 4, 5]
 
 
-@pytest.fixture()
-def sample_pairs() -> List[Tuple[int, int]]:
+@pytest.fixture
+def sample_pairs() -> list[tuple[int, int]]:
     """Returns a sample list of pairs."""
     return [(1, 2), (2, 3), (3, 4), (4, 5)]
 
 
-@pytest.fixture()
-def base_kwargs() -> Dict[str, Any]:
+@pytest.fixture
+def base_kwargs() -> dict[str, Any]:
     """Base set of values in the configuration"""
     return {
         "frequency": "days",
@@ -69,7 +66,7 @@ def gap(request) -> int:
 
 
 @pytest.fixture(params=[None, 3])
-def stride(request) -> Union[int, None]:
+def stride(request) -> int | None:
     """Fixture for setting the stride parameter."""
     return request.param
 
@@ -86,15 +83,15 @@ def mode(request) -> Literal["forward", "backward"]:
     return request.param
 
 
-@pytest.fixture()
+@pytest.fixture
 def valid_kwargs(
     train_size: int,
     forecast_horizon: int,
     gap: int,
-    stride: Union[int, None],
+    stride: int | None,
     window: Literal["rolling", "expanding"],
     mode: Literal["forward", "backward"],
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Valid combination of settings"""
     return {
         "frequency": "days",
@@ -107,8 +104,8 @@ def valid_kwargs(
     }
 
 
-@pytest.fixture()
-def generate_test_data() -> Tuple[datetime, datetime, np.ndarray, np.ndarray, np.ndarray]:
+@pytest.fixture
+def generate_test_data() -> tuple[datetime, datetime, np.ndarray, np.ndarray, np.ndarray]:
     """Generate start and end time, time series, X, and y for testing purposes.
 
     Returns:
@@ -126,7 +123,7 @@ def generate_test_data() -> Tuple[datetime, datetime, np.ndarray, np.ndarray, np
 
 
 @pytest.fixture(params=[pd.DataFrame, pl.DataFrame, pa.table])
-def frame_constructor(request) -> Callable[[Dict[str, Any]], IntoDataFrame]:
+def frame_constructor(request) -> Callable[[dict[str, Any]], IntoDataFrame]:
     """Fixture to return a eager dataframe constructor."""
     return request.param
 

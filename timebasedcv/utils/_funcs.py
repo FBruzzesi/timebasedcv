@@ -1,15 +1,18 @@
 from __future__ import annotations
 
+from itertools import starmap
 from itertools import tee
-from typing import Callable
-from typing import Iterable
-from typing import Tuple
+from typing import TYPE_CHECKING
 from typing import TypeVar
 
-T = TypeVar("T")
+if TYPE_CHECKING:
+    from collections.abc import Callable
+    from collections.abc import Iterable
+
+    T = TypeVar("T")
 
 
-def pairwise(iterable: Iterable[T]) -> Iterable[Tuple[T, T]]:
+def pairwise(iterable: Iterable[T]) -> Iterable[tuple[T, T]]:
     """Returns an iterator that yields pairs of consecutive elements from the given iterable.
 
     s -> (s0, s1), (s1, s2), (s2, s3), ...
@@ -35,4 +38,4 @@ def pairwise_comparison(iterable: Iterable[T], comparison_op: Callable[[T, T], b
     Returns:
         An iterator that yields the result of applying the given comparison operator.
     """
-    return (comparison_op(a, b) for a, b in pairwise(iterable))
+    return starmap(comparison_op, pairwise(iterable))

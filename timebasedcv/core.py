@@ -1,13 +1,9 @@
 from __future__ import annotations
 
-import sys
 from itertools import chain
 from typing import TYPE_CHECKING
-from typing import Generator
 from typing import Literal
-from typing import Tuple
 from typing import TypeVar
-from typing import Union
 from typing import get_args
 from typing import overload
 
@@ -25,13 +21,11 @@ from timebasedcv.utils._types import SeriesLike
 from timebasedcv.utils._types import TensorLike
 from timebasedcv.utils._types import WindowType
 
-if sys.version_info >= (3, 11):  # pragma: no cover
-    from typing import Self
-else:  # pragma: no cover
-    from typing_extensions import Self
-
 if TYPE_CHECKING:  # pragma: no cover
+    from collections.abc import Generator
+
     import numpy as np
+    from typing_extensions import Self
 
 _frequency_values = get_args(FrequencyUnit)
 _window_values = get_args(WindowType)
@@ -99,7 +93,7 @@ class _CoreTimeBasedSplit:
         train_size: int,
         forecast_horizon: int,
         gap: int = 0,
-        stride: Union[int, None] = None,
+        stride: int | None = None,
         window: WindowType = "rolling",
         mode: ModeType = "forward",
     ) -> None:
@@ -169,7 +163,7 @@ class _CoreTimeBasedSplit:
         _values = tuple(getattr(self, _attr) for _attr in _attrs)
         _new_line_tab = "\n    "
 
-        return f"{self.name_}" "(\n    " f"{_new_line_tab.join(f'{s} = {v}' for s, v in zip(_attrs, _values))}" "\n)"
+        return f"{self.name_}(\n    {_new_line_tab.join(f'{s} = {v}' for s, v in zip(_attrs, _values))}\n)"
 
     @property
     def train_delta(self: Self) -> relativedelta:
@@ -248,7 +242,7 @@ class _CoreTimeBasedSplit:
     def n_splits_of(
         self: Self,
         *,
-        time_series: Union[SeriesLike[DateTimeLike], None] = None,
+        time_series: SeriesLike[DateTimeLike] | None = None,
         start_dt: NullableDatetime = None,
         end_dt: NullableDatetime = None,
     ) -> int:
@@ -436,7 +430,7 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
         start_dt: NullableDatetime = None,
         end_dt: NullableDatetime = None,
         return_splitstate: Literal[False],
-    ) -> Generator[Tuple[TensorLikeT, ...], None, None]: ...  # pragma: no cover
+    ) -> Generator[tuple[TensorLikeT, ...], None, None]: ...  # pragma: no cover
 
     @overload
     def split(
@@ -446,7 +440,7 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
         start_dt: NullableDatetime = None,
         end_dt: NullableDatetime = None,
         return_splitstate: Literal[True],
-    ) -> Generator[Tuple[Tuple[TensorLikeT, ...], SplitState], None, None]: ...  # pragma: no cover
+    ) -> Generator[tuple[tuple[TensorLikeT, ...], SplitState], None, None]: ...  # pragma: no cover
 
     @overload
     def split(
@@ -457,7 +451,7 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
         end_dt: NullableDatetime = None,
         return_splitstate: bool = False,
     ) -> Generator[
-        Union[Tuple[TensorLikeT, ...], Tuple[Tuple[TensorLikeT, ...], SplitState]],
+        tuple[TensorLikeT, ...] | tuple[tuple[TensorLikeT, ...], SplitState],
         None,
         None,
     ]: ...  # pragma: no cover
@@ -469,7 +463,7 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
         start_dt: NullableDatetime = None,
         end_dt: NullableDatetime = None,
         return_splitstate: bool = False,
-    ) -> Generator[Union[Tuple[TensorLikeT, ...], Tuple[Tuple[TensorLikeT, ...], SplitState]], None, None]:
+    ) -> Generator[tuple[TensorLikeT, ...] | tuple[tuple[TensorLikeT, ...], SplitState], None, None]:
         """Returns a generator of split arrays based on the `time_series`.
 
         The `time_series` argument is split on split state values to create boolean masks for training - from train_
@@ -523,10 +517,10 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
             msg = "At least one array required as input"
             raise ValueError(msg)
 
-        arrays_: Tuple[Union[nw.DataFrame, nw.Series, np.ndarray], ...] = tuple(
+        arrays_: tuple[nw.DataFrame | nw.Series | np.ndarray, ...] = tuple(
             nw.from_native(array, eager_only=True, allow_series=True, strict=False) for array in arrays
         )
-        time_series_: Union[nw.Series, np.ndarray] = nw.from_native(time_series, series_only=True, strict=False)
+        time_series_: nw.Series | np.ndarray = nw.from_native(time_series, series_only=True, strict=False)
 
         ts_shape = time_series_.shape
         if len(ts_shape) != 1:
@@ -581,7 +575,7 @@ class ExpandingTimeSplit(TimeBasedSplit):  # pragma: no cover
         train_size: int,
         forecast_horizon: int,
         gap: int = 0,
-        stride: Union[int, None] = None,
+        stride: int | None = None,
         mode: ModeType,
     ) -> None:
         super().__init__(
@@ -605,7 +599,7 @@ class RollingTimeSplit(TimeBasedSplit):  # pragma: no cover
         train_size: int,
         forecast_horizon: int,
         gap: int = 0,
-        stride: Union[int, None] = None,
+        stride: int | None = None,
         mode: ModeType,
     ) -> None:
         super().__init__(

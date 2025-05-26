@@ -64,10 +64,13 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
-          import:
-          - https://installer.readthedocs.io/en/stable/objects.inv
-          rendering:
+          options:
+            line_length: 80
+            separate_signature: true
+            show_overloads: false
             show_signature_annotations: true
+            signature_crossrefs: true
+      enable_inventory: true
 
 # Customization
 extra:

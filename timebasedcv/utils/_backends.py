@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from typing import Callable
-from typing import Dict
 from typing import TypeVar
 
 import narwhals.stable.v1 as nw
 import numpy as np
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from timebasedcv.utils._types import SeriesLike
     from timebasedcv.utils._types import TensorLike
 
@@ -42,7 +42,7 @@ def nw_indexing_method(_dfs: T_NW, mask: nw.Expr) -> T_NW:
     return _dfs.filter(mask)
 
 
-BACKEND_TO_INDEXING_METHOD: Dict[str, Callable] = {
+BACKEND_TO_INDEXING_METHOD: dict[str, Callable] = {
     str(np.ndarray): default_indexing_method,
     str(nw.DataFrame): nw_indexing_method,
     str(nw.Series): nw_indexing_method,
