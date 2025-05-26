@@ -39,8 +39,9 @@ interrogate-badge:
 
 typing:
 	mypy timebasedcv
+	pyright timebasedcv
 
-check: interrogate lint test types clean-folders
+check: interrogate lint test typing clean-folders
 
 docs-serve:
 	mkdocs serve

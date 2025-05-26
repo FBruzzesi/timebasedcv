@@ -15,5 +15,4 @@ __all__ = (
     "RollingTimeSplit",
     "SplitState",
     "TimeBasedSplit",
-    "_CoreTimeBasedSplit",
 )

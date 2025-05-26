@@ -36,6 +36,9 @@ if TYPE_CHECKING:  # pragma: no cover
     from timebasedcv.utils._types import WindowType
 
 
+__all__ = ("TimeBasedCVSplitter",)
+
+
 class TimeBasedCVSplitter(_BaseKFold):  # type: ignore[no-any-unimported]
     """The `TimeBasedCVSplitter` is a scikit-learn compatible CV Splitter that generates splits based on time values.
 
