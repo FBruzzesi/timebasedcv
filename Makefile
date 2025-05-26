@@ -22,7 +22,7 @@ lint:
 	ruff clean
 
 test:
-	pytest tests -n auto
+	pytest tests
 
 coverage:
 	rm -rf .coverage
@@ -31,17 +31,11 @@ coverage:
 	coverage report -m
 	coverage-badge -o docs/img/coverage.svg
 
-interrogate:
-	interrogate timebasedcv tests
-
-interrogate-badge:
-	interrogate --generate-badge docs/img/interrogate-shield.svg
-
 typing:
 	mypy timebasedcv
 	pyright timebasedcv
 
-check: interrogate lint test typing clean-folders
+check: lint test typing clean-folders
 
 docs-serve:
 	mkdocs serve

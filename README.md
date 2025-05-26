@@ -1,7 +1,6 @@
 <img src="https://raw.githubusercontent.com/FBruzzesi/timebasedcv/main/docs/img/timebasedcv-logo.svg" width=185 height=185 align="right">
 
 ![license-shield](https://img.shields.io/github/license/FBruzzesi/timebasedcv)
-![interrogate-badge](https://raw.githubusercontent.com/FBruzzesi/timebasedcv/main/docs/img/interrogate-shield.svg)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 ![coverage-badge](https://raw.githubusercontent.com/FBruzzesi/timebasedcv/main/docs/img/coverage.svg)
 ![versions-shield](https://img.shields.io/pypi/pyversions/timebasedcv)
