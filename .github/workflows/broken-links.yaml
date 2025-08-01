@@ -14,5 +14,5 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
       - name: Markup Link Checker (mlc)
-        uses: becheran/mlc@v0.22.0
+        uses: becheran/mlc@v1.0.0
         # from https://github.com/becheran/mlc
