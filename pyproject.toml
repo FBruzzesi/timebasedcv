@@ -43,9 +43,9 @@ scikit-learn = ["scikit-learn>=0.19"]
 [dependency-groups]
 lint = ["ruff>=0.11.0"]
 tests = [
-    "pytest==7.2.0",
-    "pytest-xdist==3.2.1",
-    "coverage==7.2.1",
+    "pytest>=7.2.0",
+    "pytest-xdist>=3.2.1",
+    "coverage>=7.2.1",
     "dask>=2023.1.0",
     "pandas>=1.2.0",
     "polars>=0.20.3",
@@ -85,6 +85,25 @@ target-version = "py38"
 fix = true
 
 [tool.ruff.lint]
+preview = true
+explicit-preview-rules = true
+extend-safe-fixes = [
+  "C419",    # unnecessary-comprehension-in-call
+  "C420",    # unnecessary-dict-comprehension-for-iterable
+  "EM101",   # raw-string-in-exception
+  "EM102",   # f-string-in-exception
+  "PLR6201", # literal-membership
+  "TC",      # flake8-type-checking
+  "UP",      # pyupgrade
+  "PLW1514", # unspecified-encoding
+]
+extend-select = [
+  "PLR0914", # too-many-locals
+  "PLR0916", # too-many-boolean-expressions
+  "PLR1702", # too-many-nested-blocks
+  "PLR6201", # literal-membership
+  "PLW1514", # unspecified-encoding
+]
 select = ["ALL"]
 ignore = [
     "COM812",
