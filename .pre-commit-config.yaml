@@ -12,7 +12,7 @@ repos:
     -   id: check-ast
     -   id: check-added-large-files
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.12.11 # Ruff version.
+  rev: v0.14.3 # Ruff version.
   hooks:
     - id: ruff  # Run the linter.
       args: [--fix, timebasedcv, tests]
@@ -23,16 +23,11 @@ repos:
     hooks:
     -   id: python-bandit-vulnerability-check
         args: [--skip, "B101",--severity-level, medium,  --recursive, timebasedcv]
--   repo: https://github.com/econchick/interrogate
-    rev: 1.7.0
-    hooks:
-    -   id: interrogate
-        args: [timebasedcv, tests]
 -   repo: https://github.com/pre-commit/pygrep-hooks
     rev: v1.10.0
     hooks:
     -   id: python-no-eval
 -   repo: https://github.com/crate-ci/typos
-    rev: v1
+    rev: v1.39.0
     hooks:
     -   id: typos
