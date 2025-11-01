@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from contextlib import nullcontext as does_not_raise
 
 import narwhals.stable.v1 as nw
@@ -22,7 +23,12 @@ invalid_mask = np.zeros(shape=size + 1).astype(bool)
     "arr, mask, expected, context",
     [
         (arr, valid_mask, expected, does_not_raise()),
-        (arr, invalid_mask, expected, pytest.raises(ValueError, match="Length of arr and mask must be equal.")),
+        (
+            arr,
+            invalid_mask,
+            expected,
+            pytest.raises(ValueError, match=re.escape("Length of arr and mask must be equal.")),
+        ),
     ],
 )
 def test_default_indexing_method(arr, mask, expected, context):
