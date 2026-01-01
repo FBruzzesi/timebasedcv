@@ -28,7 +28,7 @@ jobs:
           uv pip install pre-commit --system
           pre-commit autoupdate
       - name: Commit and push changes
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           branch: update-pre-commit-hooks
           title: 'Update pre-commit hooks'
