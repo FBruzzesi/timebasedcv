@@ -6,7 +6,7 @@ The following sections will guide you through the basic usage of the library.
 
 The [`TimeBasedSplit`](../api/timebasedcv.md#timebasedcv.core.TimeBasedSplit) class allows to define a way to split your data based on time. There is a (long) list of parameters that can be set to define how to generate the splits. These allow for a lot of flexibility in how the data is split. Here is an overview of them:
 
-- `frequency`: we do not try to infer the frequency from the data, this information has to be specified beforehand. Available values are "days", "seconds", "microseconds", "milliseconds", "minutes", "hours", "weeks".
+- `frequency`: we do not try to infer the frequency from the data, this information has to be specified beforehand. Available values are "days", "seconds", "microseconds", "milliseconds", "minutes", "hours", "weeks", "months" and "years".
 - `train_size`: defines the minimum number of time units required to be in the train set, e.g. if `frequency="days"` and `train_size=30`, the train set will have at least 30 days.
 - `forecast_horizon`: specifies the number of time units to forecast, e.g. if `frequency="days"` and `forecast_horizon=7`, the forecast set will have 7 days. Notice that at the end of the time series, the forecast set might be smaller than the specified `forecast_horizon`.
 - `gap`: the number of time units to skip between the end of the train set and the start of the forecast set.
@@ -93,7 +93,7 @@ Train: (137, 2), Forecast: (22, 2)
 
 As we can see, each split does not necessarely have the same number of points, this is because the time series has a different number of points per day.
 
-Let's visualize the splits (blue dots represent the train points, while the red dots represent the forecastng points).
+Let's visualize the splits (blue dots represent the train points, while the red dots represent the forecasting points).
 
 ![basic-cv-split](../img/basic-cv-split.png)
 
@@ -269,3 +269,32 @@ for a_train, a_test, b_train, b_test, y_train, y_test in tbs.split(a, b, y, time
 
 !!! warning
     Ideally each array can be a different type (numpy, pandas, polars, and so on...), in practice there are a few limitations that might arise from the different types, so please be aware of that.
+
+### Using Polars
+
+Thanks to [Narwhals](https://narwhals-dev.github.io/narwhals/){:target="_blank"}, `timebasedcv` works seamlessly with Polars DataFrames and Series:
+
+```python title="Split with Polars"
+import polars as pl
+
+df_polars = pl.DataFrame({
+    "time": df["time"].to_numpy(),
+    "a": df["a"].to_numpy(),
+    "b": df["b"].to_numpy(),
+    "y": df["y"].to_numpy(),
+})
+
+X_pl = df_polars.select("a", "b")
+y_pl = df_polars["y"]
+time_series_pl = df_polars["time"]
+
+for X_train, X_forecast, y_train, y_forecast in tbs.split(X_pl, y_pl, time_series=time_series_pl):
+    print(f"Train: {X_train.shape}, Forecast: {X_forecast.shape}")
+    break
+```
+
+```terminal
+Train: (100, 2), Forecast: (51, 2)
+```
+
+The returned arrays preserve the original type -- Polars DataFrames come back as Polars DataFrames, pandas as pandas, and so on.

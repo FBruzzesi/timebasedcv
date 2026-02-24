@@ -59,7 +59,7 @@ class _CoreTimeBasedSplit:
     Raises:
         ValueError:
             - If `frequency` is not one of "days", "seconds", "microseconds", "milliseconds", "minutes", "hours",
-            "weeks".
+            "weeks", "months" or "years".
             - If `window` is not one of "rolling" or "expanding".
             - If `mode` is not one of "forward" or "backward"
             - If `train_size`, `forecast_horizon`, `gap` or `stride` are not strictly positive.
@@ -346,7 +346,7 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
     Raises:
         ValueError:
             - If `frequency` is not one of "days", "seconds", "microseconds", "milliseconds", "minutes", "hours",
-            "weeks".
+            "weeks", "months" or "years".
             - If `window` is not one of "rolling" or "expanding".
             - If `mode` is not one of "forward" or "backward"
             - If `train_size`, `forecast_horizon`, `gap` or `stride` are not strictly positive.

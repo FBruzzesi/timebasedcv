@@ -112,6 +112,27 @@ score=-0.403
 
 ## Multiple arrays of different types
 
+The `split` method accepts arrays of different types (e.g. a pandas DataFrame alongside a numpy array). Under the hood, the library uses [Narwhals](https://narwhals-dev.github.io/narwhals/){:target="_blank"} and appropriate indexing methods per backend to handle each array type correctly.
+
+```python
+import numpy as np
+import polars as pl
+
+time_array = time_series.to_numpy()
+X_polars = pl.DataFrame({"a": df["a"].to_numpy(), "b": df["b"].to_numpy()})
+y_numpy = df["y"].to_numpy()
+
+for X_train, X_forecast, y_train, y_forecast in tbs.split(X_polars, y_numpy, time_series=time_array):
+    print(f"X_train type: {type(X_train).__name__}, y_train type: {type(y_train).__name__}")
+    break
+```
+
+```terminal
+X_train type: DataFrame, y_train type: ndarray
+```
+
+!!! warning
+    While mixing array types is supported, be aware that certain combinations might behave unexpectedly depending on the backend. It is generally recommended to keep array types consistent within a single `split` call.
 
 ## Window types
 
@@ -236,7 +257,7 @@ Therefore we end up with a different number of total splits, and this would hold
     mode_types = ["forward", "backward"]
 
     fig = make_subplots(
-        rows=len(window_types),
+        rows=len(mode_types),
         cols=1,
         subplot_titles=[f"mode='{m}'" for m in mode_types],
         shared_xaxes=True,

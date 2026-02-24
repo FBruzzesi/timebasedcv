@@ -13,6 +13,7 @@ edit_uri: edit/main/docs/
 watch:
   - timebasedcv
 use_directory_urls: true
+strict: true
 theme:
   name: material
   font: false
@@ -110,8 +111,8 @@ markdown_extensions:
       anchor_linenums: true
   - pymdownx.magiclink:
       repo_url_shorthand: true
-      user: squidfunk
-      repo: mkdocs-material
+      user: fbruzzesi
+      repo: timebasedcv
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.tasklist:
@@ -124,6 +125,7 @@ nav:
   - Home:
     - Home: index.md
     - Installation: installation.md
+    - Changelog: changelog.md
     - Contributing: contribute.md
   - User Guide:
     - Home: user-guide/index.md
