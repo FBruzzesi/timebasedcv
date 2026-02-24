@@ -114,22 +114,43 @@ score=-0.403
 
 The `split` method accepts arrays of different types (e.g. a pandas DataFrame alongside a numpy array). Under the hood, the library uses [Narwhals](https://narwhals-dev.github.io/narwhals/){:target="_blank"} and appropriate indexing methods per backend to handle each array type correctly.
 
-```python
-import numpy as np
-import polars as pl
+=== "Polars + numpy"
 
-time_array = time_series.to_numpy()
-X_polars = pl.DataFrame({"a": df["a"].to_numpy(), "b": df["b"].to_numpy()})
-y_numpy = df["y"].to_numpy()
+    ```python
+    import numpy as np
+    import polars as pl
 
-for X_train, X_forecast, y_train, y_forecast in tbs.split(X_polars, y_numpy, time_series=time_array):
-    print(f"X_train type: {type(X_train).__name__}, y_train type: {type(y_train).__name__}")
-    break
-```
+    time_array = time_series.to_numpy()
+    X_polars = pl.DataFrame({"a": df["a"].to_numpy(), "b": df["b"].to_numpy()})
+    y_numpy = df["y"].to_numpy()
 
-```terminal
-X_train type: DataFrame, y_train type: ndarray
-```
+    for X_train, X_forecast, y_train, y_forecast in tbs.split(X_polars, y_numpy, time_series=time_array):
+        print(f"X_train type: {type(X_train).__name__}, y_train type: {type(y_train).__name__}")
+        break
+    ```
+
+    ```terminal
+    X_train type: DataFrame, y_train type: ndarray
+    ```
+
+=== "PyArrow"
+
+    ```python
+    import pyarrow as pa
+
+    table_pa = pa.table({"a": df["a"].to_numpy(), "b": df["b"].to_numpy()})
+    time_series_pa = pa.table({"time": df["time"]})["time"]
+    start = df["time"].min()
+    end = df["time"].max()
+
+    for X_train, X_forecast in tbs.split(table_pa, time_series=time_series_pa, start_dt=start, end_dt=end):
+        print(f"X_train type: {type(X_train).__name__}, shape: ({X_train.num_rows}, {X_train.num_columns})")
+        break
+    ```
+
+    ```terminal
+    X_train type: Table, shape: (100, 2)
+    ```
 
 !!! warning
     While mixing array types is supported, be aware that certain combinations might behave unexpectedly depending on the backend. It is generally recommended to keep array types consistent within a single `split` call.

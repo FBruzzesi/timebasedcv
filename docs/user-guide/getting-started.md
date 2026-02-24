@@ -270,31 +270,54 @@ for a_train, a_test, b_train, b_test, y_train, y_test in tbs.split(a, b, y, time
 !!! warning
     Ideally each array can be a different type (numpy, pandas, polars, and so on...), in practice there are a few limitations that might arise from the different types, so please be aware of that.
 
-### Using Polars
+### Using Polars and PyArrow
 
-Thanks to [Narwhals](https://narwhals-dev.github.io/narwhals/){:target="_blank"}, `timebasedcv` works seamlessly with Polars DataFrames and Series:
+Thanks to [Narwhals](https://narwhals-dev.github.io/narwhals/){:target="_blank"}, `timebasedcv` works seamlessly with Polars and PyArrow. The returned arrays preserve the original type -- Polars DataFrames come back as Polars DataFrames, PyArrow Tables as PyArrow Tables, and so on.
 
-```python title="Split with Polars"
-import polars as pl
+=== "Polars"
 
-df_polars = pl.DataFrame({
-    "time": df["time"].to_numpy(),
-    "a": df["a"].to_numpy(),
-    "b": df["b"].to_numpy(),
-    "y": df["y"].to_numpy(),
-})
+    ```python title="Split with Polars"
+    import polars as pl
 
-X_pl = df_polars.select("a", "b")
-y_pl = df_polars["y"]
-time_series_pl = df_polars["time"]
+    df_polars = pl.DataFrame({
+        "time": df["time"].to_numpy(),
+        "a": df["a"].to_numpy(),
+        "b": df["b"].to_numpy(),
+        "y": df["y"].to_numpy(),
+    })
 
-for X_train, X_forecast, y_train, y_forecast in tbs.split(X_pl, y_pl, time_series=time_series_pl):
-    print(f"Train: {X_train.shape}, Forecast: {X_forecast.shape}")
-    break
-```
+    X_pl = df_polars.select("a", "b")
+    y_pl = df_polars["y"]
+    time_series_pl = df_polars["time"]
 
-```terminal
-Train: (100, 2), Forecast: (51, 2)
-```
+    for X_train, X_forecast, y_train, y_forecast in tbs.split(X_pl, y_pl, time_series=time_series_pl):
+        print(f"Train: {X_train.shape}, Forecast: {X_forecast.shape}")
+        break
+    ```
 
-The returned arrays preserve the original type -- Polars DataFrames come back as Polars DataFrames, pandas as pandas, and so on.
+    ```terminal
+    Train: (100, 2), Forecast: (51, 2)
+    ```
+
+=== "PyArrow"
+
+    ```python title="Split with PyArrow"
+    import pyarrow as pa
+
+    table_pa = pa.table({
+        "a": df["a"].to_numpy(),
+        "b": df["b"].to_numpy(),
+    })
+
+    time_series_pa = pa.table({"time": df["time"]})["time"]
+    start = df["time"].min()
+    end = df["time"].max()
+
+    for X_train, X_forecast in tbs.split(table_pa, time_series=time_series_pa, start_dt=start, end_dt=end):
+        print(f"Train: ({X_train.num_rows}, {X_train.num_columns}), Forecast: ({X_forecast.num_rows}, {X_forecast.num_columns})")
+        break
+    ```
+
+    ```terminal
+    Train: (100, 2), Forecast: (51, 2)
+    ```
