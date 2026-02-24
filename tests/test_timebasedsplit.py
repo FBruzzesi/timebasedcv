@@ -235,7 +235,7 @@ def test_split_boundaries_forward_rolling():
         (date(2023, 1, 11), date(2023, 1, 14), date(2023, 1, 15), date(2023, 1, 17)),
     ]
 
-    for split, (ts, te, fs, fe) in zip(splits, expected):
+    for split, (ts, te, fs, fe) in zip(splits, expected, strict=True):
         assert split.train_start == ts
         assert split.train_end == te
         assert split.forecast_start == fs
@@ -259,7 +259,7 @@ def test_split_boundaries_backward_rolling():
         (date(2023, 1, 1), date(2023, 1, 4), date(2023, 1, 5), date(2023, 1, 7)),
     ]
 
-    for split, (ts, te, fs, fe) in zip(splits, expected):
+    for split, (ts, te, fs, fe) in zip(splits, expected, strict=True):
         assert split.train_start == ts
         assert split.train_end == te
         assert split.forecast_start == fs
@@ -286,7 +286,7 @@ def test_split_boundaries_forward_expanding():
         date(2023, 1, 12),
         date(2023, 1, 14),
     ]
-    for split, expected_te in zip(splits, expected_train_ends):
+    for split, expected_te in zip(splits, expected_train_ends, strict=True):
         assert split.train_end == expected_te
 
 
@@ -503,15 +503,9 @@ def test_split_cross_backend_consistency():
     table_pa = pa.table({"x0": data["x0"], "x1": data["x1"]})
     ts_pa = pa.table({"time": data["time"]})["time"]
 
-    pd_shapes = [
-        (X_tr.shape[0], X_fc.shape[0])
-        for X_tr, X_fc, _, _ in cv.split(df_pd, y_pd, time_series=ts_pd)
-    ]
+    pd_shapes = [(X_tr.shape[0], X_fc.shape[0]) for X_tr, X_fc, _, _ in cv.split(df_pd, y_pd, time_series=ts_pd)]
 
-    pl_shapes = [
-        (X_tr.shape[0], X_fc.shape[0])
-        for X_tr, X_fc, _, _ in cv.split(df_pl, y_pl, time_series=ts_pl)
-    ]
+    pl_shapes = [(X_tr.shape[0], X_fc.shape[0]) for X_tr, X_fc, _, _ in cv.split(df_pl, y_pl, time_series=ts_pl)]
 
     pa_shapes = [
         (X_tr.num_rows, X_fc.num_rows)

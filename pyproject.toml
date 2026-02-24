@@ -9,7 +9,7 @@ description = "Time based cross validation"
 
 license = {file = "LICENSE"}
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 authors = [{name = "Francesco Bruzzesi"}]
 
 dependencies = [
@@ -20,8 +20,6 @@ dependencies = [
 
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -81,7 +79,7 @@ packages = ["timebasedcv"]
 
 [tool.ruff]
 line-length = 120
-target-version = "py38"
+target-version = "py310"
 fix = true
 
 [tool.ruff.lint]
@@ -122,7 +120,7 @@ ignore = [
     ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["ANN", "D", "N802", "N806", "PD901", "PT006", "PT007", "PLR0913", "S101"]
+"tests/*" = ["ANN", "D", "N802", "N806", "PD901", "PLC0415", "PLR0913", "PLR2004", "PT006", "PT007", "S101"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"

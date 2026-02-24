@@ -25,7 +25,7 @@
 ## Dependencies 👏
 
 !!! info
-    The minimum Python version supported is 3.8.
+    The minimum Python version supported is 3.10.
 
 - Since **v0.1.0**, the only two dependencies are [`numpy`](https://numpy.org/doc/stable/index.html){:target="_blank"} and [`narwhals>=1.0.0`](https://narwhals-dev.github.io/narwhals/){:target="_blank"}.
 

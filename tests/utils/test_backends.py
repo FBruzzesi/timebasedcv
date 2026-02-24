@@ -74,7 +74,9 @@ def test_backend_to_indexing_method(arr, mask, expected):
     _type = str(type(arr))
     result = BACKEND_TO_INDEXING_METHOD[_type](arr, mask)
     result_native = nw.to_native(result, strict=False)
-    expected_native = nw.to_native(nw.from_native(expected, allow_series=True, eager_only=True, strict=False), strict=False)
+    expected_native = nw.to_native(
+        nw.from_native(expected, allow_series=True, eager_only=True, strict=False), strict=False
+    )
     if isinstance(result_native, pa.Table):
         assert result_native.equals(expected_native)
     else:
