@@ -13,13 +13,13 @@ from dateutil.relativedelta import relativedelta
 from timebasedcv.splitstate import SplitState
 from timebasedcv.utils._backends import BACKEND_TO_INDEXING_METHOD
 from timebasedcv.utils._backends import default_indexing_method
-from timebasedcv.utils._types import DateTimeLike
-from timebasedcv.utils._types import FrequencyUnit
-from timebasedcv.utils._types import ModeType
-from timebasedcv.utils._types import NullableDatetime
-from timebasedcv.utils._types import SeriesLike
-from timebasedcv.utils._types import TensorLike
-from timebasedcv.utils._types import WindowType
+from timebasedcv._typing import DateTimeLike
+from timebasedcv._typing import FrequencyUnit
+from timebasedcv._typing import ModeType
+from timebasedcv._typing import NullableDatetime
+from timebasedcv._typing import SeriesLike
+from timebasedcv._typing import TensorLike
+from timebasedcv._typing import WindowType
 
 if TYPE_CHECKING:  # pragma: no cover
     from collections.abc import Generator

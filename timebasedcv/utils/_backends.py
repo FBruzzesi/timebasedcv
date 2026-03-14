@@ -9,8 +9,8 @@ import numpy as np
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from timebasedcv.utils._types import SeriesLike
-    from timebasedcv.utils._types import TensorLike
+    from timebasedcv._typing import SeriesLike
+    from timebasedcv._typing import TensorLike
 
 
 def default_indexing_method(arr: TensorLike, mask: SeriesLike) -> TensorLike:

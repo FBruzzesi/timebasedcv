@@ -29,11 +29,11 @@ if TYPE_CHECKING:  # pragma: no cover
     from numpy.typing import NDArray
     from typing_extensions import Self
 
-    from timebasedcv.utils._types import FrequencyUnit
-    from timebasedcv.utils._types import ModeType
-    from timebasedcv.utils._types import NullableDatetime
-    from timebasedcv.utils._types import SeriesLike
-    from timebasedcv.utils._types import WindowType
+    from timebasedcv._typing import FrequencyUnit
+    from timebasedcv._typing import ModeType
+    from timebasedcv._typing import NullableDatetime
+    from timebasedcv._typing import SeriesLike
+    from timebasedcv._typing import WindowType
 
 
 __all__ = ("TimeBasedCVSplitter",)

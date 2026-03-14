@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
     from narwhals.typing import IntoDataFrame
 
-    from timebasedcv.utils._types import TensorLike
+    from timebasedcv._typing import TensorLike
 
 
 @pytest.fixture

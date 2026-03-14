@@ -13,7 +13,7 @@ from narwhals.dependencies import get_pandas
 
 from timebasedcv.utils._funcs import pairwise
 from timebasedcv.utils._funcs import pairwise_comparison
-from timebasedcv.utils._types import DateTimeLike
+from timebasedcv._typing import DateTimeLike
 
 if TYPE_CHECKING:  # pragma: no cover
     import pandas as pd
