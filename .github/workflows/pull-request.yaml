@@ -23,9 +23,7 @@ jobs:
           cache-suffix: "3.12"
           cache-dependency-glob: "pyproject.toml"
       - name: Install & run linter
-        run: |
-          uv pip install . --group lint --system
-          make lint
+        run: make lint
 
   test:
     strategy:
