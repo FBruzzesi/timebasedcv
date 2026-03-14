@@ -125,7 +125,6 @@ nav:
   - Home:
     - Home: index.md
     - Installation: installation.md
-    - Changelog: changelog.md
     - Contributing: contribute.md
   - User Guide:
     - Home: user-guide/index.md

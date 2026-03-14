@@ -17,8 +17,7 @@ lint:
 	uvx ruff clean
 
 test:
-	uv run --group testing pytest tests --cov=timebasedcv --cov=tests --cov-fail-under=95 -n auto
-
+	uv run --all-extras --group testing pytest tests --cov=timebasedcv --cov=tests --cov-fail-under=95 -n auto
 
 typing:
 	mypy timebasedcv

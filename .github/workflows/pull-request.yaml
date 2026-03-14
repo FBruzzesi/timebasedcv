@@ -22,7 +22,7 @@ jobs:
           enable-cache: "true"
           cache-suffix: "3.12"
           cache-dependency-glob: "pyproject.toml"
-      - name: Install & run linter
+      - name: Run linter and formatter
         run: make lint
 
   test:
@@ -43,10 +43,8 @@ jobs:
           enable-cache: "true"
           cache-suffix: ${{ matrix.python-version }}
           cache-dependency-glob: "pyproject.toml"
-      - name: Install dependencies and run tests
-        run: |
-          uv pip install ".[scikit-learn]" --group testing --system
-          make test
+      - name: Run tests
+        run: make test
 
   doc-build:
     runs-on: ubuntu-latest
@@ -63,7 +61,5 @@ jobs:
           enable-cache: "true"
           cache-suffix: "3.12"
           cache-dependency-glob: "pyproject.toml"
-      - name: Install dependencies and check docs can build
-        run: |
-          uv pip install . --group docs --system
-          mkdocs build -v -s
+      - name: Check docs can build
+        run: uv run --group docs mkdocs build -v -s
