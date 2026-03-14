@@ -101,7 +101,7 @@ def valid_kwargs(
     }
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def generate_test_data() -> tuple[datetime, datetime, np.ndarray, np.ndarray, np.ndarray]:
     """Generate start and end time, time series, X, and y for testing purposes.
 
@@ -111,7 +111,7 @@ def generate_test_data() -> tuple[datetime, datetime, np.ndarray, np.ndarray, np
     RNG = np.random.default_rng(seed=42)
 
     start_dt, end_dt = datetime(2023, 1, 1), datetime(2023, 1, 31)
-    time_series = np.arange(start_dt, end_dt, timedelta(days=1))
+    time_series = np.arange(start_dt, end_dt, timedelta(hours=1))
     size = len(time_series)
 
     X = RNG.normal(size=(size, 2))
