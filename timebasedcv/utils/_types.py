@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING
 from typing import Literal
 from typing import Protocol
 from typing import TypeVar
-from typing import Union
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -14,7 +13,6 @@ if TYPE_CHECKING:
     from typing_extensions import TypeAlias  # pragma: no cover
 
 DateTimeLike = TypeVar("DateTimeLike", datetime, date, "pd.Timestamp")
-NullableDatetime = Union[DateTimeLike, None]
 
 FrequencyUnit: TypeAlias = Literal[
     "days", "seconds", "microseconds", "milliseconds", "minutes", "hours", "weeks", "months", "years"
@@ -56,10 +54,7 @@ class SeriesLike(Protocol[T]):
     def __len__(self: Self) -> int: ...
 
 
-T_co = TypeVar("T_co", covariant=True)
-
-
-class TensorLike(Protocol[T_co]):
+class TensorLike(Protocol):
     """TensorLike protocol for type hinting purposes.
 
     This protocol is used to indicate that the class should supports:

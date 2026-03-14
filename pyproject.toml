@@ -58,11 +58,12 @@ docs = [
     "mkdocs-autorefs",
 ]
 typing = [
-    "mypy",
-    "pandas-stubs",
-    "pyright",
-    "types-python-dateutil",
-    "typing-extensions",
+    "mypy>=1.14.1",
+    "pandas-stubs>=2.0.2.230605",
+    "pyrefly>=0.56.0",
+    "pyright>=1.1.408",
+    "types-python-dateutil>=2.9.0.20241206",
+    "typing-extensions>=4.13.2",
 ]
 
 dev = [
@@ -137,8 +138,14 @@ docstring-code-format = true
 force-single-line = true
 required-imports = ["from __future__ import annotations"]
 
+[tool.coverage.run]
+source = ["timebasedcv/"]
+
+omit = [
+    "timebasedcv/utils/_types.py",  # collection of type hints and protocols
+]
+
 [tool.mypy]
-# ignore_missing_imports = true
 disallow_untyped_defs = true
 disallow_any_unimported = true
 no_implicit_optional = true
@@ -146,10 +153,20 @@ check_untyped_defs = true
 warn_return_any = true
 show_error_codes = true
 warn_unused_ignores = true
+pretty = true
+strict = true
+files = ["timebasedcv", "tests"]
 
-[tool.coverage.run]
-source = ["timebasedcv/"]
-
-omit = [
-    "timebasedcv/utils/_types.py",  # collection of type hints and protocols
-]
+[tool.pyright]
+pythonPlatform = "All"
+pythonVersion = "3.10"
+reportMissingTypeStubs = "none"
+reportPrivateUsage = "none"
+reportUnknownVariableType = "none"
+reportUnknownArgumentType = "none"
+reportUnknownMemberType = "none"
+reportUnknownLambdaType = "none"
+reportUnusedFunction = "none"
+enableExperimentalFeatures = true
+typeCheckingMode = "strict"
+include = ["timebasedcv", "tests"]

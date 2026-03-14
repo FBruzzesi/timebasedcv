@@ -1,12 +1,7 @@
-init-env:
-	pip install . --no-cache-dir
+ARG := $(word 2, $(MAKECMDGOALS))
+$(eval $(ARG):;@:)
 
-init-dev:
-	pip install -e ".[all-dev]" --no-cache-dir
-	pre-commit install
-
-clean-notebooks:
-	jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace notebooks/*.ipynb
+sources = timebasedcv tests
 
 clean-folders:
 	rm -rf __pycache__ */__pycache__ */**/__pycache__ \
@@ -16,32 +11,19 @@ clean-folders:
 		site build dist htmlcov .coverage .tox
 
 lint:
-	ruff version
-	ruff format timebasedcv tests
-	ruff check timebasedcv tests --fix
-	ruff clean
+	uvx ruff version
+	uvx ruff format $(sources)
+	uvx ruff check $(sources) --fix
+	uvx ruff clean
+	# uv tool run rumdl check .
 
 test:
-	pytest tests
-
-coverage:
-	rm -rf .coverage
-	(rm docs/img/coverage.svg) || (echo "No coverage.svg file found")
-	coverage run -m pytest
-	coverage report -m
-	coverage-badge -o docs/img/coverage.svg
+	uv run --group testing pytest tests --cov=src --cov=tests --cov-fail-under=90
 
 typing:
-	mypy timebasedcv
-	pyright timebasedcv
-
-check: lint test typing clean-folders
-
-docs-serve:
-	mkdocs serve
-
-docs-deploy:
-	mkdocs gh-deploy
+	uv run --group typing pyrefly check $(sources)
+	uv run --group typing pyright $(sources)
+	uv run --group typing mypy $(sources)
 
 pypi-push:
 	rm -rf dist

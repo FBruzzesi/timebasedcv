@@ -16,7 +16,6 @@ from timebasedcv.utils._backends import default_indexing_method
 from timebasedcv.utils._types import DateTimeLike
 from timebasedcv.utils._types import FrequencyUnit
 from timebasedcv.utils._types import ModeType
-from timebasedcv.utils._types import NullableDatetime
 from timebasedcv.utils._types import SeriesLike
 from timebasedcv.utils._types import TensorLike
 from timebasedcv.utils._types import WindowType
@@ -189,7 +188,7 @@ class _CoreTimeBasedSplit:
         self: Self,
         time_start: DateTimeLike,
         time_end: DateTimeLike,
-    ) -> Generator[SplitState, None, None]:
+    ) -> Generator[SplitState[DateTimeLike], None, None]:
         """Generate splits from `time_start` to `time_end` based on the parameters passed to the class instance.
 
         This is the core iteration that generates splits. It is used by the `split` method to generate splits from the
@@ -243,8 +242,8 @@ class _CoreTimeBasedSplit:
         self: Self,
         *,
         time_series: SeriesLike[DateTimeLike] | None = None,
-        start_dt: NullableDatetime = None,
-        end_dt: NullableDatetime = None,
+        start_dt: DateTimeLike | None = None,
+        end_dt: DateTimeLike | None = None,
     ) -> int:
         """Returns the number of splits that can be generated from `time_series`.
 
@@ -427,9 +426,9 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
         self: Self,
         *arrays: TensorLikeT,
         time_series: SeriesLike[DateTimeLike],
-        start_dt: NullableDatetime = None,
-        end_dt: NullableDatetime = None,
-        return_splitstate: Literal[False],
+        start_dt: DateTimeLike | None = None,
+        end_dt: DateTimeLike | None = None,
+        return_splitstate: Literal[False] = False,
     ) -> Generator[tuple[TensorLikeT, ...], None, None]: ...  # pragma: no cover
 
     @overload
@@ -437,33 +436,22 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
         self: Self,
         *arrays: TensorLikeT,
         time_series: SeriesLike[DateTimeLike],
-        start_dt: NullableDatetime = None,
-        end_dt: NullableDatetime = None,
+        start_dt: DateTimeLike | None = None,
+        end_dt: DateTimeLike | None = None,
         return_splitstate: Literal[True],
-    ) -> Generator[tuple[tuple[TensorLikeT, ...], SplitState], None, None]: ...  # pragma: no cover
-
-    @overload
-    def split(
-        self: Self,
-        *arrays: TensorLikeT,
-        time_series: SeriesLike[DateTimeLike],
-        start_dt: NullableDatetime = None,
-        end_dt: NullableDatetime = None,
-        return_splitstate: bool = False,
-    ) -> Generator[
-        tuple[TensorLikeT, ...] | tuple[tuple[TensorLikeT, ...], SplitState],
-        None,
-        None,
-    ]: ...  # pragma: no cover
+    ) -> Generator[tuple[tuple[TensorLikeT, ...], SplitState[DateTimeLike]], None, None]: ...  # pragma: no cover
 
     def split(
         self: Self,
         *arrays: TensorLikeT,
         time_series: SeriesLike[DateTimeLike],
-        start_dt: NullableDatetime = None,
-        end_dt: NullableDatetime = None,
+        start_dt: DateTimeLike | None = None,
+        end_dt: DateTimeLike | None = None,
         return_splitstate: bool = False,
-    ) -> Generator[tuple[TensorLikeT, ...] | tuple[tuple[TensorLikeT, ...], SplitState], None, None]:
+    ) -> (
+        Generator[tuple[TensorLikeT, ...], None, None]
+        | Generator[tuple[tuple[TensorLikeT, ...], SplitState[DateTimeLike]], None, None]
+    ):
         """Returns a generator of split arrays based on the `time_series`.
 
         The `time_series` argument is split on split state values to create boolean masks for training - from train_

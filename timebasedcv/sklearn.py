@@ -29,9 +29,9 @@ if TYPE_CHECKING:  # pragma: no cover
     from numpy.typing import NDArray
     from typing_extensions import Self
 
+    from timebasedcv.utils._types import DateTimeLike
     from timebasedcv.utils._types import FrequencyUnit
     from timebasedcv.utils._types import ModeType
-    from timebasedcv.utils._types import NullableDatetime
     from timebasedcv.utils._types import SeriesLike
     from timebasedcv.utils._types import WindowType
 
@@ -39,7 +39,7 @@ if TYPE_CHECKING:  # pragma: no cover
 __all__ = ("TimeBasedCVSplitter",)
 
 
-class TimeBasedCVSplitter(_BaseKFold):  # type: ignore[no-any-unimported]
+class TimeBasedCVSplitter(_BaseKFold):
     """The `TimeBasedCVSplitter` is a scikit-learn compatible CV Splitter that generates splits based on time values.
 
     The number of sample in each split is independent of the number of splits but based purely on the timestamp of the
@@ -142,8 +142,8 @@ class TimeBasedCVSplitter(_BaseKFold):  # type: ignore[no-any-unimported]
         stride: int | None = None,
         window: WindowType = "rolling",
         mode: ModeType = "forward",
-        start_dt: NullableDatetime = None,
-        end_dt: NullableDatetime = None,
+        start_dt: DateTimeLike | None = None,
+        end_dt: DateTimeLike | None = None,
     ) -> None:
         self.splitter = TimeBasedSplit(
             frequency=frequency,
@@ -164,9 +164,9 @@ class TimeBasedCVSplitter(_BaseKFold):  # type: ignore[no-any-unimported]
 
     def split(
         self: Self,
-        X: NDArray | None = None,
-        y: NDArray | None = None,
-        groups: NDArray | None = None,
+        X: np.ndarray | None = None,
+        y: np.ndarray | None = None,
+        groups: np.ndarray | None = None,
     ) -> Generator[tuple[NDArray[np.int_], NDArray[np.int_]], None, None]:
         """Generates integer indices corresponding to train and test sets.
 
@@ -196,9 +196,9 @@ class TimeBasedCVSplitter(_BaseKFold):  # type: ignore[no-any-unimported]
 
     def get_n_splits(
         self: Self,
-        X: NDArray | None = None,
-        y: NDArray | None = None,
-        groups: NDArray | None = None,
+        X: np.ndarray | None = None,
+        y: np.ndarray | None = None,
+        groups: np.ndarray | None = None,
     ) -> int:
         """Returns the number of splits that can be generated from the instance.
 
@@ -223,9 +223,9 @@ class TimeBasedCVSplitter(_BaseKFold):  # type: ignore[no-any-unimported]
     @staticmethod
     def _validate_split_args(
         size: int,
-        X: NDArray | None = None,
-        y: NDArray | None = None,
-        groups: NDArray | None = None,
+        X: np.ndarray | None = None,
+        y: np.ndarray | None = None,
+        groups: np.ndarray | None = None,
     ) -> None:
         """Validates the arguments passed to the `split` and `get_n_splits` methods."""
         if X is not None and X.shape[0] != size:

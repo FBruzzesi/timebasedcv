@@ -121,7 +121,7 @@ class SplitState(Generic[DateTimeLike]):
         """
         return relativedelta(self.forecast_end, self.train_start)
 
-    def __add__(self: Self, other: timedelta | relativedelta | pd.Timedelta) -> SplitState:
+    def __add__(self: Self, other: timedelta | relativedelta | pd.Timedelta) -> SplitState[DateTimeLike]:
         """Adds `other` to each value of the state."""
         return SplitState(
             train_start=self.train_start + other,
@@ -130,7 +130,7 @@ class SplitState(Generic[DateTimeLike]):
             forecast_end=self.forecast_end + other,
         )
 
-    def __sub__(self: Self, other: timedelta | relativedelta | pd.Timedelta) -> SplitState:
+    def __sub__(self: Self, other: timedelta | relativedelta | pd.Timedelta) -> SplitState[DateTimeLike]:
         """Subtracts other to each value of the state."""
         return SplitState(
             train_start=self.train_start - other,

@@ -5,6 +5,7 @@ from typing import TypeVar
 
 import narwhals.stable.v1 as nw
 import numpy as np
+from narwhals.stable.v1.typing import IntoDataFrame
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -13,7 +14,7 @@ if TYPE_CHECKING:
     from timebasedcv.utils._types import TensorLike
 
 
-def default_indexing_method(arr: TensorLike, mask: SeriesLike) -> TensorLike:
+def default_indexing_method(arr: TensorLike, mask: SeriesLike[bool]) -> TensorLike:
     """Default indexing method for arrays.
 
     !!! warning
@@ -29,7 +30,7 @@ def default_indexing_method(arr: TensorLike, mask: SeriesLike) -> TensorLike:
     return arr[mask]
 
 
-T_NW = TypeVar("T_NW", nw.DataFrame, nw.Series)
+T_NW = TypeVar("T_NW", nw.DataFrame[IntoDataFrame], nw.Series)
 
 
 def nw_indexing_method(_dfs: T_NW, mask: nw.Expr) -> T_NW:
