@@ -22,18 +22,13 @@ else:  # pragma: no cover
 
 if TYPE_CHECKING:  # pragma: no cover
     from collections.abc import Generator
-    from datetime import date
-    from datetime import datetime
+    from datetime import date, datetime
 
     import pandas as pd
     from numpy.typing import NDArray
     from typing_extensions import Self
 
-    from timebasedcv._typing import FrequencyUnit
-    from timebasedcv._typing import ModeType
-    from timebasedcv._typing import NullableDatetime
-    from timebasedcv._typing import SeriesLike
-    from timebasedcv._typing import WindowType
+    from timebasedcv._typing import FrequencyUnit, ModeType, NullableDatetime, SeriesLike, WindowType
 
 
 __all__ = ("TimeBasedCVSplitter",)

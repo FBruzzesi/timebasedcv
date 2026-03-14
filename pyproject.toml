@@ -132,7 +132,6 @@ keep-runtime-typing = true
 docstring-code-format = true
 
 [tool.ruff.lint.isort]
-force-single-line = true
 required-imports = ["from __future__ import annotations"]
 
 [tool.pytest.ini_options]

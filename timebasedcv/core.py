@@ -1,25 +1,22 @@
 from __future__ import annotations
 
 from itertools import chain
-from typing import TYPE_CHECKING
-from typing import Literal
-from typing import TypeVar
-from typing import get_args
-from typing import overload
+from typing import TYPE_CHECKING, Literal, TypeVar, get_args, overload
 
 import narwhals.stable.v1 as nw
 from dateutil.relativedelta import relativedelta
 
+from timebasedcv._typing import (
+    DateTimeLike,
+    FrequencyUnit,
+    ModeType,
+    NullableDatetime,
+    SeriesLike,
+    TensorLike,
+    WindowType,
+)
 from timebasedcv.splitstate import SplitState
-from timebasedcv.utils._backends import BACKEND_TO_INDEXING_METHOD
-from timebasedcv.utils._backends import default_indexing_method
-from timebasedcv._typing import DateTimeLike
-from timebasedcv._typing import FrequencyUnit
-from timebasedcv._typing import ModeType
-from timebasedcv._typing import NullableDatetime
-from timebasedcv._typing import SeriesLike
-from timebasedcv._typing import TensorLike
-from timebasedcv._typing import WindowType
+from timebasedcv.utils._backends import BACKEND_TO_INDEXING_METHOD, default_indexing_method
 
 if TYPE_CHECKING:  # pragma: no cover
     from collections.abc import Generator

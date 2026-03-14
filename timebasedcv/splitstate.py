@@ -1,19 +1,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import date
-from datetime import datetime
-from datetime import timedelta
+from datetime import date, datetime, timedelta
 from operator import le as less_or_equal
-from typing import TYPE_CHECKING
-from typing import Generic
+from typing import TYPE_CHECKING, Generic
 
 from dateutil.relativedelta import relativedelta
 from narwhals.dependencies import get_pandas
 
-from timebasedcv.utils._funcs import pairwise
-from timebasedcv.utils._funcs import pairwise_comparison
 from timebasedcv._typing import DateTimeLike
+from timebasedcv.utils._funcs import pairwise, pairwise_comparison
 
 if TYPE_CHECKING:  # pragma: no cover
     import pandas as pd

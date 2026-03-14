@@ -1,12 +1,7 @@
 from __future__ import annotations
 
-from datetime import date
-from datetime import datetime
-from typing import TYPE_CHECKING
-from typing import Literal
-from typing import Protocol
-from typing import TypeAlias
-from typing import TypeVar
+from datetime import date, datetime
+from typing import TYPE_CHECKING, Literal, Protocol, TypeAlias, TypeVar
 
 if TYPE_CHECKING:
     import pandas as pd

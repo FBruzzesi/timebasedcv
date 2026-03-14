@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-from itertools import pairwise
-from itertools import starmap
+from itertools import pairwise, starmap
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
-    from collections.abc import Iterable
+    from collections.abc import Callable, Iterable
     from typing import TypeVar
 
     T = TypeVar("T")

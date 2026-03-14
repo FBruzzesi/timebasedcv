@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 from contextlib import nullcontext as does_not_raise
-from datetime import date
-from datetime import datetime
+from datetime import date, datetime
 
 import narwhals as nw
 import numpy as np
