@@ -47,7 +47,7 @@ jobs:
           cache-dependency-glob: "pyproject.toml"
       - name: Install dependencies and run tests
         run: |
-          uv pip install ".[scikit-learn]" --group tests --system
+          uv pip install ".[scikit-learn]" --group testing --system
           make test
 
   doc-build:

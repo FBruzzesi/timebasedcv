@@ -35,7 +35,7 @@ Once an instance is created, it is possible to split a list of arrays using the 
 
 Optionally it is possible to pass a `start_dt` and `end_dt` arguments as well. If provided, they are used in place of the `time_series.min()` and `time_series.max()` respectively to determine the period.
 
-This is useful because the series does not necessarely starts from the first date and/or terminates in the last date of the time period of interest, and it could lead to skewed splits.
+This is useful because the series does not necessarily starts from the first date and/or terminates in the last date of the time period of interest, and it could lead to skewed splits.
 
 !!! info
     We made the opinionated choice of returning the sliced arrays from `.split(...)`, while scikit-learn CV Splitters return train and test indices of the split.
@@ -91,7 +91,7 @@ Train: (124, 2), Forecast: (40, 2)
 Train: (137, 2), Forecast: (22, 2)
 ```
 
-As we can see, each split does not necessarely have the same number of points, this is because the time series has a different number of points per day.
+As we can see, each split does not necessarily have the same number of points, this is because the time series has a different number of points per day.
 
 Let's visualize the splits (blue dots represent the train points, while the red dots represent the forecasting points).
 

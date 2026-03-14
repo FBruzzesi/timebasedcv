@@ -470,7 +470,7 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
         The `start_dt` and `end_dt` arguments can be used to specify the start and end of the time period. If provided,
         they are used in place of the `time_series.min()` and `time_series.max()` respectively.
 
-        This is useful because the series does not necessarely starts from the first date and/or terminates in the last
+        This is useful because the series does not necessarily starts from the first date and/or terminates in the last
         date of the time period of interest.
 
         The `return_splitstate` argument can be used to return the `SplitState` instance for each split. This can be

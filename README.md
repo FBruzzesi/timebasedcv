@@ -131,7 +131,7 @@ Train: (124, 2), Forecast: (40, 2)
 Train: (137, 2), Forecast: (22, 2)
 ```
 
-As we can see, each split does not necessarely have the same number of points, this is because the time series has a different number of points per day.
+As we can see, each split does not necessarily have the same number of points, this is because the time series has a different number of points per day.
 
 A picture is worth a thousand words, let's visualize the splits (blue dots represent the train points, while the red dots represent the forecastng points):
 
