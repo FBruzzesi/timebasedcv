@@ -166,4 +166,20 @@ warn_return_any = true
 show_error_codes = true
 warn_unused_ignores = true
 
+[tool.rumdl]
+line-length = 120
+flavor = "mkdocs"
+include = ["docs/**", "README.md", "AGENTS.md"]
+disable = [
+  # NOTE: These look like either false positives or unsupported case
+  # TODO(FBruzzesi): Report upstream
+  # No blank line after admonition block
+  "MD031",
+  # Use fenced code blocks
+  "MD046",
+]
 
+[tool.rumdl.MD007]
+# Keep list indentation consistent
+indent = 4
+start-indented = false

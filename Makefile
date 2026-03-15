@@ -15,6 +15,7 @@ lint:
 	uvx ruff format $(sources)
 	uvx ruff check $(sources) --fix
 	uvx ruff clean
+	# uv tool run rumdl check .
 
 test:
 	uv run --all-extras --group testing pytest tests --cov=timebasedcv --cov=tests --cov-fail-under=95 -n auto

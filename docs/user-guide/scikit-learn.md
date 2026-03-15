@@ -1,31 +1,39 @@
 
 # Scikit-learn component 🚀
 
-[scikit-learn CV Splitters](https://scikit-learn.org/stable/common_pitfalls.html#id3){:target="_blank"} require a splitter to behave in a certain way:
+[scikit-learn CV Splitters](https://scikit-learn.org/stable/common_pitfalls.html#id3){:target="_blank"}
+require a splitter to behave in a certain way:
 
-- `.split(...)` method should have the following signature: `.split(self, X, y, groups)`.
-- `.split(...)` method should return train and test indices of the split.
-- know the total number of splits a priori, independently of `X, y, groups` arrays.
+* `.split(...)` method should have the following signature: `.split(self, X, y, groups)`.
+* `.split(...)` method should return train and test indices of the split.
+* know the total number of splits a priori, independently of `X, y, groups` arrays.
 
-Therefore, our [`TimeBasedSplit`](../api/timebasedcv.md#timebasedcv.core.TimeBasedSplit){:target="_blank"} is **not** compatible with scikit-learn.
+Therefore, our [`TimeBasedSplit`](../api/timebasedcv.md#timebasedcv.core.TimeBasedSplit){:target="_blank"} is **not**
+compatible with scikit-learn.
 
 ## `TimeBasedCVSplitter`
 
-Considering the above requirements, we provide a scikit-learn compatible splitter: [`TimeBasedCVSplitter`](../api/sklearn.md#timebasedcv.sklearn.TimeBasedCVSplitter){:target="_blank"} in the sklearn module.
+Considering the above requirements, we provide a scikit-learn compatible splitter: [`TimeBasedCVSplitter`](../api/sklearn.md#timebasedcv.sklearn.TimeBasedCVSplitter){:target="_blank"}
+in the sklearn module.
 
 ```py
 from timebasedcv.sklearn import TimeBasedCVSplitter
 ```
 
-To be scikit-learn compatible, `TimeBasedCVSplitter` is _initialized_ with the same parameters of `TimeBasedSplit` **and** the `time_series` containing the time information used to generate the train and test indices of each split.
+To be scikit-learn compatible, `TimeBasedCVSplitter` is _initialized_ with the same parameters of `TimeBasedSplit`
+**and** the `time_series` containing the time information used to generate the train and test indices of each split.
 
-From a point of view, `TimeBasedCVSplitter` has all the features that `TimeBasedSplit` has, plus the compatibility with scikit-learn.
+From a point of view, `TimeBasedCVSplitter` has all the features that `TimeBasedSplit` has, plus the compatibility
+with scikit-learn.
 
-This comes to the cost of requiring to know `time_series` beforehand, during `.__init__()` step. Therefore it is not possible to instantiate the split class once and re-use it with different time series dynamically.
+This comes to the cost of requiring to know `time_series` beforehand, during `.__init__()` step.
+Therefore it is not possible to instantiate the split class once and re-use it with different time series dynamically.
 
 ## Example
 
-In the following example we will see how to use it with a [`Ridge`](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Ridge.html){:target="_blank"} model and [`RandomizedSearchCV`](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.RandomizedSearchCV.html){:target="_blank"} to find the best parameters for the model.
+In the following example we will see how to use it with a [`Ridge`](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Ridge.html){:target="_blank"}
+model and [`RandomizedSearchCV`](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.RandomizedSearchCV.html){:target="_blank"}
+to find the best parameters for the model.
 
 ```python hl_lines="7" title="Imports"
 import numpy as np

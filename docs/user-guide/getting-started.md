@@ -1,23 +1,36 @@
 # Getting started 🐍
 
-The following sections will guide you through the basic usage of the library.
+The following sections will guide you through the basic usage of the library using the
+[`TimeBasedSplit`](../api/timebasedcv.md#timebasedcv.core.TimeBasedSplit) class.
 
 ## `TimeBasedSplit`
 
-The [`TimeBasedSplit`](../api/timebasedcv.md#timebasedcv.core.TimeBasedSplit) class allows to define a way to split your data based on time. There is a (long) list of parameters that can be set to define how to generate the splits. These allow for a lot of flexibility in how the data is split. Here is an overview of them:
+The [`TimeBasedSplit`](../api/timebasedcv.md#timebasedcv.core.TimeBasedSplit) class allows to define a way to split
+your data based on time.
 
-- `frequency`: we do not try to infer the frequency from the data, this information has to be specified beforehand. Available values are "days", "seconds", "microseconds", "milliseconds", "minutes", "hours", "weeks", "months" and "years".
-- `train_size`: defines the minimum number of time units required to be in the train set, e.g. if `frequency="days"` and `train_size=30`, the train set will have at least 30 days.
-- `forecast_horizon`: specifies the number of time units to forecast, e.g. if `frequency="days"` and `forecast_horizon=7`, the forecast set will have 7 days. Notice that at the end of the time series, the forecast set might be smaller than the specified `forecast_horizon`.
-- `gap`: the number of time units to skip between the end of the train set and the start of the forecast set.
-- `stride`: how many time unit to move forward after each split. If `None`, the stride is equal to the `forecast_horizon`.
-- `window`: it can be either "rolling" or "expanding"
-- `mode`: it can be either "forward" or "backward" (generating splits either starting from the beginning or the end of the time series).
+There is a (long) list of parameters that can be set to define how to generate the splits.
+These allow for a lot of flexibility for how the data is split. Here is an overview of them:
 
-Well that is a lot of parameters! But in our opinion it is what makes the library so flexible and powerful to be able to cover the large majority of use cases!
+* `frequency`: we do not try to infer the frequency from the data, this information has to be specified beforehand.
+    Available values are "days", "seconds", "microseconds", "milliseconds", "minutes", "hours", "weeks", "months" and
+    "years".
+* `train_size`: defines the minimum number of time units required to be in the train set, e.g. if `frequency="days"`
+    and `train_size=30`, the train set will have at least 30 days.
+* `forecast_horizon`: specifies the number of time units to forecast, e.g. if `frequency="days"` and
+    `forecast_horizon=7`, the forecast set will have 7 days. **Note** that at the end of the time series,
+    the forecast set might be smaller than the specified `forecast_horizon`.
+* `gap`: the number of time units to skip between the end of the train set and the start of the forecast set.
+* `stride`: how many time unit to move forward after each split. If `None`, then the stride is equal to the
+    `forecast_horizon` value.
+* `window`: it can be either "rolling" or "expanding".
+* `mode`: it can be either "forward" or "backward", to generate splits either starting from the beginning or from the
+    end of the time series.
+
+Well that is a lot of parameters! But in our opinion it is what is required to cover the majority of use cases!
 
 !!! info
-    As the list of so long, and it could be easy to provide values in the wrong order and/or be very hard to understand what each number means, we require to pass them as keyword only arguments!
+    As the list of so long, and it could be easy to provide values in the wrong order and/or be very hard to understand
+    what each number means, we require to pass them as keyword only arguments!
 
 ```python title="Create a TimeBasedSplit instance"
 from timebasedcv import TimeBasedSplit
@@ -31,14 +44,18 @@ tbs = TimeBasedSplit(
 )
 ```
 
-Once an instance is created, it is possible to split a list of arrays using the `.split(...)` method, such method requires to pass a `time_series` as input to know how to split each array.
+Once an instance is created, it is possible to split a list of arrays using the `.split(...)` method,
+such method requires to pass a `time_series` as input to know how to split each array.
 
-Optionally it is possible to pass a `start_dt` and `end_dt` arguments as well. If provided, they are used in place of the `time_series.min()` and `time_series.max()` respectively to determine the period.
+Optionally it is possible to provide the `start_dt` and the `end_dt` arguments: if that's to be the case, then these
+values are used in place of the `time_series.min()` and `time_series.max()` (respectively) to determine the period.
 
-This is useful because the series does not necessarily starts from the first date and/or terminates in the last date of the time period of interest, and it could lead to skewed splits.
+This is useful because the series does not necessarily starts from the first date and/or terminates in the last date of
+the time period of interest, and it could lead to skewed splits.
 
 !!! info
-    We made the opinionated choice of returning the sliced arrays from `.split(...)`, while scikit-learn CV Splitters return train and test indices of the split.
+    We made the opinionated choice of returning the sliced arrays from `.split(...)`, while scikit-learn CV Splitters
+    return train and test indices of the split.
 
 ```python title="Generate the data"
 import numpy as np
@@ -91,7 +108,8 @@ Train: (124, 2), Forecast: (40, 2)
 Train: (137, 2), Forecast: (22, 2)
 ```
 
-As we can see, each split does not necessarily have the same number of points, this is because the time series has a different number of points per day.
+As we can see, each split does not necessarily have the same number of points, this is because the time series has a
+different number of points per day.
 
 Let's visualize the splits (blue dots represent the train points, while the red dots represent the forecasting points).
 
@@ -265,14 +283,18 @@ for a_train, a_test, b_train, b_test, y_train, y_test in tbs.split(a, b, y, time
 ```
 
 !!! info
-    The only requirement is that the all the arrays must have the same length, as we use the mask on the `time_series` to slice each one of them.
+    The only requirement is that the all the arrays must have the same length, as we use the mask on the `time_series`
+    to slice each one of them.
 
 !!! warning
-    Ideally each array can be a different type (numpy, pandas, polars, and so on...), in practice there are a few limitations that might arise from the different types, so please be aware of that.
+    Ideally each array can be a different type (numpy, pandas, polars, and so on...), in practice there are a few
+    limitations that might arise from the different types, so please be aware of that.
 
 ### Using Polars and PyArrow
 
-Thanks to [Narwhals](https://narwhals-dev.github.io/narwhals/){:target="_blank"}, `timebasedcv` works seamlessly with Polars and PyArrow. The returned arrays preserve the original type -- Polars DataFrames come back as Polars DataFrames, PyArrow Tables as PyArrow Tables, and so on.
+Thanks to [Narwhals](https://narwhals-dev.github.io/narwhals/){:target="_blank"}, `timebasedcv` works seamlessly with
+Polars and PyArrow. The returned arrays preserve the original type: Polars DataFrames come back as Polars DataFrames,
+PyArrow Tables as PyArrow Tables, and so on.
 
 === "Polars"
 
