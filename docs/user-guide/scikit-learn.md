@@ -1,31 +1,39 @@
 
 # Scikit-learn component 🚀
 
-[scikit-learn CV Splitters](https://scikit-learn.org/stable/common_pitfalls.html#id3){:target="_blank"} require a splitter to behave in a certain way:
+[scikit-learn CV Splitters](https://scikit-learn.org/stable/common_pitfalls.html#id3){:target="_blank"}
+require a splitter to behave in a certain way:
 
-- `.split(...)` method should have the following signature: `.split(self, X, y, groups)`.
-- `.split(...)` method should return train and test indices of the split.
-- know the total number of splits a priori, independently of `X, y, groups` arrays.
+* `.split(...)` method should have the following signature: `.split(self, X, y, groups)`.
+* `.split(...)` method should return train and test indices of the split.
+* know the total number of splits a priori, independently of `X, y, groups` arrays.
 
-Therefore, our [`TimeBasedSplit`](../api/timebasedcv.md#timebasedcv.core.TimeBasedSplit){:target="_blank"} is **not** compatible with scikit-learn.
+Therefore, our [`TimeBasedSplit`](../api/timebasedcv.md#timebasedcv.core.TimeBasedSplit){:target="_blank"} is **not**
+compatible with scikit-learn.
 
 ## `TimeBasedCVSplitter`
 
-Considering the above requirements, we provide a scikit-learn compatible splitter: [`TimeBasedCVSplitter`](../api/sklearn.md#timebasedcv.sklearn.TimeBasedCVSplitter){:target="_blank"} in the sklearn module.
+Considering the above requirements, we provide a scikit-learn compatible splitter: [`TimeBasedCVSplitter`](../api/sklearn.md#timebasedcv.sklearn.TimeBasedCVSplitter){:target="_blank"}
+in the sklearn module.
 
 ```py
 from timebasedcv.sklearn import TimeBasedCVSplitter
 ```
 
-To be scikit-learn compatible, `TimeBasedCVSplitter` is _initialized_ with the same parameters of `TimeBasedSplit` **and** the `time_series` containing the time information used to generate the train and test indices of each split.
+To be scikit-learn compatible, `TimeBasedCVSplitter` is _initialized_ with the same parameters of `TimeBasedSplit`
+**and** the `time_series` containing the time information used to generate the train and test indices of each split.
 
-From a point of view, `TimeBasedCVSplitter` has all the features that `TimeBasedSplit` has, plus the compatibility with scikit-learn.
+From a point of view, `TimeBasedCVSplitter` has all the features that `TimeBasedSplit` has, plus the compatibility
+with scikit-learn.
 
-This comes to the cost of requiring to know `time_series` beforehand, during `.__init__()` step. Therefore it is not possible to instantiate the split class once and re-use it with different time series dynamically.
+This comes to the cost of requiring to know `time_series` beforehand, during `.__init__()` step.
+Therefore it is not possible to instantiate the split class once and reuse it with different time series dynamically.
 
 ## Example
 
-In the following example we will see how to use it with a [`Ridge`](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Ridge.html){:target="_blank"} model and [`RandomizedSearchCV`](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.RandomizedSearchCV.html){:target="_blank"} to find the best parameters for the model.
+In the following example we will see how to use it with a [`Ridge`](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Ridge.html){:target="_blank"}
+model and [`RandomizedSearchCV`](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.RandomizedSearchCV.html){:target="_blank"}
+to find the best parameters for the model.
 
 ```python hl_lines="7" title="Imports"
 import numpy as np
@@ -43,16 +51,23 @@ RNG = np.random.default_rng(seed=42)
 dates = pd.Series(pd.date_range("2023-01-01", "2023-01-31", freq="D"))
 size = len(dates)
 
-df = (pd.concat([
-        pd.DataFrame({
-            "time": pd.date_range(start, end, periods=_size, inclusive="left"),
-            "a": RNG.normal(size=_size-1),
-            "b": RNG.normal(size=_size-1),
-        })
-        for start, end, _size in zip(dates[:-1], dates[1:], RNG.integers(2, 24, size-1))
-    ])
+df = (
+    pd.concat(
+        [
+            pd.DataFrame(
+                {
+                    "time": pd.date_range(start, end, periods=_size, inclusive="left"),
+                    "a": RNG.normal(size=_size - 1),
+                    "b": RNG.normal(size=_size - 1),
+                }
+            )
+            for start, end, _size in zip(
+                dates[:-1], dates[1:], RNG.integers(2, 24, size - 1)
+            )
+        ]
+    )
     .reset_index(drop=True)
-    .assign(y=lambda t: t[["a", "b"]].sum(axis=1) + RNG.normal(size=t.shape[0])/25)
+    .assign(y=lambda t: t[["a", "b"]].sum(axis=1) + RNG.normal(size=t.shape[0]) / 25)
 )
 
 df.set_index("time").resample("D").agg(count=("y", np.size)).head(5)

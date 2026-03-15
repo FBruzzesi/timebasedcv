@@ -1,44 +1,57 @@
 # Getting started 🐍
 
-The following sections will guide you through the basic usage of the library.
+The following sections will guide you through the basic usage of the library using the
+[`TimeBasedSplit`](../api/timebasedcv.md#timebasedcv.core.TimeBasedSplit) class.
 
 ## `TimeBasedSplit`
 
-The [`TimeBasedSplit`](../api/timebasedcv.md#timebasedcv.core.TimeBasedSplit) class allows to define a way to split your data based on time. There is a (long) list of parameters that can be set to define how to generate the splits. These allow for a lot of flexibility in how the data is split. Here is an overview of them:
+The [`TimeBasedSplit`](../api/timebasedcv.md#timebasedcv.core.TimeBasedSplit) class allows to define a way to split
+your data based on time.
 
-- `frequency`: we do not try to infer the frequency from the data, this information has to be specified beforehand. Available values are "days", "seconds", "microseconds", "milliseconds", "minutes", "hours", "weeks".
-- `train_size`: defines the minimum number of time units required to be in the train set, e.g. if `frequency="days"` and `train_size=30`, the train set will have at least 30 days.
-- `forecast_horizon`: specifies the number of time units to forecast, e.g. if `frequency="days"` and `forecast_horizon=7`, the forecast set will have 7 days. Notice that at the end of the time series, the forecast set might be smaller than the specified `forecast_horizon`.
-- `gap`: the number of time units to skip between the end of the train set and the start of the forecast set.
-- `stride`: how many time unit to move forward after each split. If `None`, the stride is equal to the `forecast_horizon`.
-- `window`: it can be either "rolling" or "expanding"
-- `mode`: it can be either "forward" or "backward" (generating splits either starting from the beginning or the end of the time series).
+There is a (long) list of parameters that can be set to define how to generate the splits.
+These allow for a lot of flexibility for how the data is split. Here is an overview of them:
 
-Well that is a lot of parameters! But in our opinion it is what makes the library so flexible and powerful to be able to cover the large majority of use cases!
+* `frequency`: we do not try to infer the frequency from the data, this information has to be specified beforehand.
+    Available values are "days", "seconds", "microseconds", "milliseconds", "minutes", "hours", "weeks", "months" and
+    "years".
+* `train_size`: defines the minimum number of time units required to be in the train set, e.g. if `frequency="days"`
+    and `train_size=30`, the train set will have at least 30 days.
+* `forecast_horizon`: specifies the number of time units to forecast, e.g. if `frequency="days"` and
+    `forecast_horizon=7`, the forecast set will have 7 days. **Note** that at the end of the time series,
+    the forecast set might be smaller than the specified `forecast_horizon`.
+* `gap`: the number of time units to skip between the end of the train set and the start of the forecast set.
+* `stride`: how many time unit to move forward after each split. If `None`, then the stride is equal to the
+    `forecast_horizon` value.
+* `window`: it can be either "rolling" or "expanding".
+* `mode`: it can be either "forward" or "backward", to generate splits either starting from the beginning or from the
+    end of the time series.
+
+Well that is a lot of parameters! But in our opinion it is what is required to cover the majority of use cases!
 
 !!! info
-    As the list of so long, and it could be easy to provide values in the wrong order and/or be very hard to understand what each number means, we require to pass them as keyword only arguments!
+    As the list of so long, and it could be easy to provide values in the wrong order and/or be very hard to understand
+    what each number means, we require to pass them as keyword only arguments!
 
 ```python title="Create a TimeBasedSplit instance"
 from timebasedcv import TimeBasedSplit
 
 tbs = TimeBasedSplit(
-    frequency="days",
-    train_size=10,
-    forecast_horizon=5,
-    gap=1,
-    stride=3
+    frequency="days", train_size=10, forecast_horizon=5, gap=1, stride=3
 )
 ```
 
-Once an instance is created, it is possible to split a list of arrays using the `.split(...)` method, such method requires to pass a `time_series` as input to know how to split each array.
+Once an instance is created, it is possible to split a list of arrays using the `.split(...)` method,
+such method requires to pass a `time_series` as input to know how to split each array.
 
-Optionally it is possible to pass a `start_dt` and `end_dt` arguments as well. If provided, they are used in place of the `time_series.min()` and `time_series.max()` respectively to determine the period.
+Optionally it is possible to provide the `start_dt` and the `end_dt` arguments: if that's to be the case, then these
+values are used in place of the `time_series.min()` and `time_series.max()` (respectively) to determine the period.
 
-This is useful because the series does not necessarely starts from the first date and/or terminates in the last date of the time period of interest, and it could lead to skewed splits.
+This is useful because the series does not necessarily starts from the first date and/or terminates in the last date of
+the time period of interest, and it could lead to skewed splits.
 
 !!! info
-    We made the opinionated choice of returning the sliced arrays from `.split(...)`, while scikit-learn CV Splitters return train and test indices of the split.
+    We made the opinionated choice of returning the sliced arrays from `.split(...)`, while scikit-learn CV Splitters
+    return train and test indices of the split.
 
 ```python title="Generate the data"
 import numpy as np
@@ -49,16 +62,23 @@ RNG = np.random.default_rng(seed=42)
 dates = pd.Series(pd.date_range("2023-01-01", "2023-01-31", freq="D"))
 size = len(dates)
 
-df = (pd.concat([
-        pd.DataFrame({
-            "time": pd.date_range(start, end, periods=_size, inclusive="left"),
-            "a": RNG.normal(size=_size-1),
-            "b": RNG.normal(size=_size-1),
-        })
-        for start, end, _size in zip(dates[:-1], dates[1:], RNG.integers(2, 24, size-1))
-    ])
+df = (
+    pd.concat(
+        [
+            pd.DataFrame(
+                {
+                    "time": pd.date_range(start, end, periods=_size, inclusive="left"),
+                    "a": RNG.normal(size=_size - 1),
+                    "b": RNG.normal(size=_size - 1),
+                }
+            )
+            for start, end, _size in zip(
+                dates[:-1], dates[1:], RNG.integers(2, 24, size - 1)
+            )
+        ]
+    )
     .reset_index(drop=True)
-    .assign(y=lambda t: t[["a", "b"]].sum(axis=1) + RNG.normal(size=t.shape[0])/25)
+    .assign(y=lambda t: t[["a", "b"]].sum(axis=1) + RNG.normal(size=t.shape[0]) / 25)
 )
 
 df.set_index("time").resample("D").agg(count=("y", np.size)).head(5)
@@ -79,7 +99,9 @@ Now let's run split the data with the provided `TimeBasedSplit` instance:
 ```py title="Generate the splits"
 X, y, time_series = df.loc[:, ["a", "b"]], df["y"], df["time"]
 
-for X_train, X_forecast, y_train, y_forecast in tbs.split(X, y, time_series=time_series):
+for X_train, X_forecast, y_train, y_forecast in tbs.split(
+    X, y, time_series=time_series
+):
     print(f"Train: {X_train.shape}, Forecast: {X_forecast.shape}")
 ```
 
@@ -91,9 +113,10 @@ Train: (124, 2), Forecast: (40, 2)
 Train: (137, 2), Forecast: (22, 2)
 ```
 
-As we can see, each split does not necessarely have the same number of points, this is because the time series has a different number of points per day.
+As we can see, each split does not necessarily have the same number of points, this is because the time series has a
+different number of points per day.
 
-Let's visualize the splits (blue dots represent the train points, while the red dots represent the forecastng points).
+Let's visualize the splits (blue dots represent the train points, while the red dots represent the forecasting points).
 
 ![basic-cv-split](../img/basic-cv-split.png)
 
@@ -105,47 +128,51 @@ Let's visualize the splits (blue dots represent the train points, while the red 
     fig = go.Figure()
 
     for _fold, (train_forecast, split_state) in enumerate(
-        tbs.split(y/25, time_series=time_series, return_splitstate=True),
+        tbs.split(y / 25, time_series=time_series, return_splitstate=True),
         start=1,
-        ):
+    ):
 
         train, forecast = train_forecast
 
-        ts = split_state.train_start
-        te = split_state.train_end
-        fs = split_state.forecast_start
-        fe = split_state.forecast_end
+        train_start = split_state.train_start
+        train_end = split_state.train_end
+        forecast_start = split_state.forecast_start
+        forecast_end = split_state.forecast_end
+
+        train_mask = time_series.between(train_start, train_end, inclusive="left")
+        forecast_mask = time_series.between(forecast_start, forecast_end, inclusive="left")
 
         fig.add_trace(
             go.Scatter(
-                x=time_series[time_series.between(ts, te, inclusive="left")],
+                x=time_series[train_mask],
                 y=train + _fold,
                 name=f"Train Fold {_fold}",
                 mode="markers",
-                marker={"color": "rgb(57, 105, 172)"}
+                marker={"color": "rgb(57, 105, 172)"},
             )
         )
 
         fig.add_trace(
             go.Scatter(
-                x=time_series[time_series.between(fs, fe, inclusive="left")],
+                x=time_series[forecast_mask],
                 y=forecast + _fold,
                 name=f"Forecast Fold {_fold}",
                 mode="markers",
-                marker={"color": "indianred"}
+                marker={"color": "indianred"},
             )
         )
 
         fig.update_layout(
             title={
                 "text": "Time Based Cross Validation",
-                "y":0.95, "x":0.5,
+                "y": 0.95,
+                "x": 0.5,
                 "xanchor": "center",
-                "yanchor": "top"
+                "yanchor": "top",
             },
             showlegend=True,
             height=500,
-            yaxis = {"autorange": "reversed", "title": "Fold"}
+            yaxis={"autorange": "reversed", "title": "Fold"},
         )
 
     fig.show()
@@ -168,7 +195,7 @@ Here is an example of a few different configuration values for the splitter:
             "forecast_horizon": 7,
             "gap": 2,
             "stride": 5,
-            "window": "expanding"
+            "window": "expanding",
         },
         {
             "frequency": "days",
@@ -176,7 +203,7 @@ Here is an example of a few different configuration values for the splitter:
             "forecast_horizon": 7,
             "gap": 2,
             "stride": 5,
-            "window": "rolling"
+            "window": "rolling",
         },
         {
             "frequency": "days",
@@ -184,8 +211,8 @@ Here is an example of a few different configuration values for the splitter:
             "forecast_horizon": 7,
             "gap": 0,
             "stride": None,
-            "window": "rolling"
-        }
+            "window": "rolling",
+        },
     ]
 
     fig = make_subplots(
@@ -201,22 +228,29 @@ Here is an example of a few different configuration values for the splitter:
 
         tbs = TimeBasedSplit(**config)
 
-        for _fold, (train_forecast, split_state) in enumerate(tbs.split(y/25, time_series=time_series, return_splitstate=True), start=1):
+        for _fold, (train_forecast, split_state) in enumerate(
+            tbs.split(y / 25, time_series=time_series, return_splitstate=True), start=1
+        ):
 
             train, forecast = train_forecast
 
-            ts = split_state.train_start
-            te = split_state.train_end
-            fs = split_state.forecast_start
-            fe = split_state.forecast_end
+            train_start = split_state.train_start
+            train_end = split_state.train_end
+            forecast_start = split_state.forecast_start
+            forecast_end = split_state.forecast_end
+
+            train_mask = time_series.between(train_start, train_end, inclusive="left")
+            forecast_mask = time_series.between(
+                forecast_start, forecast_end, inclusive="left"
+            )
 
             fig.add_trace(
                 go.Scatter(
-                    x=time_series[time_series.between(ts, te, inclusive="left")],
+                    x=time_series[train_mask],
                     y=train + _fold,
                     name=f"Train Fold {_fold}",
                     mode="markers",
-                    marker={"color": "rgb(57, 105, 172)"}
+                    marker={"color": "rgb(57, 105, 172)"},
                 ),
                 row=_row,
                 col=1,
@@ -224,11 +258,11 @@ Here is an example of a few different configuration values for the splitter:
 
             fig.add_trace(
                 go.Scatter(
-                    x=time_series[time_series.between(fs, fe, inclusive="left")],
+                    x=time_series[forecast_mask],
                     y=forecast + _fold,
                     name=f"Forecast Fold {_fold}",
                     mode="markers",
-                    marker={"color": "indianred"}
+                    marker={"color": "indianred"},
                 ),
                 row=_row,
                 col=1,
@@ -237,20 +271,20 @@ Here is an example of a few different configuration values for the splitter:
     fig.update_layout(
         title={
             "text": "Time Based Cross Validation",
-            "y":0.95, "x":0.5,
+            "y": 0.95,
+            "x": 0.5,
             "xanchor": "center",
-            "yanchor": "top"
+            "yanchor": "top",
         },
         showlegend=False,
         height=750,
         **{
             f"yaxis{i}": {"autorange": "reversed", "title": "Fold"}
-            for i in range(1, len(configs)+1)
-        }
+            for i in range(1, len(configs) + 1)
+        },
     )
 
     fig.show()
-
     ```
 
 ### Multiple arrays
@@ -258,14 +292,81 @@ Here is an example of a few different configuration values for the splitter:
 It is possible to split multiple any arbitrary number of arrays at the same time, similarly to how [train_test_split](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html){:target="_blank"} behaves.
 
 ```python title="Generate the splits"
-time_series, a, b, y  = df.to_numpy().T
+time_series, a, b, y = df.to_numpy().T
 
-for a_train, a_test, b_train, b_test, y_train, y_test in tbs.split(a, b, y, time_series=time_series):
-    # Do some magic!
+splits = tbs.split(a, b, y, time_series=time_series)
+for a_train, a_test, b_train, b_test, y_train, y_test in splits:
+    ...  # Do your magic!
 ```
 
 !!! info
-    The only requirement is that the all the arrays must have the same length, as we use the mask on the `time_series` to slice each one of them.
+    The only requirement is that the all the arrays must have the same length, as we use the mask on the `time_series`
+    to slice each one of them.
 
 !!! warning
-    Ideally each array can be a different type (numpy, pandas, polars, and so on...), in practice there are a few limitations that might arise from the different types, so please be aware of that.
+    Ideally each array can be a different type (numpy, pandas, polars, and so on...), in practice there are a few
+    limitations that might arise from the different types, so please be aware of that.
+
+### Using Polars and PyArrow
+
+Thanks to [Narwhals](https://narwhals-dev.github.io/narwhals/){:target="_blank"}, `timebasedcv` works seamlessly with
+Polars and PyArrow. The returned arrays preserve the original type: Polars DataFrames come back as Polars DataFrames,
+PyArrow Tables as PyArrow Tables, and so on.
+
+=== "Polars"
+
+    ```python title="Split with Polars"
+    import polars as pl
+
+    df_polars = pl.DataFrame(
+        {
+            "time": df["time"].to_numpy(),
+            "a": df["a"].to_numpy(),
+            "b": df["b"].to_numpy(),
+            "y": df["y"].to_numpy(),
+        }
+    )
+
+    X_pl = df_polars.select("a", "b")
+    y_pl = df_polars["y"]
+    time_series_pl = df_polars["time"]
+
+    for X_train, X_forecast, y_train, y_forecast in tbs.split(
+        X_pl, y_pl, time_series=time_series_pl
+    ):
+        print(f"Train: {X_train.shape}, Forecast: {X_forecast.shape}")
+        break
+    ```
+
+    ```terminal
+    Train: (100, 2), Forecast: (51, 2)
+    ```
+
+=== "PyArrow"
+
+    ```python title="Split with PyArrow"
+    import pyarrow as pa
+
+    table_pa = pa.table(
+        {
+            "a": df["a"].to_numpy(),
+            "b": df["b"].to_numpy(),
+        }
+    )
+
+    time_series_pa = pa.table({"time": df["time"]})["time"]
+    start = df["time"].min()
+    end = df["time"].max()
+
+    for X_train, X_forecast in tbs.split(
+        table_pa, time_series=time_series_pa, start_dt=start, end_dt=end
+    ):
+        print(
+            f"Train: ({X_train.num_rows}, {X_train.num_columns}), Forecast: ({X_forecast.num_rows}, {X_forecast.num_columns})"
+        )
+        break
+    ```
+
+    ```terminal
+    Train: (100, 2), Forecast: (51, 2)
+    ```

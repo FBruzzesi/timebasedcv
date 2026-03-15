@@ -1,19 +1,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import date
-from datetime import datetime
-from datetime import timedelta
+from datetime import date, datetime, timedelta
 from operator import le as less_or_equal
-from typing import TYPE_CHECKING
-from typing import Generic
+from typing import TYPE_CHECKING, Generic
 
 from dateutil.relativedelta import relativedelta
 from narwhals.dependencies import get_pandas
 
-from timebasedcv.utils._funcs import pairwise
-from timebasedcv.utils._funcs import pairwise_comparison
-from timebasedcv.utils._types import DateTimeLike
+from timebasedcv._typing import DateTimeLike
+from timebasedcv.utils._funcs import pairwise, pairwise_comparison
 
 if TYPE_CHECKING:  # pragma: no cover
     import pandas as pd
@@ -79,7 +75,7 @@ class SplitState(Generic[DateTimeLike]):
         if not all(_ordered):
             _error_msg = "\n".join(
                 f"{s1}({v1}) is greater or equal to {s2}({v2})"
-                for (s1, s2), (v1, v2), is_ordered in zip(pairwise(_slots), pairwise(_values), _ordered)
+                for (s1, s2), (v1, v2), is_ordered in zip(pairwise(_slots), pairwise(_values), _ordered, strict=True)
                 if not is_ordered
             )
             msg = f"`{'`, `'.join(_slots)}` must be ordered. Found:\n{_error_msg}"

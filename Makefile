@@ -18,7 +18,7 @@ lint:
 	# uv tool run rumdl check .
 
 test:
-	uv run --group testing pytest tests --cov=src --cov=tests --cov-fail-under=90
+	uv run --all-extras --group testing pytest tests --cov=timebasedcv --cov=tests --cov-fail-under=95 -n auto
 
 typing:
 	uv run --group typing pyrefly check $(sources)

@@ -1,24 +1,21 @@
 from __future__ import annotations
 
 from itertools import chain
-from typing import TYPE_CHECKING
-from typing import Literal
-from typing import TypeVar
-from typing import get_args
-from typing import overload
+from typing import TYPE_CHECKING, Literal, TypeVar, get_args, overload
 
 import narwhals.stable.v1 as nw
 from dateutil.relativedelta import relativedelta
 
+from timebasedcv._typing import (
+    DateTimeLike,
+    FrequencyUnit,
+    ModeType,
+    SeriesLike,
+    TensorLike,
+    WindowType,
+)
 from timebasedcv.splitstate import SplitState
-from timebasedcv.utils._backends import BACKEND_TO_INDEXING_METHOD
-from timebasedcv.utils._backends import default_indexing_method
-from timebasedcv.utils._types import DateTimeLike
-from timebasedcv.utils._types import FrequencyUnit
-from timebasedcv.utils._types import ModeType
-from timebasedcv.utils._types import SeriesLike
-from timebasedcv.utils._types import TensorLike
-from timebasedcv.utils._types import WindowType
+from timebasedcv.utils._backends import BACKEND_TO_INDEXING_METHOD, default_indexing_method
 
 if TYPE_CHECKING:  # pragma: no cover
     from collections.abc import Generator
@@ -57,11 +54,12 @@ class _CoreTimeBasedSplit:
 
     Raises:
         ValueError:
-            - If `frequency` is not one of "days", "seconds", "microseconds", "milliseconds", "minutes", "hours",
-            "weeks".
-            - If `window` is not one of "rolling" or "expanding".
-            - If `mode` is not one of "forward" or "backward"
-            - If `train_size`, `forecast_horizon`, `gap` or `stride` are not strictly positive.
+            * If `frequency` is not one of "days", "seconds", "microseconds", "milliseconds", "minutes", "hours",
+            "weeks", "months" or "years".
+            * If `window` is not one of "rolling" or "expanding".
+            * If `mode` is not one of "forward" or "backward"
+            * If `train_size`, `forecast_horizon`, `gap` or `stride` are not strictly positive.
+
         TypeError: If `train_size`, `forecast_horizon`, `gap` or `stride` are not of type `int`.
 
     Although `_CoreTimeBasedSplit` is not meant to be used directly, it can be used as a template to create new time
@@ -76,7 +74,7 @@ class _CoreTimeBasedSplit:
             ...
 
             def split(self, X, timeseries):
-                '''Implement the split method to return a generator'''
+                # Implement the split method to return a generator
 
                 for split in self._splits_from_period(timeseries.min(), timeseries.max()):
                     # Do something with the split to compute the train and forecast sets
@@ -137,7 +135,7 @@ class _CoreTimeBasedSplit:
             )
             raise TypeError(msg)
 
-        if not all(v >= lb for v, lb in zip(_values, _lower_bounds)):
+        if not all(v >= lb for v, lb in zip(_values, _lower_bounds, strict=True)):
             msg = (
                 f"(`{'`, `'.join(_slot_names)}`) must be greater or equal than "
                 f"({', '.join(map(str, _lower_bounds))}).\n"
@@ -162,7 +160,7 @@ class _CoreTimeBasedSplit:
         _values = tuple(getattr(self, _attr) for _attr in _attrs)
         _new_line_tab = "\n    "
 
-        return f"{self.name_}(\n    {_new_line_tab.join(f'{s} = {v}' for s, v in zip(_attrs, _values))}\n)"
+        return f"{self.name_}(\n    {_new_line_tab.join(f'{s} = {v}' for s, v in zip(_attrs, _values, strict=True))}\n)"
 
     @property
     def train_delta(self: Self) -> relativedelta:
@@ -290,11 +288,11 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
 
         In fact, we have made the (opinioned) choice to:
 
-        - Return the sliced arrays from `.split(...)`, while scikit-learn CV Splitters return train and test indices of
+        * Return the sliced arrays from `.split(...)`, while scikit-learn CV Splitters return train and test indices of
             the split.
-        - Require to pass the time series as input to `.split(...)` method, while scikit-learn CV Splitters require to
+        * Require to pass the time series as input to `.split(...)` method, while scikit-learn CV Splitters require to
             provide only `X, y, groups` to `.split(...)`.
-        - Such time series is used to generate the boolean masks with which we slice the original arrays into train and
+        * Such time series is used to generate the boolean masks with which we slice the original arrays into train and
             test for each split.
 
         If you are looking for a class compatible with scikit-learn, check out our
@@ -344,11 +342,12 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
 
     Raises:
         ValueError:
-            - If `frequency` is not one of "days", "seconds", "microseconds", "milliseconds", "minutes", "hours",
-            "weeks".
-            - If `window` is not one of "rolling" or "expanding".
-            - If `mode` is not one of "forward" or "backward"
-            - If `train_size`, `forecast_horizon`, `gap` or `stride` are not strictly positive.
+            * If `frequency` is not one of "days", "seconds", "microseconds", "milliseconds", "minutes", "hours",
+            "weeks", "months" or "years".
+            * If `window` is not one of "rolling" or "expanding".
+            * If `mode` is not one of "forward" or "backward"
+            * If `train_size`, `forecast_horizon`, `gap` or `stride` are not strictly positive.
+
         TypeError: If `train_size`, `forecast_horizon`, `gap` or `stride` are not of type `int`.
 
 
@@ -373,7 +372,11 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
                             "b": RNG.normal(size=_size - 1),
                         }
                     )
-                    for start, end, _size in zip(dates[:-1], dates[1:], RNG.integers(2, 24, size - 1))
+                    for start, end, _size in zip(
+                        dates[:-1],
+                        dates[1:],
+                        RNG.integers(2, 24, size - 1),
+                    )
                 ]
             )
             .reset_index(drop=True)
@@ -400,15 +403,13 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
 
 
         tbs = TimeBasedSplit(
-            frequency="days",
-            train_size=10,
-            forecast_horizon=5,
-            gap=1,
-            stride=3
+            frequency="days", train_size=10, forecast_horizon=5, gap=1, stride=3
         )
         X, y, time_series = df.loc[:, ["a", "b"]], df["y"], df["time"]
 
-        for X_train, X_forecast, y_train, y_forecast in tbs.split(X, y, time_series=time_series):
+        for X_train, X_forecast, y_train, y_forecast in tbs.split(
+            X, y, time_series=time_series
+        ):
             print(f"Train: {X_train.shape}, Forecast: {X_forecast.shape}")
         ```
 
@@ -461,7 +462,7 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
         The `start_dt` and `end_dt` arguments can be used to specify the start and end of the time period. If provided,
         they are used in place of the `time_series.min()` and `time_series.max()` respectively.
 
-        This is useful because the series does not necessarely starts from the first date and/or terminates in the last
+        This is useful because the series does not necessarily starts from the first date and/or terminates in the last
         date of the time period of interest.
 
         The `return_splitstate` argument can be used to return the `SplitState` instance for each split. This can be
@@ -543,7 +544,7 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
                         nw.to_native(_idx_method(_arr, train_mask), strict=False),
                         nw.to_native(_idx_method(_arr, forecast_mask), strict=False),
                     )
-                    for _arr, _idx_method in zip(arrays_, _index_methods)
+                    for _arr, _idx_method in zip(arrays_, _index_methods, strict=True)
                 ),
             )
 

@@ -5,8 +5,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from timebasedcv.utils._funcs import pairwise
-from timebasedcv.utils._funcs import pairwise_comparison
+from timebasedcv.utils._funcs import pairwise, pairwise_comparison
 
 if TYPE_CHECKING:
     from collections.abc import Callable
