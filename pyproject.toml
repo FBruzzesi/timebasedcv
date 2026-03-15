@@ -67,7 +67,7 @@ typing = [
 ]
 
 dev = [
-    "pre-commit",
+    "prek>=0.3.5",
     "ruff>=0.15.6",
     {include-group = "testing"},
     {include-group = "docs"},

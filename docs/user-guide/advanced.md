@@ -15,16 +15,23 @@ Let's first create a dataset to show how these features work.
     dates = pd.Series(pd.date_range("2023-01-01", "2023-01-31", freq="D"))
     size = len(dates)
 
-    df = (pd.concat([
-            pd.DataFrame({
-                "time": pd.date_range(start, end, periods=_size, inclusive="left"),
-                "a": RNG.normal(size=_size-1),
-                "b": RNG.normal(size=_size-1),
-            })
-            for start, end, _size in zip(dates[:-1], dates[1:], RNG.integers(2, 24, size-1))
-        ])
+    df = (
+        pd.concat(
+            [
+                pd.DataFrame(
+                    {
+                        "time": pd.date_range(start, end, periods=_size, inclusive="left"),
+                        "a": RNG.normal(size=_size - 1),
+                        "b": RNG.normal(size=_size - 1),
+                    }
+                )
+                for start, end, _size in zip(
+                    dates[:-1], dates[1:], RNG.integers(2, 24, size - 1)
+                )
+            ]
+        )
         .reset_index(drop=True)
-        .assign(y=lambda t: t[["a", "b"]].sum(axis=1) + RNG.normal(size=t.shape[0])/25)
+        .assign(y=lambda t: t[["a", "b"]].sum(axis=1) + RNG.normal(size=t.shape[0]) / 25)
     )
 
     X, y, time_series = df.loc[:, ["a", "b"]], df["y"], df["time"]
@@ -86,14 +93,13 @@ _splits_with_state = tbs.split(X, y, time_series=time_series, return_splitstate=
 for (X_train, X_forecast, y_train, y_forecast), split_state in _splits_with_state:
 
     split_week = split_state.train_start.strftime("%Y-W%W")
-    if  (current_week is None) or (split_week > current_week):
+    if (current_week is None) or (split_week > current_week):
         model = clone(model).fit(X_train, y_train)
         current_week = split_week
         print(f"\nTraining for week {split_week}")
 
     score = round(model.score(X_forecast, y_forecast), 3)
     print(f"{score=}")
-
 ```
 
 ```terminal
@@ -147,7 +153,7 @@ and [`ExpandingTimeSplit`](../api/timebasedcv.md#timebasedcv.core.ExpandingTimeS
         "train_size": 10,
         "forecast_horizon": 5,
         "gap": 1,
-        "stride": 3
+        "stride": 3,
     }
 
     window_types = ["rolling", "expanding"]
@@ -164,21 +170,27 @@ and [`ExpandingTimeSplit`](../api/timebasedcv.md#timebasedcv.core.ExpandingTimeS
     for _row, window in enumerate(window_types, start=1):
 
         tbs = TimeBasedSplit(window=window, **base_config)
-        _splits = tbs.split(y/25, time_series=time_series, return_splitstate=True)
+        _splits = tbs.split(y / 25, time_series=time_series, return_splitstate=True)
         for _fold, (train_forecast, split_state) in enumerate(_splits, start=1):
 
             train, forecast = train_forecast
 
-            ts, te = split_state.train_start, split_state.train_end
-            fs, fe = split_state.forecast_start, split_state.forecast_end
+            train_start = split_state.train_start
+            train_end = split_state.train_end
+            forecast_start = split_state.forecast_start
+            forecast_end = split_state.forecast_end
 
+            train_mask = time_series.between(train_start, train_end, inclusive="left")
+            forecast_mask = time_series.between(
+                forecast_start, forecast_end, inclusive="left"
+            )
             fig.add_trace(
                 go.Scatter(
-                    x=time_series[time_series.between(ts, te, inclusive="left")],
+                    x=time_series[train_mask],
                     y=train + _fold,
                     name=f"Train Fold {_fold}",
                     mode="markers",
-                    marker={"color": "rgb(57, 105, 172)"}
+                    marker={"color": "rgb(57, 105, 172)"},
                 ),
                 row=_row,
                 col=1,
@@ -186,11 +198,11 @@ and [`ExpandingTimeSplit`](../api/timebasedcv.md#timebasedcv.core.ExpandingTimeS
 
             fig.add_trace(
                 go.Scatter(
-                    x=time_series[time_series.between(fs, fe, inclusive="left")],
+                    x=time_series[forecast_mask],
                     y=forecast + _fold,
                     name=f"Forecast Fold {_fold}",
                     mode="markers",
-                    marker={"color": "indianred"}
+                    marker={"color": "indianred"},
                 ),
                 row=_row,
                 col=1,
@@ -201,8 +213,8 @@ and [`ExpandingTimeSplit`](../api/timebasedcv.md#timebasedcv.core.ExpandingTimeS
         height=1000,
         **{
             f"yaxis{i}": {"autorange": "reversed", "title": "Fold"}
-            for i in range(1, len(window_types)+1)
-        }
+            for i in range(1, len(window_types) + 1)
+        },
     )
 
     fig.show()
@@ -244,7 +256,7 @@ Therefore we end up with a different number of total splits, and this would hold
         "train_size": 10,
         "forecast_horizon": 5,
         "gap": 1,
-        "stride": 3
+        "stride": 3,
     }
 
     mode_types = ["forward", "backward"]
@@ -261,23 +273,28 @@ Therefore we end up with a different number of total splits, and this would hold
     for _row, mode in enumerate(mode_types, start=1):
 
         tbs = TimeBasedSplit(mode=mode, **base_config)
-        _splits = tbs.split(y/25, time_series=time_series, return_splitstate=True)
+        _splits = tbs.split(y / 25, time_series=time_series, return_splitstate=True)
         for _fold, (train_forecast, split_state) in enumerate(_splits, start=1):
 
             train, forecast = train_forecast
 
-            ts = split_state.train_start
-            te = split_state.train_end
-            fs = split_state.forecast_start
-            fe = split_state.forecast_end
+            train_start = split_state.train_start
+            train_end = split_state.train_end
+            forecast_start = split_state.forecast_start
+            forecast_end = split_state.forecast_end
+
+            train_mask = time_series.between(train_start, train_end, inclusive="left")
+            forecast_mask = time_series.between(
+                forecast_start, forecast_end, inclusive="left"
+            )
 
             fig.add_trace(
                 go.Scatter(
-                    x=time_series[time_series.between(ts, te, inclusive="left")],
+                    x=time_series[train_mask],
                     y=train + _fold,
                     name=f"Train Fold {_fold}",
                     mode="markers",
-                    marker={"color": "rgb(57, 105, 172)"}
+                    marker={"color": "rgb(57, 105, 172)"},
                 ),
                 row=_row,
                 col=1,
@@ -285,11 +302,11 @@ Therefore we end up with a different number of total splits, and this would hold
 
             fig.add_trace(
                 go.Scatter(
-                    x=time_series[time_series.between(fs, fe, inclusive="left")],
+                    x=time_series[forecast_mask],
                     y=forecast + _fold,
                     name=f"Forecast Fold {_fold}",
                     mode="markers",
-                    marker={"color": "indianred"}
+                    marker={"color": "indianred"},
                 ),
                 row=_row,
                 col=1,
@@ -300,8 +317,8 @@ Therefore we end up with a different number of total splits, and this would hold
         height=1000,
         **{
             f"yaxis{i}": {"autorange": "reversed", "title": "Fold"}
-            for i in range(1, len(mode_types)+1)
-        }
+            for i in range(1, len(mode_types) + 1)
+        },
     )
 
     fig.show()
@@ -328,7 +345,7 @@ tbs = TimeBasedSplit(
     stride=3,
     mode="backward",
 )
-splits = tbs.split(y/25, time_series=time_series)
+splits = tbs.split(y / 25, time_series=time_series)
 for fold_number, (train, forecast) in islice(enumerate(splits, start=1), take_n):
     print(f"Fold {fold_number}")
     print(f"Train: {train.shape}, Forecast: {forecast.shape}")
@@ -349,38 +366,42 @@ Train: (126,), Forecast: (56,)
 
     ```python
     from itertools import islice
+
     tbs = TimeBasedSplit(mode="backward", **base_config)
 
     take_n = 3
     fig = go.Figure()
 
-    splits = tbs.split(y/25, time_series=time_series, return_splitstate=True)
+    splits = tbs.split(y / 25, time_series=time_series, return_splitstate=True)
     for _fold, (train_forecast, split_state) in islice(enumerate(splits, start=1), take_n):
 
         train, forecast = train_forecast
 
-        ts = split_state.train_start
-        te = split_state.train_end
-        fs = split_state.forecast_start
-        fe = split_state.forecast_end
+        train_start = split_state.train_start
+        train_end = split_state.train_end
+        forecast_start = split_state.forecast_start
+        forecast_end = split_state.forecast_end
+
+        train_mask = time_series.between(train_start, train_end, inclusive="left")
+        forecast_mask = time_series.between(forecast_start, forecast_end, inclusive="left")
 
         fig.add_trace(
             go.Scatter(
-                x=time_series[time_series.between(ts, te, inclusive="left")],
+                x=time_series[train_mask],
                 y=train + _fold,
                 name=f"Train Fold {_fold}",
                 mode="markers",
-                marker={"color": "rgb(57, 105, 172)"}
+                marker={"color": "rgb(57, 105, 172)"},
             )
         )
 
         fig.add_trace(
             go.Scatter(
-                x=time_series[time_series.between(fs, fe, inclusive="left")],
+                x=time_series[forecast_mask],
                 y=forecast + _fold,
                 name=f"Forecast Fold {_fold}",
                 mode="markers",
-                marker={"color": "indianred"}
+                marker={"color": "indianred"},
             )
         )
 
@@ -389,8 +410,8 @@ Train: (126,), Forecast: (56,)
         height=500,
         **{
             f"yaxis{i}": {"autorange": "reversed", "title": "Fold"}
-            for i in range(1, len(mode_types)+1)
-        }
+            for i in range(1, len(mode_types) + 1)
+        },
     )
 
     fig.show()

@@ -38,43 +38,19 @@ To format the code, you can run the following commands:
 === "without Make"
 
     ```bash
-    ruff version
-    ruff format timebasedcv tests
-    ruff check timebasedcv tests --fix
-    ruff clean
+    uvx ruff version
+    uvx ruff format timebasedcv tests
+    uvx ruff check timebasedcv tests --fix
+    uvx ruff clean
     ```
 
 As part of the checks on pull requests, it is checked whether the code follows those standards.
-To ensure that the standard is met, it is recommended to install [pre-commit hooks](https://pre-commit.com/){:target="_blank"}:
+To ensure that the standard is met, it is recommended to install [prek](https://prek.j178.dev/){:target="_blank"} to run pre-commit hooks:
 
 ```bash
-python -m pip install pre-commit
-pre-commit install
+python -m pip install prek
+prek install
 ```
-
-## Developing 🐍
-
-Let's suppose that you already did steps 1-4 from the above list, now you should install the library and its developing
-dependencies in editable way.
-
-First move into the repo folder: `cd timebasedcv`.
-
-Then:
-
-=== "with Make"
-
-    ```bash
-    make init-dev
-    ```
-
-=== "without Make"
-
-    ```bash
-    pip install -e ".[all-dev]" --no-cache-dir
-    pre-commit install
-    ```
-
-Now you are ready to proceed with all the changes you want to!
 
 ## Testing 🧪
 

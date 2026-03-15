@@ -55,11 +55,12 @@ class _CoreTimeBasedSplit:
 
     Raises:
         ValueError:
-            - If `frequency` is not one of "days", "seconds", "microseconds", "milliseconds", "minutes", "hours",
+            * If `frequency` is not one of "days", "seconds", "microseconds", "milliseconds", "minutes", "hours",
             "weeks", "months" or "years".
-            - If `window` is not one of "rolling" or "expanding".
-            - If `mode` is not one of "forward" or "backward"
-            - If `train_size`, `forecast_horizon`, `gap` or `stride` are not strictly positive.
+            * If `window` is not one of "rolling" or "expanding".
+            * If `mode` is not one of "forward" or "backward"
+            * If `train_size`, `forecast_horizon`, `gap` or `stride` are not strictly positive.
+
         TypeError: If `train_size`, `forecast_horizon`, `gap` or `stride` are not of type `int`.
 
     Although `_CoreTimeBasedSplit` is not meant to be used directly, it can be used as a template to create new time
@@ -74,7 +75,7 @@ class _CoreTimeBasedSplit:
             ...
 
             def split(self, X, timeseries):
-                '''Implement the split method to return a generator'''
+                # Implement the split method to return a generator
 
                 for split in self._splits_from_period(timeseries.min(), timeseries.max()):
                     # Do something with the split to compute the train and forecast sets
@@ -288,11 +289,11 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
 
         In fact, we have made the (opinioned) choice to:
 
-        - Return the sliced arrays from `.split(...)`, while scikit-learn CV Splitters return train and test indices of
+        * Return the sliced arrays from `.split(...)`, while scikit-learn CV Splitters return train and test indices of
             the split.
-        - Require to pass the time series as input to `.split(...)` method, while scikit-learn CV Splitters require to
+        * Require to pass the time series as input to `.split(...)` method, while scikit-learn CV Splitters require to
             provide only `X, y, groups` to `.split(...)`.
-        - Such time series is used to generate the boolean masks with which we slice the original arrays into train and
+        * Such time series is used to generate the boolean masks with which we slice the original arrays into train and
             test for each split.
 
         If you are looking for a class compatible with scikit-learn, check out our
@@ -342,11 +343,12 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
 
     Raises:
         ValueError:
-            - If `frequency` is not one of "days", "seconds", "microseconds", "milliseconds", "minutes", "hours",
+            * If `frequency` is not one of "days", "seconds", "microseconds", "milliseconds", "minutes", "hours",
             "weeks", "months" or "years".
-            - If `window` is not one of "rolling" or "expanding".
-            - If `mode` is not one of "forward" or "backward"
-            - If `train_size`, `forecast_horizon`, `gap` or `stride` are not strictly positive.
+            * If `window` is not one of "rolling" or "expanding".
+            * If `mode` is not one of "forward" or "backward"
+            * If `train_size`, `forecast_horizon`, `gap` or `stride` are not strictly positive.
+
         TypeError: If `train_size`, `forecast_horizon`, `gap` or `stride` are not of type `int`.
 
 
@@ -371,7 +373,11 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
                             "b": RNG.normal(size=_size - 1),
                         }
                     )
-                    for start, end, _size in zip(dates[:-1], dates[1:], RNG.integers(2, 24, size - 1))
+                    for start, end, _size in zip(
+                        dates[:-1],
+                        dates[1:],
+                        RNG.integers(2, 24, size - 1),
+                    )
                 ]
             )
             .reset_index(drop=True)
@@ -398,15 +404,13 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
 
 
         tbs = TimeBasedSplit(
-            frequency="days",
-            train_size=10,
-            forecast_horizon=5,
-            gap=1,
-            stride=3
+            frequency="days", train_size=10, forecast_horizon=5, gap=1, stride=3
         )
         X, y, time_series = df.loc[:, ["a", "b"]], df["y"], df["time"]
 
-        for X_train, X_forecast, y_train, y_forecast in tbs.split(X, y, time_series=time_series):
+        for X_train, X_forecast, y_train, y_forecast in tbs.split(
+            X, y, time_series=time_series
+        ):
             print(f"Train: {X_train.shape}, Forecast: {X_forecast.shape}")
         ```
 
