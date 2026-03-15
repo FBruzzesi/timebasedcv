@@ -1,20 +1,14 @@
 from __future__ import annotations
 
-from datetime import date
-from datetime import datetime
-from typing import TYPE_CHECKING
-from typing import Literal
-from typing import Protocol
-from typing import TypeVar
-from typing import Union
+from datetime import date, datetime
+from typing import TYPE_CHECKING, Literal, Protocol, TypeAlias, TypeVar
 
 if TYPE_CHECKING:
     import pandas as pd
     from typing_extensions import Self  # pragma: no cover
-    from typing_extensions import TypeAlias  # pragma: no cover
 
 DateTimeLike = TypeVar("DateTimeLike", datetime, date, "pd.Timestamp")
-NullableDatetime = Union[DateTimeLike, None]
+NullableDatetime = DateTimeLike | None
 
 FrequencyUnit: TypeAlias = Literal[
     "days", "seconds", "microseconds", "milliseconds", "minutes", "hours", "weeks", "months", "years"

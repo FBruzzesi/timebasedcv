@@ -9,7 +9,7 @@ from sklearn.model_selection import RandomizedSearchCV
 
 from timebasedcv.sklearn import TimeBasedCVSplitter
 
-RNG = np.random.default_rng()
+RNG = np.random.default_rng(seed=42)
 
 # Define a fix set of valid arguments
 

@@ -1,25 +1,15 @@
 from __future__ import annotations
 
-from itertools import starmap
-from itertools import tee
+from itertools import pairwise, starmap
 from typing import TYPE_CHECKING
-from typing import TypeVar
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
-    from collections.abc import Iterable
+    from collections.abc import Callable, Iterable
+    from typing import TypeVar
 
     T = TypeVar("T")
 
-
-def pairwise(iterable: Iterable[T]) -> Iterable[tuple[T, T]]:
-    """Returns an iterator that yields pairs of consecutive elements from the given iterable.
-
-    s -> (s0, s1), (s1, s2), (s2, s3), ...
-    """
-    a, b = tee(iterable)
-    next(b, None)
-    return zip(a, b)
+__all__ = ("pairwise", "pairwise_comparison")
 
 
 def pairwise_comparison(iterable: Iterable[T], comparison_op: Callable[[T, T], bool]) -> Iterable[bool]:

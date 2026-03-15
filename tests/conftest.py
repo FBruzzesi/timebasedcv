@@ -1,10 +1,7 @@
 from __future__ import annotations
 
-from datetime import datetime
-from datetime import timedelta
-from typing import TYPE_CHECKING
-from typing import Any
-from typing import Literal
+from datetime import datetime, timedelta
+from typing import TYPE_CHECKING, Any, Literal
 
 import dask.array as da
 import numpy as np
@@ -18,7 +15,7 @@ if TYPE_CHECKING:
 
     from narwhals.typing import IntoDataFrame
 
-    from timebasedcv.utils._types import TensorLike
+    from timebasedcv._typing import TensorLike
 
 
 @pytest.fixture
@@ -104,17 +101,17 @@ def valid_kwargs(
     }
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def generate_test_data() -> tuple[datetime, datetime, np.ndarray, np.ndarray, np.ndarray]:
     """Generate start and end time, time series, X, and y for testing purposes.
 
     Returns:
         tuple: A tuple containing the start datetime, end datetime, time series, X and y.
     """
-    RNG = np.random.default_rng()
+    RNG = np.random.default_rng(seed=42)
 
     start_dt, end_dt = datetime(2023, 1, 1), datetime(2023, 1, 31)
-    time_series = np.arange(start_dt, end_dt, timedelta(days=1))
+    time_series = np.arange(start_dt, end_dt, timedelta(hours=1))
     size = len(time_series)
 
     X = RNG.normal(size=(size, 2))

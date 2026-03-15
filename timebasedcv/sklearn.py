@@ -22,18 +22,13 @@ else:  # pragma: no cover
 
 if TYPE_CHECKING:  # pragma: no cover
     from collections.abc import Generator
-    from datetime import date
-    from datetime import datetime
+    from datetime import date, datetime
 
     import pandas as pd
     from numpy.typing import NDArray
     from typing_extensions import Self
 
-    from timebasedcv.utils._types import FrequencyUnit
-    from timebasedcv.utils._types import ModeType
-    from timebasedcv.utils._types import NullableDatetime
-    from timebasedcv.utils._types import SeriesLike
-    from timebasedcv.utils._types import WindowType
+    from timebasedcv._typing import FrequencyUnit, ModeType, NullableDatetime, SeriesLike, WindowType
 
 
 __all__ = ("TimeBasedCVSplitter",)
@@ -78,7 +73,7 @@ class TimeBasedCVSplitter(_BaseKFold):  # type: ignore[no-any-unimported]
     Raises:
         ValueError:
             - If `frequency` is not one of "days", "seconds", "microseconds", "milliseconds", "minutes", "hours",
-            "weeks".
+            "weeks", "months" or "years".
             - If `window` is not one of "rolling" or "expanding".
             - If `mode` is not one of "forward" or "backward"
             - If `train_size`, `forecast_horizon`, `gap` or `stride` are not strictly positive.

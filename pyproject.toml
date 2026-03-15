@@ -9,7 +9,7 @@ description = "Time based cross validation"
 
 license = {file = "LICENSE"}
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 authors = [{name = "Francesco Bruzzesi"}]
 
 dependencies = [
@@ -20,8 +20,6 @@ dependencies = [
 
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -41,15 +39,15 @@ issue-tracker = "https://github.com/fbruzzesi/timebasedcv/issues"
 scikit-learn = ["scikit-learn>=0.19"]
 
 [dependency-groups]
-lint = ["ruff>=0.11.0"]
-tests = [
-    "pytest>=7.2.0",
-    "pytest-xdist>=3.2.1",
-    "coverage>=7.2.1",
+testing = [
+    "covdefaults>=2.3.0",
     "dask>=2023.1.0",
     "pandas>=1.2.0",
     "polars>=0.20.3",
     "pyarrow>=11.0.0",
+    "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
+    "pytest-xdist>=3.8.0",
 ]
 docs = [
     "mkdocs>=1.4.2",
@@ -58,17 +56,20 @@ docs = [
     "mkdocs-autorefs",
 ]
 typing = [
-    "mypy",
-    "pandas-stubs",
-    "pyright",
-    "types-python-dateutil",
-    "typing-extensions",
+    "mypy>=1.19.1",
+    "pandas-stubs>=2.3.3.260113",
+    "pyarrow-stubs>=20.0.0.20251215",
+    "pyrefly>=0.56.0",
+    "pyright>=1.1.408",
+    "types-python-dateutil>=2.9.0.20260305",
+    "typing-extensions>=4.15.0",
+    {include-group = "testing"},
 ]
 
 dev = [
     "pre-commit",
-    {include-group = "lint"},
-    {include-group = "tests"},
+    "ruff>=0.15.6",
+    {include-group = "testing"},
     {include-group = "docs"},
     {include-group = "typing"},
 ]
@@ -81,7 +82,7 @@ packages = ["timebasedcv"]
 
 [tool.ruff]
 line-length = 120
-target-version = "py38"
+target-version = "py310"
 fix = true
 
 [tool.ruff.lint]
@@ -122,7 +123,7 @@ ignore = [
     ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["ANN", "D", "N802", "N806", "PD901", "PT006", "PT007", "PLR0913", "S101"]
+"tests/*" = ["ANN", "D", "N802", "N806", "PD901", "PLC0415", "PLR0913", "PLR2004", "PT006", "PT007", "S101"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
@@ -134,8 +135,26 @@ keep-runtime-typing = true
 docstring-code-format = true
 
 [tool.ruff.lint.isort]
-force-single-line = true
 required-imports = ["from __future__ import annotations"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = [
+  "error",
+]
+xfail_strict = true
+
+[tool.coverage.run]
+plugins = ["covdefaults"]
+
+[tool.coverage.report]
+fail_under = 95
+omit = [
+  "**/_typing.py",
+]
+exclude_also = [
+  "except ImportError",
+]
 
 [tool.mypy]
 # ignore_missing_imports = true
@@ -147,9 +166,20 @@ warn_return_any = true
 show_error_codes = true
 warn_unused_ignores = true
 
-[tool.coverage.run]
-source = ["timebasedcv/"]
-
-omit = [
-    "timebasedcv/utils/_types.py",  # collection of type hints and protocols
+[tool.rumdl]
+line-length = 120
+flavor = "mkdocs"
+include = ["docs/**", "README.md", "AGENTS.md"]
+disable = [
+  # NOTE: These look like either false positives or unsupported case
+  # TODO(FBruzzesi): Report upstream
+  # No blank line after admonition block
+  "MD031",
+  # Use fenced code blocks
+  "MD046",
 ]
+
+[tool.rumdl.MD007]
+# Keep list indentation consistent
+indent = 4
+start-indented = false

@@ -6,10 +6,11 @@ from contextlib import nullcontext as does_not_raise
 import narwhals.stable.v1 as nw
 import numpy as np
 import pandas as pd
+import polars as pl
+import pyarrow as pa
 import pytest
 
-from timebasedcv.utils._backends import BACKEND_TO_INDEXING_METHOD
-from timebasedcv.utils._backends import default_indexing_method
+from timebasedcv.utils._backends import BACKEND_TO_INDEXING_METHOD, default_indexing_method
 
 size = 10
 arr = np.arange(size)
@@ -50,6 +51,17 @@ def test_default_indexing_method(arr, mask, expected, context):
             pd.Series(valid_mask),
             pd.DataFrame(data={"a": expected, "b": expected}),
         ),  # pandas dataframe
+        (pl.Series(values=arr), valid_mask, expected),  # polars series
+        (
+            pl.DataFrame(data={"a": arr, "b": arr}),
+            pl.Series(values=valid_mask),
+            pl.DataFrame(data={"a": expected, "b": expected}),
+        ),  # polars dataframe
+        (
+            pa.table({"a": arr, "b": arr}),
+            pa.chunked_array([valid_mask]),
+            pa.table({"a": expected, "b": expected}),
+        ),  # pyarrow table
     ],
 )
 def test_backend_to_indexing_method(arr, mask, expected):
@@ -60,4 +72,11 @@ def test_backend_to_indexing_method(arr, mask, expected):
     mask = nw.from_native(mask, series_only=True, strict=False)
     _type = str(type(arr))
     result = BACKEND_TO_INDEXING_METHOD[_type](arr, mask)
-    assert np.array_equal(result, expected)
+    result_native = nw.to_native(result, strict=False)
+    expected_native = nw.to_native(
+        nw.from_native(expected, allow_series=True, eager_only=True, strict=False), strict=False
+    )
+    if isinstance(result_native, pa.Table):
+        assert result_native.equals(expected_native)
+    else:
+        assert np.array_equal(result_native, expected_native)
