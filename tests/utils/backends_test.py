@@ -10,7 +10,7 @@ import polars as pl
 import pyarrow as pa
 import pytest
 
-from timebasedcv.utils._backends import BACKEND_TO_INDEXING_METHOD, default_indexing_method
+from timebasedcv.utils._backends import indexing_method
 
 size = 10
 arr = np.arange(size)
@@ -37,7 +37,7 @@ def test_default_indexing_method(arr, mask, expected, context):
     Tests the default indexing method with a numpy array.
     """
     with context:
-        result = default_indexing_method(arr, mask)
+        result = indexing_method(arr, mask)
         assert np.array_equal(result, expected)
 
 
@@ -66,12 +66,11 @@ def test_default_indexing_method(arr, mask, expected, context):
 )
 def test_backend_to_indexing_method(arr, mask, expected):
     """
-    Tests the `BACKEND_TO_INDEXING_METHOD` dictionary with different backends.
+    Tests `indexing_method` dispatch with different backends.
     """
     arr = nw.from_native(arr, allow_series=True, eager_only=True, strict=False)
     mask = nw.from_native(mask, series_only=True, strict=False)
-    _type = str(type(arr))
-    result = BACKEND_TO_INDEXING_METHOD[_type](arr, mask)
+    result = indexing_method(arr, mask)
     result_native = nw.to_native(result, strict=False)
     expected_native = nw.to_native(
         nw.from_native(expected, allow_series=True, eager_only=True, strict=False), strict=False

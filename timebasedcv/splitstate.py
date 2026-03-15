@@ -11,12 +11,12 @@ from narwhals.dependencies import get_pandas
 from timebasedcv._typing import DateTimeLike
 from timebasedcv.utils._funcs import pairwise, pairwise_comparison
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     import pandas as pd
     from typing_extensions import Self
 
 
-@dataclass(frozen=True)
+@dataclass(slots=True, frozen=True)
 class SplitState(Generic[DateTimeLike]):
     """A `SplitState` represents the state of a split in terms of its four cut/split points.
 
@@ -38,13 +38,6 @@ class SplitState(Generic[DateTimeLike]):
         TypeError: If any of the attributes is not of type `datetime`, `date` or `pd.Timestamp`.
         ValueError: If the attributes are not ordered chronologically.
     """
-
-    __slots__ = (  # noqa: RUF023
-        "train_start",
-        "train_end",
-        "forecast_start",
-        "forecast_end",
-    )
 
     train_start: DateTimeLike
     train_end: DateTimeLike

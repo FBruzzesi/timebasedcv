@@ -1,48 +1,60 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TypeVar
+from functools import singledispatch
+from typing import TYPE_CHECKING, Any, overload
 
 import narwhals.stable.v1 as nw
-import numpy as np
-from narwhals.stable.v1.typing import IntoDataFrame
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from narwhals.stable.v1.typing import IntoDataFrame
 
     from timebasedcv._typing import SeriesLike, TensorLike
 
+    @overload
+    def indexing_method(arr: nw.DataFrame[Any], mask: nw.Series) -> nw.DataFrame[Any]: ...
 
-def default_indexing_method(arr: TensorLike, mask: SeriesLike[bool]) -> TensorLike:
-    """Default indexing method for arrays.
+    @overload
+    def indexing_method(arr: nw.Series, mask: nw.Series) -> nw.Series: ...
 
-    !!! warning
-        Remark that `arr` should support indexing with an array.
+    @overload
+    def indexing_method(arr: TensorLike, mask: SeriesLike[bool]) -> TensorLike: ...
 
-    Arguments:
-        arr: The array-like to index.
-        mask: The boolean mask to use for indexing.
-    """
-    if len(arr) != len(mask):
-        msg = "Length of arr and mask must be equal."
-        raise ValueError(msg)
-    return arr[mask]
+    def indexing_method(arr: Any, mask: Any) -> Any: ...
 
+else:
 
-T_NW = TypeVar("T_NW", nw.DataFrame[IntoDataFrame], nw.Series)
+    @singledispatch
+    def indexing_method(arr: Any, mask: Any) -> Any:  # noqa: ANN401
+        """Default indexing method for arrays.
 
+        !!! warning
+            Remark that `arr` should support indexing with an array.
 
-def nw_indexing_method(_dfs: T_NW, mask: nw.Expr) -> T_NW:
-    """Indexing method for Narwhals dataframes and series.
+        Arguments:
+            arr: The array-like to index.
+            mask: The boolean mask to use for indexing.
+        """
+        if len(arr) != len(mask):
+            msg = "Length of arr and mask must be equal."
+            raise ValueError(msg)
+        return arr[mask]
 
-    Arguments:
-        df: The Narwhals dataframe or series to index.
-        mask: The boolean mask to use for indexing.
-    """
-    return _dfs.filter(mask)
+    @indexing_method.register(nw.DataFrame)
+    def _nw_dataframe_indexing(df: nw.DataFrame[IntoDataFrame], mask: nw.Series) -> nw.DataFrame[IntoDataFrame]:
+        """Indexing method for Narwhals DataFrames.
 
+        Arguments:
+            df: The Narwhals DataFrame to index.
+            mask: The boolean mask to use for indexing.
+        """
+        return df.filter(mask)
 
-BACKEND_TO_INDEXING_METHOD: dict[str, Callable] = {
-    str(np.ndarray): default_indexing_method,
-    str(nw.DataFrame): nw_indexing_method,
-    str(nw.Series): nw_indexing_method,
-}
+    @indexing_method.register(nw.Series)
+    def _nw_series_indexing(series: nw.Series, mask: nw.Series) -> nw.Series:
+        """Indexing method for Narwhals Series.
+
+        Arguments:
+            series: The Narwhals Series to index.
+            mask: The boolean mask to use for indexing.
+        """
+        return series.filter(mask)

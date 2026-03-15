@@ -15,12 +15,13 @@ from timebasedcv._typing import (
     WindowType,
 )
 from timebasedcv.splitstate import SplitState
-from timebasedcv.utils._backends import BACKEND_TO_INDEXING_METHOD, default_indexing_method
+from timebasedcv.utils._backends import indexing_method
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from collections.abc import Generator
 
     import numpy as np
+    from narwhals.stable.v1.typing import IntoDataFrame
     from typing_extensions import Self
 
 _frequency_values = get_args(FrequencyUnit)
@@ -506,7 +507,7 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
             msg = "At least one array required as input"
             raise ValueError(msg)
 
-        arrays_: tuple[nw.DataFrame | nw.Series | np.ndarray, ...] = tuple(
+        arrays_: tuple[nw.DataFrame[IntoDataFrame] | nw.Series | np.ndarray, ...] = tuple(
             nw.from_native(array, eager_only=True, allow_series=True, strict=False) for array in arrays
         )
         time_series_: nw.Series | np.ndarray = nw.from_native(time_series, series_only=True, strict=False)
@@ -533,7 +534,6 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
             msg = "`time_start` must be before `time_end`."
             raise ValueError(msg)
 
-        _index_methods = tuple(BACKEND_TO_INDEXING_METHOD.get(str(type(a)), default_indexing_method) for a in arrays_)
         for split in self._splits_from_period(time_start, time_end):
             train_mask = (time_series_ >= split.train_start) & (time_series_ < split.train_end)
             forecast_mask = (time_series_ >= split.forecast_start) & (time_series_ < split.forecast_end)
@@ -541,10 +541,10 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
             train_forecast_arrays = tuple(
                 chain.from_iterable(
                     (
-                        nw.to_native(_idx_method(_arr, train_mask), strict=False),
-                        nw.to_native(_idx_method(_arr, forecast_mask), strict=False),
+                        nw.to_native(indexing_method(_arr, train_mask), strict=False),
+                        nw.to_native(indexing_method(_arr, forecast_mask), strict=False),
                     )
-                    for _arr, _idx_method in zip(arrays_, _index_methods, strict=True)
+                    for _arr in arrays_
                 ),
             )
 

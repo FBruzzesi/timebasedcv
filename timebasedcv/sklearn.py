@@ -20,7 +20,7 @@ else:  # pragma: no cover
     from sklearn.model_selection._split import _BaseKFold  # type: ignore[import-untyped]
 
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from collections.abc import Generator
     from datetime import date, datetime
 

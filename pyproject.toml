@@ -153,6 +153,7 @@ omit = [
   "**/_typing.py",
 ]
 exclude_also = [
+  "if TYPE_CHECKING",
   "except ImportError",
 ]
 
