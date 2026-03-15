@@ -94,16 +94,23 @@ RNG = np.random.default_rng(seed=42)
 dates = pd.Series(pd.date_range("2023-01-01", "2023-01-31", freq="D"))
 size = len(dates)
 
-df = (pd.concat([
-        pd.DataFrame({
-            "time": pd.date_range(start, end, periods=_size, inclusive="left"),
-            "a": RNG.normal(size=_size-1),
-            "b": RNG.normal(size=_size-1),
-        })
-        for start, end, _size in zip(dates[:-1], dates[1:], RNG.integers(2, 24, size-1))
-    ])
+df = (
+    pd.concat(
+        [
+            pd.DataFrame(
+                {
+                    "time": pd.date_range(start, end, periods=_size, inclusive="left"),
+                    "a": RNG.normal(size=_size - 1),
+                    "b": RNG.normal(size=_size - 1),
+                }
+            )
+            for start, end, _size in zip(
+                dates[:-1], dates[1:], RNG.integers(2, 24, size - 1)
+            )
+        ]
+    )
     .reset_index(drop=True)
-    .assign(y=lambda t: t[["a", "b"]].sum(axis=1) + RNG.normal(size=t.shape[0])/25)
+    .assign(y=lambda t: t[["a", "b"]].sum(axis=1) + RNG.normal(size=t.shape[0]) / 25)
 )
 
 df.set_index("time").resample("D").agg(count=("y", np.size)).head(5)
@@ -140,7 +147,9 @@ Now let's run split the data with the provided `TimeBasedSplit` instance:
 ```py title="Generate the splits"
 X, y, time_series = df.loc[:, ["a", "b"]], df["y"], df["time"]
 
-for X_train, X_forecast, y_train, y_forecast in tbs.split(X, y, time_series=time_series):
+for X_train, X_forecast, y_train, y_forecast in tbs.split(
+    X, y, time_series=time_series
+):
     print(f"Train: {X_train.shape}, Forecast: {X_forecast.shape}")
 ```
 

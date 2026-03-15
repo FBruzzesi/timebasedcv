@@ -1,4 +1,4 @@
-name: Pre-commit auto-update
+name: Prek auto-update
 
 on:
   workflow_dispatch:
@@ -23,15 +23,14 @@ jobs:
           enable-cache: "true"
           cache-suffix: "3.12"
           cache-dependency-glob: "pyproject.toml"
-      - name: pre-commit install autoupdate
+      - name: prek install autoupdate
         run: |
-          uv pip install pre-commit --system
-          pre-commit autoupdate
+          uv pip install prek --system
+          prek auto-update
       - name: Commit and push changes
         uses: peter-evans/create-pull-request@v8
         with:
-          branch: update-pre-commit-hooks
-          title: 'Update pre-commit hooks'
-          commit-message: 'Update pre-commit hooks'
-          body: |
-              Update versions of pre-commit hooks to latest versions.
+          branch: update-prek-hooks
+          title: 'Update prek hooks'
+          commit-message: 'Update prek hooks'
+          body: Update versions of prek hooks to latest versions.

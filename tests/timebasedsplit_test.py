@@ -234,11 +234,12 @@ def test_split_boundaries_forward_rolling():
         (date(2023, 1, 11), date(2023, 1, 14), date(2023, 1, 15), date(2023, 1, 17)),
     ]
 
-    for split, (ts, te, fs, fe) in zip(splits, expected, strict=True):
-        assert split.train_start == ts
-        assert split.train_end == te
-        assert split.forecast_start == fs
-        assert split.forecast_end == fe
+    it = zip(splits, expected, strict=True)
+    for split, (train_start, train_end, forecast_start, forecast_end) in it:
+        assert split.train_start == train_start
+        assert split.train_end == train_end
+        assert split.forecast_start == forecast_start
+        assert split.forecast_end == forecast_end
 
 
 def test_split_boundaries_backward_rolling():
@@ -257,12 +258,12 @@ def test_split_boundaries_backward_rolling():
         (date(2023, 1, 3), date(2023, 1, 6), date(2023, 1, 7), date(2023, 1, 9)),
         (date(2023, 1, 1), date(2023, 1, 4), date(2023, 1, 5), date(2023, 1, 7)),
     ]
-
-    for split, (ts, te, fs, fe) in zip(splits, expected, strict=True):
-        assert split.train_start == ts
-        assert split.train_end == te
-        assert split.forecast_start == fs
-        assert split.forecast_end == fe
+    it = zip(splits, expected, strict=True)
+    for split, (train_start, train_end, forecast_start, forecast_end) in it:
+        assert split.train_start == train_start
+        assert split.train_end == train_end
+        assert split.forecast_start == forecast_start
+        assert split.forecast_end == forecast_end
 
 
 def test_split_boundaries_forward_expanding():

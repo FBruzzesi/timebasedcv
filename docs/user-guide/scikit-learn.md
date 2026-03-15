@@ -27,7 +27,7 @@ From a point of view, `TimeBasedCVSplitter` has all the features that `TimeBased
 with scikit-learn.
 
 This comes to the cost of requiring to know `time_series` beforehand, during `.__init__()` step.
-Therefore it is not possible to instantiate the split class once and re-use it with different time series dynamically.
+Therefore it is not possible to instantiate the split class once and reuse it with different time series dynamically.
 
 ## Example
 
@@ -51,16 +51,23 @@ RNG = np.random.default_rng(seed=42)
 dates = pd.Series(pd.date_range("2023-01-01", "2023-01-31", freq="D"))
 size = len(dates)
 
-df = (pd.concat([
-        pd.DataFrame({
-            "time": pd.date_range(start, end, periods=_size, inclusive="left"),
-            "a": RNG.normal(size=_size-1),
-            "b": RNG.normal(size=_size-1),
-        })
-        for start, end, _size in zip(dates[:-1], dates[1:], RNG.integers(2, 24, size-1))
-    ])
+df = (
+    pd.concat(
+        [
+            pd.DataFrame(
+                {
+                    "time": pd.date_range(start, end, periods=_size, inclusive="left"),
+                    "a": RNG.normal(size=_size - 1),
+                    "b": RNG.normal(size=_size - 1),
+                }
+            )
+            for start, end, _size in zip(
+                dates[:-1], dates[1:], RNG.integers(2, 24, size - 1)
+            )
+        ]
+    )
     .reset_index(drop=True)
-    .assign(y=lambda t: t[["a", "b"]].sum(axis=1) + RNG.normal(size=t.shape[0])/25)
+    .assign(y=lambda t: t[["a", "b"]].sum(axis=1) + RNG.normal(size=t.shape[0]) / 25)
 )
 
 df.set_index("time").resample("D").agg(count=("y", np.size)).head(5)

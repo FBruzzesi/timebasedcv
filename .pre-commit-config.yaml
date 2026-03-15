@@ -1,33 +1,39 @@
-# See https://pre-commit.com for more information
-# See https://pre-commit.com/hooks.html for more hooks
 repos:
--   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v6.0.0
-    hooks:
-    -   id: trailing-whitespace
-    -   id: end-of-file-fixer
-    -   id: requirements-txt-fixer
-    -   id: check-json
-    -   id: check-yaml
-    -   id: check-ast
-    -   id: check-added-large-files
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.14.10 # Ruff version.
+  # Ruff version.
+  rev: 'v0.15.6'
   hooks:
-    - id: ruff  # Run the linter.
-      args: [--fix, timebasedcv, tests]
-    - id: ruff-format # Run the formatter.
-      args: [timebasedcv, tests]
--   repo: https://github.com/Lucas-C/pre-commit-hooks-bandit
-    rev: v1.0.6
-    hooks:
-    -   id: python-bandit-vulnerability-check
-        args: [--skip, "B101",--severity-level, medium,  --recursive, timebasedcv]
--   repo: https://github.com/pre-commit/pygrep-hooks
-    rev: v1.10.0
-    hooks:
-    -   id: python-no-eval
--   repo: https://github.com/crate-ci/typos
-    rev: v1.39.0
-    hooks:
-    -   id: typos
+  # Run the formatter.
+  - id: ruff-format
+  # Run the linter.
+  - id: ruff
+    args: [ --fix ]
+- repo: https://github.com/codespell-project/codespell
+  rev: 'v2.4.2'
+  hooks:
+  - id: codespell
+    files: \.(py|rst|md)$
+- repo: https://github.com/adhtruong/mirrors-typos
+  # Use mirror to avoid autoupdate issue: https://github.com/crate-ci/typos/issues/390
+  rev: 'v1.44.0'
+  hooks:
+  - id: typos
+- repo: https://github.com/adamchainz/blacken-docs
+  rev: "1.20.0" # replace with latest tag on GitHub
+  hooks:
+  - id: blacken-docs
+    args: [ --skip-errors ]
+    additional_dependencies:
+    - black==22.12.0
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v6.0.0
+  hooks:
+  - id: trailing-whitespace
+  - id: name-tests-test
+  - id: end-of-file-fixer
+  - id: requirements-txt-fixer
+  - id: no-commit-to-branch
+  - id: check-json
+  - id: check-yaml
+  - id: check-ast
+  - id: check-added-large-files
