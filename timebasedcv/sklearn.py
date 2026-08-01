@@ -13,7 +13,7 @@ if (sklearn_version := version("scikit-learn")) and tuple(
 ) < (0, 19, 0):  # pragma: no cover
     msg = (
         f"scikit-learn>=0.19.0 is required for this module. Found version {sklearn_version}.\nInstall it with "
-        "`python -m pip install scikit-learn>=0.19.0` or `python -m pip install timebasedcv[scikit-learn]`",
+        "`python -m pip install scikit-learn>=0.19.0` or `python -m pip install timebasedcv[scikit-learn]`"
     )
     raise ImportError(msg)
 else:  # pragma: no cover

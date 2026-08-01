@@ -81,7 +81,7 @@ def mode(request) -> Literal["forward", "backward"]:
 
 
 @pytest.fixture
-def valid_kwargs(
+def valid_kwargs(  # noqa:PLR0917
     train_size: int,
     forecast_horizon: int,
     gap: int,

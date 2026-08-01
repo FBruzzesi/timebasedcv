@@ -42,7 +42,7 @@ from timebasedcv.splitstate import SplitState
     "expected_train_len, expected_forecast_len, expected_gap_len, expected_total_len",
     [(relativedelta(days=30), relativedelta(days=27), relativedelta(days=1), relativedelta(months=1, days=27))],
 )
-def test_splitstate_valid(
+def test_splitstate_valid(  # noqa:PLR0917
     train_start,
     train_end,
     forecast_start,
