@@ -107,6 +107,7 @@ extend-select = [
 ]
 select = ["ALL"]
 ignore = [
+    "CPY",
     "COM812",
     "D100",  # Checks for undocumented public module definitions.
     "D104",  # Checks for undocumented public package definitions.
