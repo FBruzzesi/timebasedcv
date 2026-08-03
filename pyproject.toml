@@ -1,16 +1,16 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["uv_build>=0.11.0,<0.13.0"]
+build-backend = "uv_build"
 
 [project]
 name = "timebasedcv"
 version = "0.3.0"
 description = "Time based cross validation"
-
-license = {file = "LICENSE"}
+authors = [{name = "Francesco Bruzzesi"}]
+license = "MIT"
+license-files = ["LICENSE"]
 readme = "README.md"
 requires-python = ">=3.10"
-authors = [{name = "Francesco Bruzzesi"}]
 
 dependencies = [
     "python-dateutil",
@@ -25,7 +25,6 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
-    "License :: OSI Approved :: MIT License",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Typing :: Typed",
 ]
@@ -59,7 +58,7 @@ typing = [
     "mypy>=1.19.1",
     "pandas-stubs>=2.3.3.260113",
     "pyarrow-stubs>=20.0.0.20251215",
-    "pyrefly>=0.56.0",
+    "pyrefly>=1.0.0",
     "pyright>=1.1.408",
     "types-python-dateutil>=2.9.0.20260305",
     "typing-extensions>=4.15.0",
@@ -74,11 +73,14 @@ dev = [
     {include-group = "typing"},
 ]
 
-[tool.hatch.build.targets.sdist]
-only-include = ["timebasedcv"]
-
-[tool.hatch.build.targets.wheel]
-packages = ["timebasedcv"]
+[tool.uv.build-backend]
+source-include = [
+  "src/*",
+  "tests/*",
+]
+wheel-include = [
+  "src/*",
+]
 
 [tool.ruff]
 line-length = 120
@@ -88,55 +90,58 @@ fix = true
 [tool.ruff.lint]
 preview = true
 explicit-preview-rules = true
+
+select = ["ALL"]
+ignore = [
+  "CPY",
+  "D100",  # Checks for undocumented public module definitions.
+  "D104",  # Checks for undocumented public package definitions.
+  "D107",  # Checks for public __init__ method definitions that are missing docstrings.
+  "N803",  # Checks for argument names that do not follow the snake_case convention.
+  "RET505",  # Checks for else statements with a return statement in the preceding if block.
+  "DTZ",
+  "COM812",
+  "TD003",
+  "FIX002"
+]
+
 extend-safe-fixes = [
   "C419",    # unnecessary-comprehension-in-call
   "C420",    # unnecessary-dict-comprehension-for-iterable
-  "EM101",   # raw-string-in-exception
-  "EM102",   # f-string-in-exception
   "PLR6201", # literal-membership
   "TC",      # flake8-type-checking
   "UP",      # pyupgrade
-  "PLW1514", # unspecified-encoding
 ]
 extend-select = [
-  "PLR0914", # too-many-locals
-  "PLR0916", # too-many-boolean-expressions
-  "PLR1702", # too-many-nested-blocks
   "PLR6201", # literal-membership
-  "PLW1514", # unspecified-encoding
 ]
-select = ["ALL"]
-ignore = [
-    "CPY",
-    "COM812",
-    "D100",  # Checks for undocumented public module definitions.
-    "D104",  # Checks for undocumented public package definitions.
-    "D107",  # Checks for public __init__ method definitions that are missing docstrings.
-    "E731",  # Checks for lambda expressions which are assigned to a variable.
-    "ISC001",
-    "N803",  # Checks for argument names that do not follow the snake_case convention.
-    # "EM101",  # Checks for the use of string literals in exception constructors.
-    # "ISC001",  # Checks for implicitly concatenated strings on a single line.
-    "RET505",  # Checks for else statements with a return statement in the preceding if block.
-    "RET506",
-    # "TRY003",  # Checks for long exception messages that are not defined in the exception class itself.
-    "DTZ"
-    ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["ANN", "D", "N802", "N806", "PD901", "PLC0415", "PLR0913", "PLR2004", "PT006", "PT007", "S101"]
+"tests/*" = [
+  "ANN",
+  "D",
+  "S101",
+  "PT006",
+  "PT007",
+  "FBT001",
+  "SLF001",
+  "N806",  # Checks for the use of non-lowercase variable names in functions.
+]
+
+[tool.ruff.lint.isort]
+required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
+
+[tool.ruff.lint.pylint]
+max-args = 6
 
 [tool.ruff.lint.pyupgrade]
 keep-runtime-typing = true
 
 [tool.ruff.format]
 docstring-code-format = true
-
-[tool.ruff.lint.isort]
-required-imports = ["from __future__ import annotations"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

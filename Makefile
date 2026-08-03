@@ -1,7 +1,7 @@
 ARG := $(word 2, $(MAKECMDGOALS))
 $(eval $(ARG):;@:)
 
-sources = timebasedcv tests
+sources = src tests
 
 clean-folders:
 	rm -rf __pycache__ */__pycache__ */**/__pycache__ \
@@ -18,11 +18,11 @@ lint:
 	# uv tool run rumdl check .
 
 test:
-	uv run --all-extras --group testing pytest tests --cov=timebasedcv --cov=tests --cov-fail-under=95 -n auto
+	uv run --all-extras --group testing pytest tests --cov=src --cov=tests --cov-fail-under=95 -n auto
 
 typing:
-	mypy timebasedcv
-	pyright timebasedcv
+	mypy $(sources)
+	pyright $(sources)
 
 check: lint test typing clean-folders
 
