@@ -1,12 +1,19 @@
 from __future__ import annotations
 
 from datetime import date, datetime
+from typing import TYPE_CHECKING, Any, TypeAlias
 
 import pandas as pd
 import pytest
 from dateutil.relativedelta import relativedelta
 
 from timebasedcv.splitstate import SplitState
+
+if TYPE_CHECKING:
+    from contextlib import AbstractContextManager
+
+DateTimeValue: TypeAlias = datetime | date | pd.Timestamp
+"""Any of the concrete date-like types accepted by `SplitState`."""
 
 
 @pytest.mark.parametrize(
@@ -43,14 +50,14 @@ from timebasedcv.splitstate import SplitState
     [(relativedelta(days=30), relativedelta(days=27), relativedelta(days=1), relativedelta(months=1, days=27))],
 )
 def test_splitstate_valid(  # noqa: PLR0913, PLR0917
-    train_start,
-    train_end,
-    forecast_start,
-    forecast_end,
-    expected_train_len,
-    expected_forecast_len,
-    expected_gap_len,
-    expected_total_len,
+    train_start: DateTimeValue,
+    train_end: DateTimeValue,
+    forecast_start: DateTimeValue,
+    forecast_end: DateTimeValue,
+    expected_train_len: relativedelta,
+    expected_forecast_len: relativedelta,
+    expected_gap_len: relativedelta,
+    expected_total_len: relativedelta,
 ) -> None:
     """Test the SplitState class with different input values types."""
     split_state = SplitState(
@@ -82,8 +89,8 @@ def test_splitstate_valid(  # noqa: PLR0913, PLR0917
     ],
 )
 def test_splitstate_invalid(
-    train_start,
-    context,
+    train_start: DateTimeValue | str,
+    context: AbstractContextManager[Any],
 ) -> None:
     """Test the SplitState class with mixed input values types or unordered datetypes."""
     with context:

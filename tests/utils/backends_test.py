@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 from contextlib import nullcontext as does_not_raise
+from typing import TYPE_CHECKING, Any, TypeAlias
 
 import narwhals.stable.v1 as nw
 import numpy as np
@@ -11,6 +12,12 @@ import pyarrow as pa
 import pytest
 
 from timebasedcv.utils._backends import BACKEND_TO_INDEXING_METHOD, default_indexing_method
+
+if TYPE_CHECKING:
+    from contextlib import AbstractContextManager
+
+NativeArray: TypeAlias = np.ndarray | pd.Series | pd.DataFrame | pl.Series | pl.DataFrame | pa.Table | pa.ChunkedArray
+"""Native array-like objects exercised against the indexing methods."""
 
 size = 10
 arr = np.arange(size)
@@ -32,7 +39,12 @@ invalid_mask = np.zeros(shape=size + 1).astype(bool)
         ),
     ],
 )
-def test_default_indexing_method(arr, mask, expected, context) -> None:
+def test_default_indexing_method(
+    arr: np.ndarray,
+    mask: np.ndarray,
+    expected: np.ndarray,
+    context: AbstractContextManager[Any],
+) -> None:
     """Tests the default indexing method with a numpy array."""
     with context:
         result = default_indexing_method(arr, mask)
@@ -62,12 +74,12 @@ def test_default_indexing_method(arr, mask, expected, context) -> None:
         ),  # pyarrow table
     ],
 )
-def test_backend_to_indexing_method(arr, mask, expected) -> None:
+def test_backend_to_indexing_method(arr: NativeArray, mask: NativeArray, expected: NativeArray) -> None:
     """Tests the `BACKEND_TO_INDEXING_METHOD` dictionary with different backends."""
-    arr = nw.from_native(arr, allow_series=True, eager_only=True, strict=False)
-    mask = nw.from_native(mask, series_only=True, strict=False)
-    _type = str(type(arr))
-    result = BACKEND_TO_INDEXING_METHOD[_type](arr, mask)
+    arr_nw = nw.from_native(arr, allow_series=True, eager_only=True, strict=False)
+    mask_nw = nw.from_native(mask, series_only=True, strict=False)
+    _type = str(type(arr_nw))
+    result = BACKEND_TO_INDEXING_METHOD[_type](arr_nw, mask_nw)
     result_native = nw.to_native(result, strict=False)
     expected_native = nw.to_native(
         nw.from_native(expected, allow_series=True, eager_only=True, strict=False), strict=False

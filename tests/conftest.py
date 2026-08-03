@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, TypeAlias
 
 import dask.array as da
 import numpy as np
@@ -18,6 +18,9 @@ if TYPE_CHECKING:
     from timebasedcv._typing import TensorLike
 
 RNG = np.random.default_rng(seed=42)
+
+GeneratedTestData: TypeAlias = tuple[datetime, datetime, np.ndarray, np.ndarray, np.ndarray]
+"""Return type of the `generate_test_data` fixture: `(start_dt, end_dt, time_series, X, y)`."""
 
 
 @pytest.fixture
@@ -47,37 +50,37 @@ def base_kwargs() -> dict[str, Any]:
 
 
 @pytest.fixture(params=[3, 6])
-def train_size(request) -> int:
+def train_size(request: pytest.FixtureRequest) -> int:
     """Fixture for setting the train_size parameter."""
     return request.param
 
 
 @pytest.fixture(params=[3, 4])
-def forecast_horizon(request) -> int:
+def forecast_horizon(request: pytest.FixtureRequest) -> int:
     """Fixture for setting the forecast_horizon parameter."""
     return request.param
 
 
 @pytest.fixture(params=[1, 2])
-def gap(request) -> int:
+def gap(request: pytest.FixtureRequest) -> int:
     """Fixture for setting the gap parameter."""
     return request.param
 
 
 @pytest.fixture(params=[None, 3])
-def stride(request) -> int | None:
+def stride(request: pytest.FixtureRequest) -> int | None:
     """Fixture for setting the stride parameter."""
     return request.param
 
 
 @pytest.fixture(params=["rolling", "expanding"])
-def window(request) -> Literal["rolling", "expanding"]:
+def window(request: pytest.FixtureRequest) -> Literal["rolling", "expanding"]:
     """Fixture that provides a parameterized window type for testing."""
     return request.param
 
 
 @pytest.fixture(params=["forward", "backward"])
-def mode(request) -> Literal["forward", "backward"]:
+def mode(request: pytest.FixtureRequest) -> Literal["forward", "backward"]:
     """Fixture for setting the mode parameter."""
     return request.param
 
@@ -104,7 +107,7 @@ def valid_kwargs(
 
 
 @pytest.fixture(scope="session")
-def generate_test_data() -> tuple[datetime, datetime, np.ndarray, np.ndarray, np.ndarray]:
+def generate_test_data() -> GeneratedTestData:
     """Generate start and end time, time series, X, and y for testing purposes.
 
     Returns:
@@ -120,12 +123,12 @@ def generate_test_data() -> tuple[datetime, datetime, np.ndarray, np.ndarray, np
 
 
 @pytest.fixture(params=[pd.DataFrame, pl.DataFrame, pa.table])
-def frame_constructor(request) -> Callable[[dict[str, Any]], IntoDataFrame]:
+def frame_constructor(request: pytest.FixtureRequest) -> Callable[[dict[str, Any]], IntoDataFrame]:
     """Fixture to return a eager dataframe constructor."""
     return request.param
 
 
 @pytest.fixture(params=[np.asarray, da.from_array])
-def array_constructor(request) -> Callable[[np.ndarray], TensorLike]:
+def array_constructor(request: pytest.FixtureRequest) -> Callable[[np.ndarray], TensorLike]:
     """Fixture to return an array constructor."""
     return request.param
