@@ -73,8 +73,22 @@ Once you are done with changes, you should:
 
 ## Docs 📑
 
-The documentation is generated using [mkdocs-material](https://squidfunk.github.io/mkdocs-material/){:target="_blank"},
+The documentation is generated using [zensical](https://zensical.org/){:target="_blank"},
 the API part uses [mkdocstrings](https://mkdocstrings.github.io/){:target="_blank"}.
+
+To preview the documentation locally:
+
+=== "with Make"
+
+    ```bash
+    make docs-serve
+    ```
+
+=== "without Make"
+
+    ```bash
+    uv run --group docs zensical serve
+    ```
 
 If a new feature or a breaking change is developed, then we suggest to update documentation in the `/docs` folder as
 well, in order to describe how this can be used from a user perspective.

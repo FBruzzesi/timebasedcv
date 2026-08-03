@@ -27,10 +27,10 @@ typing:
 check: lint test typing clean-folders
 
 docs-serve:
-	mkdocs serve
+	uv run --group docs zensical serve
 
-docs-deploy:
-	mkdocs gh-deploy
+docs-build:
+	uv run --group docs zensical build --clean --strict
 
 pypi-push:
 	rm -rf dist

@@ -70,4 +70,4 @@ jobs:
           cache-suffix: "3.12"
           cache-dependency-glob: "pyproject.toml"
       - name: Check docs can build
-        run: uv run --group docs mkdocs build -v -s
+        run: make docs-build
