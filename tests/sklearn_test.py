@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from contextlib import nullcontext as does_not_raise
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pytest
@@ -8,6 +9,11 @@ from sklearn.linear_model import Ridge
 from sklearn.model_selection import RandomizedSearchCV
 
 from timebasedcv.sklearn import TimeBasedCVSplitter
+
+if TYPE_CHECKING:
+    from contextlib import AbstractContextManager
+
+    from tests.conftest import GeneratedTestData
 
 RNG = np.random.default_rng(seed=42)
 SIZE = 10
@@ -18,11 +24,8 @@ SIZE = 10
 err_msg_shape = "Invalid shape: "
 
 
-def test_cv_splitter(valid_kwargs, generate_test_data):
-    """
-    Tests the TimeBasedCVSplitter `__init__` and `split` methods as well as its
-    compatibility with sklearn's _CV Splitter_s.
-    """
+def test_cv_splitter(valid_kwargs: dict[str, Any], generate_test_data: GeneratedTestData) -> None:
+    """Tests the TimeBasedCVSplitter `__init__` and `split` methods."""
     start_dt, end_dt, time_series, X, y = generate_test_data
     cv = TimeBasedCVSplitter(
         time_series=time_series,
@@ -54,7 +57,7 @@ def test_cv_splitter(valid_kwargs, generate_test_data):
 
 
 @pytest.mark.parametrize(
-    "x_extra, y_extra, g_extra, context",
+    ("x_extra", "y_extra", "g_extra", "context"),
     [
         (0, 0, 0, does_not_raise()),
         (1, 0, 0, pytest.raises(ValueError, match=err_msg_shape)),
@@ -66,10 +69,9 @@ def test_cv_splitter_validate_split(
     x_extra: int,
     y_extra: int,
     g_extra: int,
-    context,
-):
+    context: AbstractContextManager[Any],
+) -> None:
     """Test the TimeBasedCVSplitter._validate_split_args static method."""
-
     with context:
         TimeBasedCVSplitter._validate_split_args(
             size=SIZE,
