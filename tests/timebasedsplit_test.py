@@ -47,7 +47,7 @@ err_msg_shape = "Invalid shape: "
 
 
 @pytest.mark.parametrize(
-    "arg_name, arg_value, context",
+    ("arg_name", "arg_value", "context"),
     [
         ("frequency", "days", does_not_raise()),
         ("frequency", "hours", does_not_raise()),
@@ -81,7 +81,7 @@ err_msg_shape = "Invalid shape: "
         ("mode", 123, pytest.raises(ValueError, match=err_msg_mode)),
     ],
 )
-def test_core_init(base_kwargs, arg_name, arg_value, context):
+def test_core_init(base_kwargs, arg_name, arg_value, context) -> None:
     """Tests initialization of _CoreTimeBasedSplit with different input values."""
     with context:
         kwargs = {**base_kwargs, arg_name: arg_value}
@@ -100,10 +100,10 @@ def test_core_init(base_kwargs, arg_name, arg_value, context):
 
 
 @pytest.mark.parametrize(
-    "frequency, train_size, forecast_horizon, gap, stride",
+    ("frequency", "train_size", "forecast_horizon", "gap", "stride"),
     [("days", 7, 7, 1, None), ("hours", 48, 24, 0, 2), ("weeks", 4, 1, 1, 1)],
 )
-def test_core_properties(frequency, train_size, forecast_horizon, gap, stride):
+def test_core_properties(frequency, train_size, forecast_horizon, gap, stride) -> None:
     """Tests the properties of _CoreTimeBasedSplit."""
     cv = _CoreTimeBasedSplit(
         frequency=frequency,
@@ -120,7 +120,7 @@ def test_core_properties(frequency, train_size, forecast_horizon, gap, stride):
 
 
 @pytest.mark.parametrize(
-    "time_start, time_end, context",
+    ("time_start", "time_end", "context"),
     [
         (datetime(2023, 1, 1), datetime(2023, 1, 31), does_not_raise()),
         (datetime(2023, 1, 1), datetime(2022, 1, 1), pytest.raises(ValueError, match=err_msg_time_order)),
@@ -130,9 +130,8 @@ def test_core_properties(frequency, train_size, forecast_horizon, gap, stride):
         (pd.Timestamp(2023, 1, 1), pd.Timestamp(2022, 1, 1), pytest.raises(ValueError, match=err_msg_time_order)),
     ],
 )
-def test_core_splits_from_period(valid_kwargs, time_start, time_end, context):
+def test_core_splits_from_period(valid_kwargs, time_start, time_end, context) -> None:
     """Tests the _CoreTimeBasedSplit._splits_from_period method."""
-
     cv = _CoreTimeBasedSplit(**valid_kwargs)
 
     with context:
@@ -141,9 +140,8 @@ def test_core_splits_from_period(valid_kwargs, time_start, time_end, context):
         assert n_splits == cv.n_splits_of(time_series=pd.Series(pd.date_range(time_start, time_end, freq="D")))
 
 
-def test_core_splits_from_period_invalid(base_kwargs):
+def test_core_splits_from_period_invalid(base_kwargs) -> None:
     """Tests the _CoreTimeBasedSplit._splits_from_period method invalid args."""
-
     msg = r"Either `time_series` or \(`start_dt`, `end_dt`\) pair must be provided."
     with pytest.raises(ValueError, match=msg):  # noqa: PT012
         cv = _CoreTimeBasedSplit(**base_kwargs)
@@ -163,7 +161,7 @@ def test_core_splits_from_period_invalid(base_kwargs):
         {"start_dt": pd.Timestamp(2023, 1, 1), "end_dt": pd.Timestamp(2023, 1, 1)},
     ],
 )
-def test_timebasedcv_split_invalid(valid_kwargs, kwargs):
+def test_timebasedcv_split_invalid(valid_kwargs, kwargs) -> None:
     """Test the TimeBasedSplit.split method with invalid arguments."""
     cv = TimeBasedSplit(**valid_kwargs)
     arrays_ = kwargs.get("arrays", (X, y))
@@ -176,7 +174,7 @@ def test_timebasedcv_split_invalid(valid_kwargs, kwargs):
 
 
 @pytest.mark.parametrize("return_splitstate", [True, False])
-def test_timebasedcv_split_dataframes(valid_kwargs, frame_constructor, generate_test_data, return_splitstate):
+def test_timebasedcv_split_dataframes(valid_kwargs, frame_constructor, generate_test_data, return_splitstate) -> None:
     """Tests the TimeBasedSplit.split method on different dataframe constructors."""
     cv = TimeBasedSplit(**valid_kwargs)
 
@@ -216,7 +214,7 @@ def test_timebasedcv_split_dataframes(valid_kwargs, frame_constructor, generate_
 # Golden / boundary-value tests
 
 
-def test_split_boundaries_forward_rolling():
+def test_split_boundaries_forward_rolling() -> None:
     """Asserts exact SplitState boundaries for forward rolling splits with known parameters."""
     expected_splits = 6
     cv = TimeBasedSplit(
@@ -243,7 +241,7 @@ def test_split_boundaries_forward_rolling():
         assert split.forecast_end == forecast_end
 
 
-def test_split_boundaries_backward_rolling():
+def test_split_boundaries_backward_rolling() -> None:
     """Asserts exact SplitState boundaries for backward rolling splits with known parameters."""
     expected_splits = 5
     cv = TimeBasedSplit(
@@ -268,7 +266,7 @@ def test_split_boundaries_backward_rolling():
         assert split.forecast_end == forecast_end
 
 
-def test_split_boundaries_forward_expanding():
+def test_split_boundaries_forward_expanding() -> None:
     """Asserts exact SplitState boundaries for forward expanding splits with known parameters."""
     expected_splits = 6
     cv = TimeBasedSplit(
@@ -293,7 +291,7 @@ def test_split_boundaries_forward_expanding():
         assert split.train_end == expected_te
 
 
-def test_split_content_shapes_and_ordering():
+def test_split_content_shapes_and_ordering() -> None:
     """Verifies that split arrays have correct shapes and temporal ordering."""
     cv = TimeBasedSplit(
         frequency="days", train_size=5, forecast_horizon=3, gap=0, stride=3, window="rolling", mode="forward"
@@ -315,7 +313,7 @@ def test_split_content_shapes_and_ordering():
         assert split_state.forecast_start <= split_state.forecast_end
 
 
-def test_split_rolling_constant_train_size():
+def test_split_rolling_constant_train_size() -> None:
     """Verifies that rolling window produces constant-size train periods."""
     cv = TimeBasedSplit(
         frequency="days", train_size=5, forecast_horizon=3, gap=0, stride=3, window="rolling", mode="forward"
@@ -332,7 +330,7 @@ def test_split_rolling_constant_train_size():
     assert len(set(train_periods)) == 1, "Rolling window should have constant train period length"
 
 
-def test_split_expanding_nondecreasing_train_size():
+def test_split_expanding_nondecreasing_train_size() -> None:
     """Verifies that expanding window produces non-decreasing train periods."""
     cv = TimeBasedSplit(
         frequency="days", train_size=5, forecast_horizon=3, gap=0, stride=3, window="expanding", mode="forward"
@@ -353,9 +351,8 @@ def test_split_expanding_nondecreasing_train_size():
 # Smoke tests for alias classes
 
 
-def test_expanding_time_split_smoke():
+def test_expanding_time_split_smoke() -> None:
     """Smoke test for ExpandingTimeSplit convenience class."""
-
     cv = ExpandingTimeSplit(frequency="days", train_size=5, forecast_horizon=3, gap=0, mode="forward")
     assert cv.window_ == "expanding"
 
@@ -366,9 +363,8 @@ def test_expanding_time_split_smoke():
         assert split.train_start == date(2023, 1, 1)
 
 
-def test_rolling_time_split_smoke():
+def test_rolling_time_split_smoke() -> None:
     """Smoke test for RollingTimeSplit convenience class."""
-
     cv = RollingTimeSplit(frequency="days", train_size=5, forecast_horizon=3, gap=0, mode="forward")
     assert cv.window_ == "rolling"
 
@@ -380,7 +376,7 @@ def test_rolling_time_split_smoke():
 
 
 @pytest.mark.parametrize("return_splitstate", [True, False])
-def test_timebasedcv_split_arrays(valid_kwargs, array_constructor, generate_test_data, return_splitstate):
+def test_timebasedcv_split_arrays(valid_kwargs, array_constructor, generate_test_data, return_splitstate) -> None:
     """Tests the TimeBasedSplit.split method on different dataframe constructors."""
     cv = TimeBasedSplit(**valid_kwargs)
 
@@ -427,7 +423,7 @@ def _make_test_data():
     }
 
 
-def test_split_polars_preserves_types():
+def test_split_polars_preserves_types() -> None:
     """Verifies that splitting Polars DataFrames/Series returns Polars types."""
     data = _make_test_data()
     df_pl = pl.DataFrame({"x0": data["x0"], "x1": data["x1"]})
@@ -450,7 +446,7 @@ def test_split_polars_preserves_types():
         break
 
 
-def test_split_pyarrow_preserves_types():
+def test_split_pyarrow_preserves_types() -> None:
     """Verifies that splitting PyArrow tables returns PyArrow types."""
     data = _make_test_data()
     table_pa = pa.table({"x0": data["x0"], "x1": data["x1"]})
@@ -470,7 +466,7 @@ def test_split_pyarrow_preserves_types():
         break
 
 
-def test_split_polars_series_only():
+def test_split_polars_series_only() -> None:
     """Verifies that splitting a single Polars Series works correctly."""
     data = _make_test_data()
     y_pl = pl.Series("y", data["y"])
@@ -485,7 +481,7 @@ def test_split_polars_series_only():
         break
 
 
-def test_split_cross_backend_consistency():
+def test_split_cross_backend_consistency() -> None:
     """Verifies that splits from pandas, Polars, and PyArrow produce the same number of rows per fold."""
     data = _make_test_data()
     cv = TimeBasedSplit(**_BASE_CV_KWARGS)
@@ -518,7 +514,7 @@ def test_split_cross_backend_consistency():
     assert len(pd_shapes) > 0
 
 
-def test_split_polars_with_return_splitstate():
+def test_split_polars_with_return_splitstate() -> None:
     """Verifies that return_splitstate works correctly with Polars."""
     data = _make_test_data()
     y_pl = pl.Series("y", data["y"])

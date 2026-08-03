@@ -21,7 +21,7 @@ invalid_mask = np.zeros(shape=size + 1).astype(bool)
 
 
 @pytest.mark.parametrize(
-    "arr, mask, expected, context",
+    ("arr", "mask", "expected", "context"),
     [
         (arr, valid_mask, expected, does_not_raise()),
         (
@@ -32,17 +32,15 @@ invalid_mask = np.zeros(shape=size + 1).astype(bool)
         ),
     ],
 )
-def test_default_indexing_method(arr, mask, expected, context):
-    """
-    Tests the default indexing method with a numpy array.
-    """
+def test_default_indexing_method(arr, mask, expected, context) -> None:
+    """Tests the default indexing method with a numpy array."""
     with context:
         result = default_indexing_method(arr, mask)
         assert np.array_equal(result, expected)
 
 
 @pytest.mark.parametrize(
-    "arr, mask, expected",
+    ("arr", "mask", "expected"),
     [
         (arr, valid_mask, expected),  # numpy array
         (pd.Series(data=arr), valid_mask, expected),  # pandas series
@@ -64,10 +62,8 @@ def test_default_indexing_method(arr, mask, expected, context):
         ),  # pyarrow table
     ],
 )
-def test_backend_to_indexing_method(arr, mask, expected):
-    """
-    Tests the `BACKEND_TO_INDEXING_METHOD` dictionary with different backends.
-    """
+def test_backend_to_indexing_method(arr, mask, expected) -> None:
+    """Tests the `BACKEND_TO_INDEXING_METHOD` dictionary with different backends."""
     arr = nw.from_native(arr, allow_series=True, eager_only=True, strict=False)
     mask = nw.from_native(mask, series_only=True, strict=False)
     _type = str(type(arr))

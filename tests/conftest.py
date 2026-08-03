@@ -34,7 +34,7 @@ def sample_pairs() -> list[tuple[int, int]]:
 
 @pytest.fixture
 def base_kwargs() -> dict[str, Any]:
-    """Base set of values in the configuration"""
+    """Base set of values in the configuration."""
     return {
         "frequency": "days",
         "train_size": 10,
@@ -91,7 +91,7 @@ def valid_kwargs(
     window: Literal["rolling", "expanding"],
     mode: Literal["forward", "backward"],
 ) -> dict[str, Any]:
-    """Valid combination of settings"""
+    """Valid combination of settings."""
     return {
         "frequency": "days",
         "train_size": train_size,
@@ -110,7 +110,6 @@ def generate_test_data() -> tuple[datetime, datetime, np.ndarray, np.ndarray, np
     Returns:
         tuple: A tuple containing the start datetime, end datetime, time series, X and y.
     """
-
     start_dt, end_dt = datetime(2023, 1, 1), datetime(2023, 1, 31)
     time_series = np.arange(start_dt, end_dt, timedelta(hours=1))
     size = len(time_series)

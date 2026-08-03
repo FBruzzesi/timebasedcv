@@ -10,7 +10,7 @@ from timebasedcv.splitstate import SplitState
 
 
 @pytest.mark.parametrize(
-    "train_start, train_end, forecast_start, forecast_end",
+    ("train_start", "train_end", "forecast_start", "forecast_end"),
     [
         (
             datetime(2023, 1, 1, 0),
@@ -39,7 +39,7 @@ from timebasedcv.splitstate import SplitState
     ],
 )
 @pytest.mark.parametrize(
-    "expected_train_len, expected_forecast_len, expected_gap_len, expected_total_len",
+    ("expected_train_len", "expected_forecast_len", "expected_gap_len", "expected_total_len"),
     [(relativedelta(days=30), relativedelta(days=27), relativedelta(days=1), relativedelta(months=1, days=27))],
 )
 def test_splitstate_valid(  # noqa: PLR0913, PLR0917
@@ -51,7 +51,7 @@ def test_splitstate_valid(  # noqa: PLR0913, PLR0917
     expected_forecast_len,
     expected_gap_len,
     expected_total_len,
-):
+) -> None:
     """Test the SplitState class with different input values types."""
     split_state = SplitState(
         train_start=train_start,
@@ -67,7 +67,7 @@ def test_splitstate_valid(  # noqa: PLR0913, PLR0917
 
 
 @pytest.mark.parametrize(
-    "train_start, context",
+    ("train_start", "context"),
     [
         (date(2023, 1, 1), pytest.raises(TypeError, match="All attributes must be of type")),
         (pd.Timestamp(2023, 1, 1), pytest.raises(TypeError, match="All attributes must be of type")),
@@ -84,9 +84,8 @@ def test_splitstate_valid(  # noqa: PLR0913, PLR0917
 def test_splitstate_invalid(
     train_start,
     context,
-):
+) -> None:
     """Test the SplitState class with mixed input values types or unordered datetypes."""
-
     with context:
         SplitState(
             train_start=train_start,
@@ -96,7 +95,7 @@ def test_splitstate_invalid(
         )
 
 
-def test_splitstate_add():
+def test_splitstate_add() -> None:
     """Tests SplitState.__add__."""
     split_state = SplitState(
         train_start=datetime(2023, 1, 1, 0),
@@ -121,7 +120,7 @@ def test_splitstate_add():
     assert result.forecast_end == expected_split_state.forecast_end
 
 
-def test_splitstate_sub():
+def test_splitstate_sub() -> None:
     """Tests SplitState.__sub__."""
     split_state = SplitState(
         train_start=datetime(2023, 1, 2, 0),

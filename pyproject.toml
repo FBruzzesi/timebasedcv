@@ -117,12 +117,7 @@ extend-select = [
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = [
-  "ANN",
-  "D",
   "S101",
-  "PT006",
-  "PT007",
-  "FBT001",
   "SLF001",
   "N806",  # Checks for the use of non-lowercase variable names in functions.
 ]

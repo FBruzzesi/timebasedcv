@@ -19,10 +19,7 @@ err_msg_shape = "Invalid shape: "
 
 
 def test_cv_splitter(valid_kwargs, generate_test_data):
-    """
-    Tests the TimeBasedCVSplitter `__init__` and `split` methods as well as its
-    compatibility with sklearn's _CV Splitter_s.
-    """
+    """Tests the TimeBasedCVSplitter `__init__` and `split` methods."""
     start_dt, end_dt, time_series, X, y = generate_test_data
     cv = TimeBasedCVSplitter(
         time_series=time_series,
@@ -54,7 +51,7 @@ def test_cv_splitter(valid_kwargs, generate_test_data):
 
 
 @pytest.mark.parametrize(
-    "x_extra, y_extra, g_extra, context",
+    ("x_extra", "y_extra", "g_extra", "context"),
     [
         (0, 0, 0, does_not_raise()),
         (1, 0, 0, pytest.raises(ValueError, match=err_msg_shape)),
@@ -69,7 +66,6 @@ def test_cv_splitter_validate_split(
     context,
 ):
     """Test the TimeBasedCVSplitter._validate_split_args static method."""
-
     with context:
         TimeBasedCVSplitter._validate_split_args(
             size=SIZE,
