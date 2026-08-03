@@ -265,8 +265,7 @@ class _CoreTimeBasedSplit:
             if start_dt >= end_dt:
                 msg = "`start_dt` must be before `end_dt`."
                 raise ValueError(msg)
-            else:
-                time_start, time_end = start_dt, end_dt
+            time_start, time_end = start_dt, end_dt
         elif time_series is not None:
             time_start, time_end = time_series.min(), time_series.max()
         else:
@@ -569,7 +568,7 @@ class TimeBasedSplit(_CoreTimeBasedSplit):
 class ExpandingTimeSplit(TimeBasedSplit):  # pragma: no cover
     """Alias for `TimeBasedSplit(..., window="expanding")`."""
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self: Self,
         *,
         frequency: FrequencyUnit,
@@ -593,7 +592,7 @@ class ExpandingTimeSplit(TimeBasedSplit):  # pragma: no cover
 class RollingTimeSplit(TimeBasedSplit):  # pragma: no cover
     """Alias for `TimeBasedSplit(..., window="rolling")`."""
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self: Self,
         *,
         frequency: FrequencyUnit,

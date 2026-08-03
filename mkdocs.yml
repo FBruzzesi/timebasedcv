@@ -11,7 +11,7 @@ edit_uri: edit/main/docs/
 
 # Configuration
 watch:
-  - timebasedcv
+  - src
 use_directory_urls: true
 strict: true
 theme:

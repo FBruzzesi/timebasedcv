@@ -10,6 +10,7 @@ from sklearn.model_selection import RandomizedSearchCV
 from timebasedcv.sklearn import TimeBasedCVSplitter
 
 RNG = np.random.default_rng(seed=42)
+SIZE = 10
 
 # Define a fix set of valid arguments
 
@@ -68,9 +69,9 @@ def test_cv_splitter_validate_split(
     context,
 ):
     """Test the TimeBasedCVSplitter._validate_split_args static method."""
-    SIZE = 10
+
     with context:
-        TimeBasedCVSplitter._validate_split_args(  # noqa: SLF001
+        TimeBasedCVSplitter._validate_split_args(
             size=SIZE,
             X=RNG.normal(size=(SIZE + x_extra, 2)),
             y=RNG.normal(size=(SIZE + y_extra,)),
