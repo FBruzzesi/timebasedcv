@@ -17,6 +17,8 @@ if TYPE_CHECKING:
 
     from timebasedcv._typing import TensorLike
 
+RNG = np.random.default_rng(seed=42)
+
 
 @pytest.fixture
 def sample_list() -> list[int]:
@@ -81,7 +83,7 @@ def mode(request) -> Literal["forward", "backward"]:
 
 
 @pytest.fixture
-def valid_kwargs(  # noqa:PLR0917
+def valid_kwargs(
     train_size: int,
     forecast_horizon: int,
     gap: int,
@@ -108,7 +110,6 @@ def generate_test_data() -> tuple[datetime, datetime, np.ndarray, np.ndarray, np
     Returns:
         tuple: A tuple containing the start datetime, end datetime, time series, X and y.
     """
-    RNG = np.random.default_rng(seed=42)
 
     start_dt, end_dt = datetime(2023, 1, 1), datetime(2023, 1, 31)
     time_series = np.arange(start_dt, end_dt, timedelta(hours=1))

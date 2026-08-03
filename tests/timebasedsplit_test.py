@@ -11,7 +11,7 @@ import pyarrow as pa
 import pytest
 from dateutil.relativedelta import relativedelta
 
-from timebasedcv import TimeBasedSplit
+from timebasedcv import ExpandingTimeSplit, RollingTimeSplit, TimeBasedSplit
 from timebasedcv.core import _CoreTimeBasedSplit
 
 RNG = np.random.default_rng(seed=42)
@@ -136,7 +136,7 @@ def test_core_splits_from_period(valid_kwargs, time_start, time_end, context):
     cv = _CoreTimeBasedSplit(**valid_kwargs)
 
     with context:
-        n_splits = sum(1 for _ in cv._splits_from_period(time_start, time_end))  # noqa: SLF001
+        n_splits = sum(1 for _ in cv._splits_from_period(time_start, time_end))
         assert n_splits == cv.n_splits_of(start_dt=time_start, end_dt=time_end)
         assert n_splits == cv.n_splits_of(time_series=pd.Series(pd.date_range(time_start, time_end, freq="D")))
 
@@ -218,12 +218,13 @@ def test_timebasedcv_split_dataframes(valid_kwargs, frame_constructor, generate_
 
 def test_split_boundaries_forward_rolling():
     """Asserts exact SplitState boundaries for forward rolling splits with known parameters."""
+    expected_splits = 6
     cv = TimeBasedSplit(
         frequency="days", train_size=3, forecast_horizon=2, gap=1, stride=2, window="rolling", mode="forward"
     )
-    splits = list(cv._splits_from_period(date(2023, 1, 1), date(2023, 1, 15)))  # noqa: SLF001
+    splits = list(cv._splits_from_period(date(2023, 1, 1), date(2023, 1, 15)))
 
-    assert len(splits) == 6
+    assert len(splits) == expected_splits
 
     expected = [
         (date(2023, 1, 1), date(2023, 1, 4), date(2023, 1, 5), date(2023, 1, 7)),
@@ -244,12 +245,13 @@ def test_split_boundaries_forward_rolling():
 
 def test_split_boundaries_backward_rolling():
     """Asserts exact SplitState boundaries for backward rolling splits with known parameters."""
+    expected_splits = 5
     cv = TimeBasedSplit(
         frequency="days", train_size=3, forecast_horizon=2, gap=1, stride=2, window="rolling", mode="backward"
     )
-    splits = list(cv._splits_from_period(date(2023, 1, 1), date(2023, 1, 15)))  # noqa: SLF001
+    splits = list(cv._splits_from_period(date(2023, 1, 1), date(2023, 1, 15)))
 
-    assert len(splits) == 5
+    assert len(splits) == expected_splits
 
     expected = [
         (date(2023, 1, 9), date(2023, 1, 12), date(2023, 1, 13), date(2023, 1, 15)),
@@ -268,12 +270,13 @@ def test_split_boundaries_backward_rolling():
 
 def test_split_boundaries_forward_expanding():
     """Asserts exact SplitState boundaries for forward expanding splits with known parameters."""
+    expected_splits = 6
     cv = TimeBasedSplit(
         frequency="days", train_size=3, forecast_horizon=2, gap=1, stride=2, window="expanding", mode="forward"
     )
-    splits = list(cv._splits_from_period(date(2023, 1, 1), date(2023, 1, 15)))  # noqa: SLF001
+    splits = list(cv._splits_from_period(date(2023, 1, 1), date(2023, 1, 15)))
 
-    assert len(splits) == 6
+    assert len(splits) == expected_splits
 
     for split in splits:
         assert split.train_start == date(2023, 1, 1), "Expanding window always starts from the beginning"
@@ -352,12 +355,11 @@ def test_split_expanding_nondecreasing_train_size():
 
 def test_expanding_time_split_smoke():
     """Smoke test for ExpandingTimeSplit convenience class."""
-    from timebasedcv import ExpandingTimeSplit
 
     cv = ExpandingTimeSplit(frequency="days", train_size=5, forecast_horizon=3, gap=0, mode="forward")
     assert cv.window_ == "expanding"
 
-    splits = list(cv._splits_from_period(date(2023, 1, 1), date(2023, 1, 15)))  # noqa: SLF001
+    splits = list(cv._splits_from_period(date(2023, 1, 1), date(2023, 1, 15)))
     assert len(splits) > 0
 
     for split in splits:
@@ -366,12 +368,11 @@ def test_expanding_time_split_smoke():
 
 def test_rolling_time_split_smoke():
     """Smoke test for RollingTimeSplit convenience class."""
-    from timebasedcv import RollingTimeSplit
 
     cv = RollingTimeSplit(frequency="days", train_size=5, forecast_horizon=3, gap=0, mode="forward")
     assert cv.window_ == "rolling"
 
-    splits = list(cv._splits_from_period(date(2023, 1, 1), date(2023, 1, 15)))  # noqa: SLF001
+    splits = list(cv._splits_from_period(date(2023, 1, 1), date(2023, 1, 15)))
     assert len(splits) > 0
 
     train_deltas = {split.train_end - split.train_start for split in splits}
@@ -441,8 +442,8 @@ def test_split_polars_preserves_types():
         assert isinstance(y_train, pl.Series), f"Expected Polars Series, got {type(y_train)}"
         assert isinstance(y_forecast, pl.Series), f"Expected Polars Series, got {type(y_forecast)}"
 
-        assert X_train.shape[1] == 2
-        assert X_forecast.shape[1] == 2
+        assert X_train.shape[1] == df_pl.width
+        assert X_forecast.shape[1] == df_pl.width
         assert len(y_train) == X_train.shape[0]
         assert len(y_forecast) == X_forecast.shape[0]
         assert X_train.shape[0] > 0
@@ -463,8 +464,8 @@ def test_split_pyarrow_preserves_types():
         assert isinstance(X_train, pa.Table), f"Expected PyArrow Table, got {type(X_train)}"
         assert isinstance(X_forecast, pa.Table), f"Expected PyArrow Table, got {type(X_forecast)}"
 
-        assert X_train.num_columns == 2
-        assert X_forecast.num_columns == 2
+        assert X_train.num_columns == table_pa.num_columns
+        assert X_forecast.num_columns == table_pa.num_columns
         assert X_train.num_rows > 0
         break
 
