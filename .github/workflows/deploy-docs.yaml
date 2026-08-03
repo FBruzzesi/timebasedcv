@@ -3,45 +3,59 @@ name: Deploy Documentation
 on:
   workflow_dispatch:
   push:
-    tags:
-      - "v[0-9]+.[0-9]+.[0-9]+*"
+    branches:
+      - main
+    paths:
+      - "docs/**"
+      - "src/**"
+      - "README.md"
+      - "zensical.toml"
+      - ".github/workflows/deploy-docs.yaml"
 
 permissions: {}
 
+# Allow a single concurrent deployment, without cancelling an in-flight one
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # mkdocs gh-deploy pushes the built site to the gh-pages branch
+      contents: read
     steps:
       - name: Checkout source code
-        # zizmor: ignore[artipacked] mkdocs gh-deploy pushes to gh-pages and needs the persisted credentials
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: true
-      - name: Configure Git Credentials
-        run: |
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          persist-credentials: false
       - name: Setup Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
       - name: Install uv
+        # Caching is deliberately off: this workflow publishes a runtime artifact,
+        # so a poisoned cache would be baked straight into the deployed site.
         uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
           enable-cache: false
-          cache-suffix: "3.12"
-          cache-dependency-glob: "pyproject.toml"
-      - run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV
-      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      - name: Build documentation
+        run: make docs-build
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
-          key: mkdocs-material-${{ env.cache_id }}
-          path: .cache
-          restore-keys: |
-            mkdocs-material-
-          lookup-only: true
-      - name: Install dependencies and deploy
-        run: |
-          uv pip install . --group docs --system
-          mkdocs gh-deploy --force
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write  # deploy the uploaded artifact to GitHub Pages
+      id-token: write  # OIDC token verified by actions/deploy-pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0

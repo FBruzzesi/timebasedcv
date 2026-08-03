@@ -49,10 +49,9 @@ testing = [
     "pytest-xdist>=3.8.0",
 ]
 docs = [
-    "mkdocs>=1.4.2,<2.0.0",
-    "mkdocs-material>=9.2.0",
-    "mkdocstrings[python]>=0.20.0",
-    "mkdocs-autorefs",
+    "markdown-exec>=1.12.3",
+    "mkdocstrings-python>=2.0.3",
+    "zensical>=0.0.26",
 ]
 typing = [
     "mypy>=1.19.1",

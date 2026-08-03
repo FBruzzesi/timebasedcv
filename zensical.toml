@@ -1,0 +1,137 @@
+[project]
+
+# Project information
+site_name = "Timebased CV"
+site_url = "https://fbruzzesi.github.io/timebasedcv/"
+site_author = "Francesco Bruzzesi"
+site_description = "Time based splits for cross validation"
+
+# Repository information
+repo_name = "FBruzzesi/timebasedcv"
+repo_url = "https://github.com/fbruzzesi/timebasedcv"
+edit_uri = "edit/main/docs"
+
+# Configuration
+use_directory_urls = true
+watch = ["src"]
+
+nav = [
+  { "Home" = [{ "Home" = "index.md" }, { "Installation" = "installation.md" }, { "Contributing" = "contribute.md" }] },
+  { "User Guide" = [{ "Home" = "user-guide/index.md" }, { "Getting started" = "user-guide/getting-started.md" }, { "Advanced features" = "user-guide/advanced.md" }, { "Scikit-learn component" = "user-guide/scikit-learn.md" }] },
+  { "API Reference" = ["api/index.md", "api/timebasedcv.md", "api/core.md", "api/sklearn.md", "api/splitstate.md"] },
+]
+
+[project.theme]
+name = "material"
+# "classic" keeps the Material for MkDocs look; drop this line for Zensical's "modern" variant
+variant = "classic"
+font = false
+logo = "img/timebasedcv-logo.png"
+favicon = "img/timebasedcv-logo.png"
+features = [
+  "navigation.tabs",
+  "navigation.tabs.sticky",
+  "navigation.expand",
+  "navigation.path",
+  "navigation.indexes",
+  "navigation.footer",
+  "navigation.top",
+  "navigation.tracking",
+
+  "content.action.edit",
+  "content.action.view",
+  "content.code.annotate",
+  "content.code.copy",
+  "content.tooltips",
+  "content.tabs.link",
+
+  "search.highlight",
+
+  "toc.follow",
+]
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: light)"
+scheme = "default"
+primary = "teal"
+accent = "deep-orange"
+toggle.icon = "material/lightbulb"
+toggle.name = "Switch to dark mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: dark)"
+scheme = "slate"
+primary = "teal"
+accent = "deep-orange"
+toggle.icon = "material/lightbulb-outline"
+toggle.name = "Switch to light mode"
+
+# Plugins
+[project.plugins.search]
+separator = '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
+
+[project.plugins.mkdocstrings]
+enable_inventory = true
+
+[project.plugins.mkdocstrings.handlers.python.options]
+line_length = 80
+separate_signature = true
+show_overloads = false
+show_signature_annotations = true
+signature_crossrefs = true
+
+# Customization
+[[project.extra.social]]
+icon = "fontawesome/brands/github"
+link = "https://github.com/fbruzzesi"
+
+[[project.extra.social]]
+icon = "fontawesome/brands/linkedin"
+link = "https://www.linkedin.com/in/francesco-bruzzesi/"
+
+[[project.extra.social]]
+icon = "fontawesome/brands/python"
+link = "https://pypi.org/project/timebasedcv/"
+
+# Extensions
+[project.markdown_extensions.abbr]
+[project.markdown_extensions.admonition]
+[project.markdown_extensions.attr_list]
+[project.markdown_extensions.def_list]
+[project.markdown_extensions.footnotes]
+[project.markdown_extensions.md_in_html]
+
+[project.markdown_extensions.toc]
+permalink = true
+
+[project.markdown_extensions.pymdownx.inlinehilite]
+[project.markdown_extensions.pymdownx.keys]
+[project.markdown_extensions.pymdownx.caret]
+[project.markdown_extensions.pymdownx.details]
+[project.markdown_extensions.pymdownx.mark]
+[project.markdown_extensions.pymdownx.smartsymbols]
+[project.markdown_extensions.pymdownx.superfences]
+[project.markdown_extensions.pymdownx.tilde]
+
+[project.markdown_extensions.pymdownx.arithmatex]
+generic = true
+
+[project.markdown_extensions.pymdownx.betterem]
+smart_enable = "all"
+
+[project.markdown_extensions.pymdownx.highlight]
+anchor_linenums = true
+
+[project.markdown_extensions.pymdownx.magiclink]
+repo_url_shorthand = true
+user = "fbruzzesi"
+repo = "timebasedcv"
+
+[project.markdown_extensions.pymdownx.tabbed]
+alternate_style = true
+
+[project.markdown_extensions.pymdownx.tasklist]
+custom_checkbox = true
+
+[project.markdown_extensions.pymdownx.snippets]
+check_paths = true
